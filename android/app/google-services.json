@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "711253959249",
+    "firebase_url": "https://mandadero-d2649.firebaseio.com",
+    "project_id": "mandadero-d2649",
+    "storage_bucket": "mandadero-d2649.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:711253959249:android:5371f8b817af8bee33ce70",
+        "android_client_info": {
+          "package_name": "sp.delivery.mandadero.mandadero"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "711253959249-8pn7nesg6m9avi4q31uhshkmbb5g2d7b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGxBnRiymda1qdrsw_C4gAef-xO3PBNDE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "711253959249-8pn7nesg6m9avi4q31uhshkmbb5g2d7b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
