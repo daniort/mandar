@@ -188,7 +188,7 @@ class _FirtsPageState extends State<FirtsPage> {
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
                     onTap: () {
-                      Navigator.pushNamed(context, signRoute);
+                      Navigator.pushNamed(context, loginClienteRoute);
                     },
                     child: Container(
                       width: ancho * 0.6,
