@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mandadero/Router/strings.dart';
+import 'package:mandadero/state/loginstate.dart';
+import 'package:provider/provider.dart';
 
 class LoginCliente extends StatefulWidget {
   @override
@@ -79,27 +81,7 @@ class _LoginClienteState extends State<LoginCliente> {
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          top: 15.0, left: 15.0, right: 15.0, bottom: 2.0),
-                      child: TextField(
-                        controller: _nameController,
-                        maxLength: 30,
-                        cursorColor: Color(0xff11151C),
-                        decoration: InputDecoration(
-                            icon: Icon(
-                              Icons.person,
-                              color: Color(0xff11151C),
-                            ),
-                            labelText: 'Nombre Completo'),
-                        keyboardType: TextInputType.emailAddress,
-                        inputFormatters: [
-                          BlacklistingTextInputFormatter(RegExp("[0-9]")),
-                        ],
-                        //autovalidate: true,
-                        autocorrect: false,
-                      ),
-                    ),
+                 
                     Padding(
                       padding: const EdgeInsets.only(
                           top: 2.0, left: 15.0, right: 15.0, bottom: 2.0),
@@ -132,18 +114,17 @@ class _LoginClienteState extends State<LoginCliente> {
                       padding: const EdgeInsets.only(
                           top: 20.0, bottom: 4.0, left: 20.0, right: 20.0),
                       child: InkWell(
-                        onTap: () async {
-                          FirebaseAuth.instance
-                              .createUserWithEmailAndPassword(
-                            email: 'ciberespdacio.sanma@gmail.com',
-                            password: 'apassworsd',
-                          )
-                              .then((FirebaseUser) {
-                            print(FirebaseUser);
-                            Navigator.pushNamed(context, perfilclienteRoute);
-                          }).catchError((e) {
-                            print(e);
-                          });
+                          onTap: () async {
+                          var uid = LoginState().loginEmail(
+                              _emailController.text,
+                              _passwordController.text,
+                              );
+                          if (uid.toString() != "null") {
+                            Provider.of<LoginState>(context, listen: false).login();                            
+                            Navigator.pop(context);
+                          } else {
+                            print('error');
+                          }
                         },
                         child: Container(
                           height: 40,

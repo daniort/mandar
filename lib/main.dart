@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mandadero/Router/strings.dart';
+import 'package:mandadero/screens/profile_user.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
           mainRoute: (BuildContext context) {
             var state = Provider.of<LoginState>(context);
             if (state.isLogin()) {
-              return HomeScreen();
+              return ProfileCliente();
             } else {
               return FirtsPage();
             }
@@ -35,21 +36,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatefulWidget {
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text('HomeScreen'),
-      ),
-    );
-  }
-}
 
 class FirtsPage extends StatefulWidget {
   @override
