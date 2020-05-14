@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -14,14 +14,13 @@ class LoginCliente extends StatefulWidget {
 class _LoginClienteState extends State<LoginCliente> {
   TextEditingController _emailController;
   TextEditingController _passwordController;
-  TextEditingController _nameController;
-  String nombre;
-  String correo;
+  
+
 
   void initState() {
     _passwordController = TextEditingController();
     _emailController = TextEditingController();
-    _nameController = TextEditingController();
+    
     super.initState();
   }
 
@@ -44,7 +43,7 @@ class _LoginClienteState extends State<LoginCliente> {
                       child: Container(
                         child: Center(
                           child: Text(
-                            'Log In',
+                            'Logeate',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 color: Color(0xff11151C), fontSize: 27),

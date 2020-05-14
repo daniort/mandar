@@ -73,6 +73,8 @@ class LoginState with ChangeNotifier {
   }
 
   void logout() {
+    _auth.signOut();
+    _googleSignIn.signOut();
     _login = false;
     notifyListeners();
   }
