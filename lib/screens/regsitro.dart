@@ -1,9 +1,7 @@
-import 'dart:math';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_email_sender/flutter_email_sender.dart';
+
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mandadero/Router/strings.dart';
 import 'package:mandadero/state/loginstate.dart';
@@ -160,51 +158,7 @@ class _SignState extends State<Sign> {
                           ),
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 0.7,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10.0)),
-                        child: Center(
-                            child: Text(
-                          'o registrate con:',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.blueGrey,
-                              fontWeight: FontWeight.normal),
-                        )),
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Container(
-                          decoration: BoxDecoration(
-                              color: Color(0xff3b5998),
-                              borderRadius: BorderRadius.circular(90)),
-                          width: 40,
-                          height: 40,
-                          child: Icon(FontAwesomeIcons.facebookF,
-                              size: 20, color: Color(0xfff6f4f3)),
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.02,
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                              color: Color(0xffee6179),
-                              borderRadius: BorderRadius.circular(90)),
-                          width: 40,
-                          height: 40,
-                          child: Icon(FontAwesomeIcons.google,
-                              size: 20, color: Color(0xfff6f4f3)),
-                        ),
-                      ],
-                    ),
-                  ],
+                    ), ],
                 ),
               ),
             ),

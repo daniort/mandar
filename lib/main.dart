@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mandadero/Router/strings.dart';
+import 'package:mandadero/screens/profile_mandar.dart';
 import 'package:mandadero/screens/profile_user.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
 import 'Router/generateRouter.dart';
+
+
+
+
 
 void main() => runApp(MyApp());
 
@@ -13,7 +18,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<LoginState>(
-
       create: (BuildContext context) => LoginState(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -24,18 +28,20 @@ class MyApp extends StatelessWidget {
           mainRoute: (BuildContext context) {
             var state = Provider.of<LoginState>(context);
             if (state.isLogin()) {
-              return ProfileCliente();
+              if (state.isTipe() == 1) {
+                return ProfileCliente();
+              } else {
+                return ProfileMandadero();
+              }
             } else {
               return FirtsPage();
             }
           }
-          //5'/add': (BuildContext context) => AddPage();
         },
       ),
     );
   }
 }
-
 
 class FirtsPage extends StatefulWidget {
   @override
@@ -48,7 +54,6 @@ class _FirtsPageState extends State<FirtsPage> {
     final alto = MediaQuery.of(context).size.height;
     final ancho = MediaQuery.of(context).size.width;
     return Scaffold(
-      
       backgroundColor: Color(0xfff6f4f3),
       body: Center(
           child: Column(
@@ -152,6 +157,10 @@ class _FirtsPageState extends State<FirtsPage> {
                   padding: const EdgeInsets.only(
                       left: 8.0, right: 8.0, bottom: 8.0, top: 16.0),
                   child: InkWell(
+                    onTap: () {
+                      Provider.of<LoginState>(context, listen: false).type(2);
+                      Navigator.pushNamed(context, loginClienteRoute);
+                    },
                     child: Container(
                       width: ancho * 0.6,
                       height: alto * 0.06,
@@ -174,6 +183,7 @@ class _FirtsPageState extends State<FirtsPage> {
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
                     onTap: () {
+                      Provider.of<LoginState>(context, listen: false).type(1);
                       Navigator.pushNamed(context, loginClienteRoute);
                     },
                     child: Container(

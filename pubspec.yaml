@@ -29,9 +29,6 @@ dependencies:
 
   firebase_core: ^0.4.4+3
   firebase_auth: ^0.16.0
-  
-  flutter_email_sender: ^3.0.1
-
   google_sign_in: ^4.4.6
   meta: ^1.1.6
   

@@ -81,7 +81,6 @@ class _LoginClienteState extends State<LoginCliente> {
                         ),
                       ),
                     ),
-                 
                     Padding(
                       padding: const EdgeInsets.only(
                           top: 2.0, left: 15.0, right: 15.0, bottom: 2.0),
@@ -114,13 +113,14 @@ class _LoginClienteState extends State<LoginCliente> {
                       padding: const EdgeInsets.only(
                           top: 20.0, bottom: 4.0, left: 20.0, right: 20.0),
                       child: InkWell(
-                          onTap: () async {
+                        onTap: () async {
                           var uid = LoginState().loginEmail(
-                              _emailController.text,
-                              _passwordController.text,
-                              );
+                            _emailController.text,
+                            _passwordController.text,
+                          );
                           if (uid.toString() != "null") {
-                            Provider.of<LoginState>(context, listen: false).login();                            
+                            Provider.of<LoginState>(context, listen: false)
+                                .login();
                             Navigator.pop(context);
                           } else {
                             print('error');
@@ -174,14 +174,26 @@ class _LoginClienteState extends State<LoginCliente> {
                         SizedBox(
                           width: ancho * 0.01,
                         ),
-                        Container(
-                          decoration: BoxDecoration(
-                              color: Color(0xffee6179),
-                              borderRadius: BorderRadius.circular(90)),
-                          width: 40,
-                          height: 40,
-                          child: Icon(FontAwesomeIcons.google,
-                              size: 20, color: Color(0xfff6f4f3)),
+                        InkWell(
+                          onTap: () async {
+                            var uid = LoginState().loginGoogle();
+                            if (uid != null) {
+                              Provider.of<LoginState>(context, listen: false)
+                                  .login();
+                              Navigator.pop(context);
+                            } else {
+                              print('error login google');
+                            }
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: Color(0xffee6179),
+                                borderRadius: BorderRadius.circular(90)),
+                            width: 40,
+                            height: 40,
+                            child: Icon(FontAwesomeIcons.google,
+                                size: 20, color: Color(0xfff6f4f3)),
+                          ),
                         ),
                       ],
                     ),
