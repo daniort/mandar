@@ -1,3 +1,4 @@
 const String mainRoute = '/';
 const String signRoute = 'sign';
-const String editRoute = 'edit';
+const String loginClienteRoute = 'login';
+const String perfilclienteRoute = 'perfilcliente';

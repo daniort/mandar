@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "711253959249-73k3avkti8tn44g3hnlkde8u0adf8h4g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "sp.delivery.mandadero.mandadero",
+            "certificate_hash": "dbc17d362e095bdb693172250710a6b5b8f7e642"
+          }
+        },
+        {
           "client_id": "711253959249-8pn7nesg6m9avi4q31uhshkmbb5g2d7b.apps.googleusercontent.com",
           "client_type": 3
         }
