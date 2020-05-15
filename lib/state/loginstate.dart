@@ -10,11 +10,11 @@ class LoginState with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final _facebookLogin = FacebookLogin();
 
-   FirebaseUser user;
-  
+  FirebaseUser _user;
 
   bool isLogin() => _login;
   int isTipe() => _tipe;
+  isData() => _user;
 
   void login() async {
     print('login metodo');
@@ -41,9 +41,7 @@ class LoginState with ChangeNotifier {
     }
   }
 
-
-
-   Future<FirebaseUser> _fbSignIn() async {
+  Future<FirebaseUser> _fbSignIn() async {
     await _facebookLogin.logIn(['email', 'public_profile']).then((result) {
       print('metodo fb1');
       switch (result.status) {
@@ -53,7 +51,7 @@ class LoginState with ChangeNotifier {
           _auth.signInWithCredential(credential).then((res) {
             print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
             print(res.user.uid);
-            user = res.user;
+            _user = res.user;
             return res.user;
           }).catchError((e) {
             print(e);
@@ -78,7 +76,7 @@ class LoginState with ChangeNotifier {
     final curretUser = await _auth
         .signInWithEmailAndPassword(email: email, password: pass)
         .then((FirebaseUser) async {
-          user = FirebaseUser.user;
+      _user = FirebaseUser.user;
       return FirebaseUser.user.uid;
     }).catchError((e) {
       print('error al auntentificar');
@@ -109,17 +107,16 @@ class LoginState with ChangeNotifier {
       idToken: googleAuth.idToken,
     );
 
-    user =
-        (await _auth.signInWithCredential(credential)).user;
-    print("signed in " + user.displayName);
-    return user;
+    _user = (await _auth.signInWithCredential(credential)).user;
+    print("signed in " + _user.displayName);
+    return _user;
   }
 
   void logout() {
     _auth.signOut();
     _googleSignIn.signOut();
     _facebookLogin.logOut();
-
+    _tipe = 0;
     _login = false;
     notifyListeners();
   }
