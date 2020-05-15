@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -14,13 +13,11 @@ class LoginCliente extends StatefulWidget {
 class _LoginClienteState extends State<LoginCliente> {
   TextEditingController _emailController;
   TextEditingController _passwordController;
-  
-
 
   void initState() {
     _passwordController = TextEditingController();
     _emailController = TextEditingController();
-    
+
     super.initState();
   }
 
@@ -161,14 +158,29 @@ class _LoginClienteState extends State<LoginCliente> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Container(
-                          decoration: BoxDecoration(
-                              color: Color(0xff3b5998),
-                              borderRadius: BorderRadius.circular(90)),
-                          width: 40,
-                          height: 40,
-                          child: Icon(FontAwesomeIcons.facebookF,
-                              size: 20, color: Color(0xfff6f4f3)),
+                        InkWell(
+                          onTap: () async {
+                            
+                                 var uid = LoginState().loginFB();
+                            if (uid != null) {
+                              Provider.of<LoginState>(context, listen: false)
+                                  .login();
+                              Navigator.pop(context);
+                            } else {
+                              print('error login facebokk');
+                            }
+                            //Provider.of<LoginState>(context, listen: false)
+                              //  .login();
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: Color(0xff3b5998),
+                                borderRadius: BorderRadius.circular(90)),
+                            width: 40,
+                            height: 40,
+                            child: Icon(FontAwesomeIcons.facebookF,
+                                size: 20, color: Color(0xfff6f4f3)),
+                          ),
                         ),
                         SizedBox(
                           width: ancho * 0.01,
