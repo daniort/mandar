@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mandadero/Router/strings.dart';
+import 'package:mandadero/cliente/principal_wid.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
@@ -12,7 +13,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<LoginState>(
-
       create: (BuildContext context) => LoginState(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
           mainRoute: (BuildContext context) {
             var state = Provider.of<LoginState>(context);
             if (state.isLogin()) {
-              return HomeScreen();
+              return Principal();
             } else {
               return FirtsPage();
             }
@@ -62,7 +62,6 @@ class _FirtsPageState extends State<FirtsPage> {
     final alto = MediaQuery.of(context).size.height;
     final ancho = MediaQuery.of(context).size.width;
     return Scaffold(
-      
       backgroundColor: Color(0xfff6f4f3),
       body: Center(
           child: Column(

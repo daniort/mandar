@@ -1,16 +1,12 @@
-
-
 import 'package:flutter/material.dart';
 
-
 class LoginState with ChangeNotifier {
-
-  bool _login = false;
+  bool _login = true;
 
   bool isLogin() => _login;
 
   void login() async {
-     _login = true;
+    _login = true;
     notifyListeners();
   }
 
@@ -18,6 +14,4 @@ class LoginState with ChangeNotifier {
     _login = false;
     notifyListeners();
   }
-
-  
 }
