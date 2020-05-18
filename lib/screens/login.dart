@@ -159,10 +159,14 @@ class _LoginState extends State<Login> {
                       children: <Widget>[
                         InkWell(
                           onTap: () async {
-                            
-                            
-                            //Provider.of<LoginState>(context, listen: false)
-                            //  .login();
+                            var _uid =
+                                Provider.of<LoginState>(context, listen: false)
+                                    .loginFB();
+                                 
+                                    
+                            if (_uid == null) {
+                             print("error logeo");
+                            }
                           },
                           child: Container(
                             decoration: BoxDecoration(

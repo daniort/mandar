@@ -8,7 +8,6 @@ class LoginState with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final _facebookLogin = FacebookLogin();
 
-  
   int _step = 1;
   int _type_user = 0;
   String _token = '';
@@ -18,7 +17,6 @@ class LoginState with ChangeNotifier {
   isToken() => _token;
 
   setStep(int n) {
-    print('prueba');
     _step = n;
     notifyListeners();
   }
@@ -32,7 +30,6 @@ class LoginState with ChangeNotifier {
     notifyListeners();
   }
 
- 
   loginGoogle() async {
     return await _handleSignIn();
   }
@@ -43,29 +40,36 @@ class LoginState with ChangeNotifier {
 
   Future _fbSignIn() async {
     await _facebookLogin.logIn(['email', 'public_profile']).then((result) {
-      print('metodo fb1');
       switch (result.status) {
         case FacebookLoginStatus.loggedIn:
           AuthCredential credential = FacebookAuthProvider.getCredential(
               accessToken: result.accessToken.token);
+
           _auth.signInWithCredential(credential).then((res) {
-            print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
             print(res.user.uid);
-            //_user = res.user;
+            _token = res.user.uid;
             notifyListeners();
+            //var iudesr = res.user.uid.toString();
+
+            return res.user.uid;
+            //return iudesr;
           }).catchError((e) {
             print(e);
+            return null;
           });
-          //return result.accessToken.token;
+          //print(result.accessToken.userId + "hola");
+          //var iudes = result.accessToken.userId.toString();
+          //return result.accessToken.userId;
+          //return iudes;
           break;
         case FacebookLoginStatus.cancelledByUser:
           print('Login Cancelado por el Usuario.');
-
+          return null;
           break;
         case FacebookLoginStatus.error:
           print('Algo paso con el logeo de facebook.\n'
               'Aqui esta el error: ${result.errorMessage}');
-
+          return null;
           break;
       }
     });
@@ -115,15 +119,14 @@ class LoginState with ChangeNotifier {
   }
 
   void logout() {
-     
-     _step = 1;
-     _type_user = 0;
-     _token = '';
+    _step = 1;
+    _type_user = 0;
+    _token = '';
 
     _auth.signOut();
     _googleSignIn.signOut();
     _facebookLogin.logOut();
-    
+
     notifyListeners();
   }
 }
