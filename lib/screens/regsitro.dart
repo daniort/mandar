@@ -138,7 +138,7 @@ class _SignState extends State<Sign> {
                               _passwordController.text,
                               _nameController.text);
                           if (uid.toString() != null) {
-                            Navigator.pushNamed(context, loginClienteRoute);
+                            Navigator.pushNamed(context, loginRoute);
                           } else {
                             print('error');
                           }

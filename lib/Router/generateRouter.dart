@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mandadero/Router/strings.dart';
+import 'package:mandadero/screens/home_page.dart';
 import 'package:mandadero/screens/login.dart';
 import 'package:mandadero/screens/profile_user.dart';
 import 'package:mandadero/screens/regsitro.dart';
@@ -9,10 +10,12 @@ class Router {
     switch (settings.name) {
       case signRoute:
         return MaterialPageRoute(builder: (_) => Sign());
+      case homeRoute:
+        return MaterialPageRoute(builder: (_) => Home());
       case perfilclienteRoute:
         return MaterialPageRoute(builder: (_) => ProfileCliente());
-          case loginClienteRoute:
-        return MaterialPageRoute(builder: (_) => LoginCliente());
+      case loginRoute:
+        return MaterialPageRoute(builder: (_) => Login());
       default:
         return MaterialPageRoute(
             builder: (_) => Scaffold(

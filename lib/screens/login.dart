@@ -5,19 +5,18 @@ import 'package:mandadero/Router/strings.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
-class LoginCliente extends StatefulWidget {
+class Login extends StatefulWidget {
   @override
-  _LoginClienteState createState() => _LoginClienteState();
+  _LoginState createState() => _LoginState();
 }
 
-class _LoginClienteState extends State<LoginCliente> {
+class _LoginState extends State<Login> {
   TextEditingController _emailController;
   TextEditingController _passwordController;
 
   void initState() {
     _passwordController = TextEditingController();
     _emailController = TextEditingController();
-
     super.initState();
   }
 

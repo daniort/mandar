@@ -5,7 +5,7 @@ import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 
 class LoginState with ChangeNotifier {
   bool _login = false;
-  int _tipe = 0;
+
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final _facebookLogin = FacebookLogin();
@@ -13,12 +13,11 @@ class LoginState with ChangeNotifier {
   FirebaseUser _user;
 
   bool isLogin() => _login;
-  int isTipe() => _tipe;
+  
   isData() => _user;
 
-  void login() async {
-    print('login metodo');
-    print(_tipe);
+
+  void login(){
     _login = true;
     notifyListeners();
   }
@@ -31,17 +30,9 @@ class LoginState with ChangeNotifier {
     return await _fbSignIn();
   }
 
-  void type(int n) async {
-    if (n == 1) {
-      _tipe = 1;
-      notifyListeners();
-    } else {
-      _tipe = 2;
-      notifyListeners();
-    }
-  }
+ 
 
-  Future<FirebaseUser> _fbSignIn() async {
+  Future _fbSignIn() async {
     await _facebookLogin.logIn(['email', 'public_profile']).then((result) {
       print('metodo fb1');
       switch (result.status) {
@@ -52,21 +43,20 @@ class LoginState with ChangeNotifier {
             print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
             print(res.user.uid);
             _user = res.user;
-            return res.user;
+            notifyListeners();
           }).catchError((e) {
             print(e);
-            return null;
           });
-          return result.accessToken.token;
+          //return result.accessToken.token;
           break;
         case FacebookLoginStatus.cancelledByUser:
           print('Login Cancelado por el Usuario.');
-          return null;
+
           break;
         case FacebookLoginStatus.error:
           print('Algo paso con el logeo de facebook.\n'
               'Aqui esta el error: ${result.errorMessage}');
-          return null;
+
           break;
       }
     });
@@ -108,6 +98,10 @@ class LoginState with ChangeNotifier {
     );
 
     _user = (await _auth.signInWithCredential(credential)).user;
+    if(_user.displayName != null) {
+      print('hola no funciono');
+      login();
+    }    
     print("signed in " + _user.displayName);
     return _user;
   }
@@ -116,8 +110,9 @@ class LoginState with ChangeNotifier {
     _auth.signOut();
     _googleSignIn.signOut();
     _facebookLogin.logOut();
-    _tipe = 0;
     _login = false;
     notifyListeners();
   }
+
+  
 }
