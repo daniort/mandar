@@ -22,7 +22,7 @@ class _PerfilState extends State<Perfil> {
                   padding: const EdgeInsets.all(0),
                   child: Container(
                     child: Text(
-                      'USUARIO',
+                      'REPARTIDOR',
                       style: TextStyle(fontSize: 30),
                     ),
                     decoration: BoxDecoration(

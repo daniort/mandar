@@ -5,12 +5,12 @@ import 'package:mandadero/Router/strings.dart';
 import 'package:mandadero/cliente/pedidos_wid.dart';
 import 'package:mandadero/cliente/perfil_wid.dart';
 
-class Principal extends StatefulWidget {
+class PrincipalRepartidor extends StatefulWidget {
   @override
-  _PrincipalState createState() => _PrincipalState();
+  _PrincipalRepartidorState createState() => _PrincipalRepartidorState();
 }
 
-class _PrincipalState extends State<Principal> {
+class _PrincipalRepartidorState extends State<PrincipalRepartidor> {
   int page = 0;
   final List<Widget> lista = [
     Perfil(),
