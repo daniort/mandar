@@ -4,24 +4,35 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 
 class LoginState with ChangeNotifier {
-  bool _login = false;
-
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final _facebookLogin = FacebookLogin();
 
-  FirebaseUser _user;
-
-  bool isLogin() => _login;
   
-  isData() => _user;
+  int _step = 1;
+  int _type_user = 0;
+  String _token = '';
 
+  isLogin_Step() => _step;
+  isType_User() => _type_user;
+  isToken() => _token;
 
-  void login(){
-    _login = true;
+  setStep(int n) {
+    print('prueba');
+    _step = n;
     notifyListeners();
   }
 
+  setUser(int n) {
+    _type_user = n;
+  }
+
+  void setToken(String i) {
+    _token = '$i';
+    notifyListeners();
+  }
+
+ 
   loginGoogle() async {
     return await _handleSignIn();
   }
@@ -29,8 +40,6 @@ class LoginState with ChangeNotifier {
   loginFB() async {
     return await _fbSignIn();
   }
-
- 
 
   Future _fbSignIn() async {
     await _facebookLogin.logIn(['email', 'public_profile']).then((result) {
@@ -42,7 +51,7 @@ class LoginState with ChangeNotifier {
           _auth.signInWithCredential(credential).then((res) {
             print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
             print(res.user.uid);
-            _user = res.user;
+            //_user = res.user;
             notifyListeners();
           }).catchError((e) {
             print(e);
@@ -66,7 +75,7 @@ class LoginState with ChangeNotifier {
     final curretUser = await _auth
         .signInWithEmailAndPassword(email: email, password: pass)
         .then((FirebaseUser) async {
-      _user = FirebaseUser.user;
+      //_user = FirebaseUser.user;
       return FirebaseUser.user.uid;
     }).catchError((e) {
       print('error al auntentificar');
@@ -97,22 +106,24 @@ class LoginState with ChangeNotifier {
       idToken: googleAuth.idToken,
     );
 
-    _user = (await _auth.signInWithCredential(credential)).user;
-    if(_user.displayName != null) {
-      print('hola no funciono');
-      login();
-    }    
-    print("signed in " + _user.displayName);
+    final _user = (await _auth.signInWithCredential(credential)).user;
+    if (_user.displayName.length >= 1) {
+      setToken(_user.displayName);
+      print("signed in " + _user.displayName);
+    }
     return _user;
   }
 
   void logout() {
+     
+     _step = 1;
+     _type_user = 0;
+     _token = '';
+
     _auth.signOut();
     _googleSignIn.signOut();
     _facebookLogin.logOut();
-    _login = false;
+    
     notifyListeners();
   }
-
-  
 }

@@ -1,10 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mandadero/Router/strings.dart';
 import 'package:mandadero/state/loginstate.dart';
+import 'package:provider/provider.dart';
 
 class Sign extends StatefulWidget {
   @override
@@ -133,14 +133,19 @@ class _SignState extends State<Sign> {
                           top: 20.0, bottom: 4.0, left: 20.0, right: 20.0),
                       child: InkWell(
                         onTap: () async {
-                          var uid = LoginState().signupEmail(
+                          var idu = LoginState().signupEmail(
                               _emailController.text,
                               _passwordController.text,
                               _nameController.text);
-                          if (uid.toString() != null) {
-                            Navigator.pushNamed(context, loginRoute);
+                          print("asdfghjk");
+                          print(idu);
+                          if (idu == null) {
+                            print("nullo");
                           } else {
-                            print('error');
+                            Provider.of<LoginState>(context, listen: false)
+                                .setStep(2);
+                                //Provider.of<LoginState>(context, listen: false)
+                                //.setToken(0);
                           }
                         },
                         child: Container(
@@ -158,7 +163,8 @@ class _SignState extends State<Sign> {
                           ),
                         ),
                       ),
-                    ), ],
+                    ),
+                  ],
                 ),
               ),
             ),

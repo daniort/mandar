@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mandadero/Router/strings.dart';
+import 'package:mandadero/state/loginstate.dart';
 import 'package:mandadero/state/userstate.dart';
 import 'package:provider/provider.dart';
 
@@ -118,8 +119,9 @@ class _FirtsPageState extends State<FirtsPage> {
                       left: 8.0, right: 8.0, bottom: 8.0, top: 16.0),
                   child: InkWell(
                     onTap: () {
-                      Provider.of<UserState>(context, listen : false).type(2);
-                      Navigator.pushNamed(context, loginRoute);
+                      Provider.of<LoginState>(context, listen : false).setUser(2);
+                      Provider.of<LoginState>(context, listen : false).setStep(2);
+                      
                     },
                     child: Container(
                       width: ancho * 0.6,
@@ -143,8 +145,8 @@ class _FirtsPageState extends State<FirtsPage> {
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
                     onTap: () {
-                      Provider.of<UserState>(context, listen: false).type(1);
-                      Navigator.pushNamed(context, loginRoute);
+                       Provider.of<LoginState>(context, listen : false).setUser(1);
+                      Provider.of<LoginState>(context, listen : false).setStep(2);
                     },
                     child: Container(
                       width: ancho * 0.6,

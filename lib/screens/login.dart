@@ -114,9 +114,9 @@ class _LoginState extends State<Login> {
                             _passwordController.text,
                           );
                           if (uid.toString() != "null") {
-                            Provider.of<LoginState>(context, listen: false)
-                                .login();
-                            Navigator.pop(context);
+                            //Provider.of<LoginState>(context, listen: false)
+                              //  .login();
+                            //Navigator.pop(context);
                           } else {
                             print('error');
                           }
@@ -160,16 +160,9 @@ class _LoginState extends State<Login> {
                         InkWell(
                           onTap: () async {
                             
-                                 var uid = LoginState().loginFB();
-                            if (uid != null) {
-                              Provider.of<LoginState>(context, listen: false)
-                                  .login();
-                              Navigator.pop(context);
-                            } else {
-                              print('error login facebokk');
-                            }
+                            
                             //Provider.of<LoginState>(context, listen: false)
-                              //  .login();
+                            //  .login();
                           },
                           child: Container(
                             decoration: BoxDecoration(
@@ -186,13 +179,12 @@ class _LoginState extends State<Login> {
                         ),
                         InkWell(
                           onTap: () async {
-                            var uid = LoginState().loginGoogle();
-                            if (uid != null) {
-                              Provider.of<LoginState>(context, listen: false)
-                                  .login();
-                              Navigator.pop(context);
-                            } else {
-                              print('error login google');
+                            var _user =
+                                Provider.of<LoginState>(context, listen: false)
+                                    .loginGoogle();
+                            if (_user.displayName.length >= 0) {
+                              Provider.of<LoginState>(context, listen: true)
+                                  .setToken(_user.displayName);
                             }
                           },
                           child: Container(
