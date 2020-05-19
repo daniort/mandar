@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:mandadero/Router/strings.dart';
 import 'package:mandadero/cliente/principal_wid.dart';
+
 import 'package:mandadero/screens/first_page.dart';
-import 'package:mandadero/screens/profile_mandar.dart';
-import 'package:mandadero/screens/profile_user.dart';
+
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
@@ -27,9 +27,9 @@ class MyApp extends StatelessWidget {
             var state = Provider.of<LoginState>(context);
             if (state.isLogin()) {
               if (state.isTipe() == 1) {
-                return Principal();
+                return PrincipalCliente();
               } else {
-                return Principal();
+                return PrincipalCliente();
               }
             } else {
               return FirtsPage();

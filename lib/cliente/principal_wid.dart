@@ -5,12 +5,12 @@ import 'package:mandadero/Router/strings.dart';
 import 'package:mandadero/cliente/pedidos_wid.dart';
 import 'package:mandadero/cliente/perfil_wid.dart';
 
-class Principal extends StatefulWidget {
+class PrincipalCliente extends StatefulWidget {
   @override
-  _PrincipalState createState() => _PrincipalState();
+  _PrincipalClienteState createState() => _PrincipalClienteState();
 }
 
-class _PrincipalState extends State<Principal> {
+class _PrincipalClienteState extends State<PrincipalCliente> {
   int page = 0;
   final List<Widget> lista = [
     Perfil(),
@@ -51,13 +51,13 @@ class _PrincipalState extends State<Principal> {
                   children: <Widget>[
                     Icon(
                       Icons.person,
-                      color: page == 0 ? Color(0xffee6179) : Colors.grey,
+                      color: page == 0 ? Color(0xff36827f) : Colors.grey,
                       size: alto * .05,
                     ),
                     Text(
                       'Perfil',
                       style: TextStyle(
-                          color: page == 0 ? Color(0xffee6179) : Colors.grey,
+                          color: page == 0 ? Color(0xff36827f) : Colors.grey,
                           fontSize: alto * .03),
                     ),
                   ],
@@ -76,12 +76,12 @@ class _PrincipalState extends State<Principal> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Icon(Icons.note,
-                        color: page == 1 ? Color(0xffee6179) : Colors.grey,
+                        color: page == 1 ? Color(0xff36827f) : Colors.grey,
                         size: alto * .05),
                     Text(
                       'Pedidos',
                       style: TextStyle(
-                          color: page == 1 ? Color(0xffee6179) : Colors.grey,
+                          color: page == 1 ? Color(0xff36827f) : Colors.grey,
                           fontSize: alto * .03),
                     ),
                   ],
@@ -93,12 +93,15 @@ class _PrincipalState extends State<Principal> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Color(0xffee6179),
+        backgroundColor: Color(0xff36827f),
         child: Icon(
           Icons.add,
           size: 30,
         ),
-        onPressed: null,
+        onPressed: () {
+          print('presionaste');
+          Navigator.pushNamed(context, nuevopedido);
+        },
       ),
     );
   }
