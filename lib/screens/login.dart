@@ -29,8 +29,22 @@ class _LoginState extends State<Login> {
       body: SafeArea(
         child: Stack(
           children: <Widget>[
+            Row(
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () {
+                    Provider.of<LoginState>(context, listen: false).logout();
+                  },
+                )
+              ],
+            ),
             Padding(
-              padding: EdgeInsets.all(15.0),
+              padding:
+                  EdgeInsets.only(top: 25, bottom: 15, left: 15, right: 15),
               child: Form(
                 child: Column(
                   children: <Widget>[
@@ -109,17 +123,9 @@ class _LoginState extends State<Login> {
                           top: 20.0, bottom: 4.0, left: 20.0, right: 20.0),
                       child: InkWell(
                         onTap: () async {
-                          var uid = LoginState().loginEmail(
-                            _emailController.text,
-                            _passwordController.text,
-                          );
-                          if (uid.toString() != "null") {
-                            //Provider.of<LoginState>(context, listen: false)
-                              //  .login();
-                            //Navigator.pop(context);
-                          } else {
-                            print('error');
-                          }
+                          Provider.of<LoginState>(context, listen: false)
+                              .loginWithEmail(_emailController.text,
+                                  _passwordController.text);
                         },
                         child: Container(
                           height: 40,
@@ -158,15 +164,9 @@ class _LoginState extends State<Login> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         InkWell(
-                          onTap: () async {
-                            var _uid =
-                                Provider.of<LoginState>(context, listen: false)
-                                    .loginFB();
-                                 
-                                    
-                            if (_uid == null) {
-                             print("error logeo");
-                            }
+                          onTap: () {
+                            Provider.of<LoginState>(context, listen: false)
+                                .socialLogin(2);
                           },
                           child: Container(
                             decoration: BoxDecoration(
@@ -183,13 +183,8 @@ class _LoginState extends State<Login> {
                         ),
                         InkWell(
                           onTap: () async {
-                            var _user =
-                                Provider.of<LoginState>(context, listen: false)
-                                    .loginGoogle();
-                            if (_user.displayName.length >= 0) {
-                              Provider.of<LoginState>(context, listen: true)
-                                  .setToken(_user.displayName);
-                            }
+                            Provider.of<LoginState>(context, listen: false)
+                                .socialLogin(3);
                           },
                           child: Container(
                             decoration: BoxDecoration(
@@ -268,13 +263,13 @@ class _LoginState extends State<Login> {
                   )),
             ),
             Align(
-              alignment: Alignment.topLeft,
+              alignment: Alignment.topRight,
               child: Container(
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
                     borderRadius:
-                        BorderRadius.only(bottomRight: Radius.circular(100.0)),
+                        BorderRadius.only(bottomLeft: Radius.circular(100.0)),
                     color: Color(0xffdde9f7),
                     //borderRadius: BorderRadius.circular(80.0)),
                   )),

@@ -15,7 +15,7 @@ class _SignState extends State<Sign> {
   TextEditingController _emailController;
   TextEditingController _passwordController;
   TextEditingController _nameController;
-
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   void initState() {
     _passwordController = TextEditingController();
     _emailController = TextEditingController();
@@ -28,12 +28,28 @@ class _SignState extends State<Sign> {
     final alto = MediaQuery.of(context).size.height;
     final ancho = MediaQuery.of(context).size.width;
     return Scaffold(
+      key: _scaffoldKey,
       resizeToAvoidBottomPadding: false,
       body: SafeArea(
         child: Stack(
           children: <Widget>[
+            Row(
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () {
+                    Provider.of<LoginState>(context, listen: false).setStep(2);
+                    Navigator.pop(context);
+                  },
+                )
+              ],
+            ),
             Padding(
-              padding: EdgeInsets.all(15.0),
+              padding:
+                  EdgeInsets.only(top: 25, bottom: 15, left: 15, right: 15),
               child: Form(
                 child: Column(
                   children: <Widget>[
@@ -133,19 +149,26 @@ class _SignState extends State<Sign> {
                           top: 20.0, bottom: 4.0, left: 20.0, right: 20.0),
                       child: InkWell(
                         onTap: () async {
-                          var idu = LoginState().signupEmail(
-                              _emailController.text,
-                              _passwordController.text,
-                              _nameController.text);
-                          print("asdfghjk");
-                          print(idu);
-                          if (idu == null) {
-                            print("nullo");
+                          if (_passwordController.text.length >= 6) {
+                            var idu = LoginState().registroEmail(
+                                _emailController.text,
+                                _passwordController.text,
+                                _nameController.text);
+                            print(idu);
+                            if (idu == null) {
+                              print("nullo");
+                            } else {
+                              Provider.of<LoginState>(context, listen: false)
+                                  .setStep(2);
+                              Navigator.pop(context);
+                            }
                           } else {
-                            Provider.of<LoginState>(context, listen: false)
-                                .setStep(2);
-                                //Provider.of<LoginState>(context, listen: false)
-                                //.setToken(0);
+                            _scaffoldKey.currentState.showSnackBar(SnackBar(
+                              content: Text(
+                                  'La contraseña debe tener almenos 6 caracteres'),
+                              duration: Duration(milliseconds: 1500),
+                              backgroundColor: Color(0xffd1495b),
+                            ));
                           }
                         },
                         child: Container(
@@ -193,13 +216,13 @@ class _SignState extends State<Sign> {
                   )),
             ),
             Align(
-              alignment: Alignment.topLeft,
+              alignment: Alignment.topRight,
               child: Container(
-                  width: 60,
-                  height: 60,
+                  width: 50,
+                  height: 50,
                   decoration: BoxDecoration(
                     borderRadius:
-                        BorderRadius.only(bottomRight: Radius.circular(100.0)),
+                        BorderRadius.only(bottomLeft: Radius.circular(100.0)),
                     color: Color(0xffbdd4d3),
                     //borderRadius: BorderRadius.circular(80.0)),
                   )),

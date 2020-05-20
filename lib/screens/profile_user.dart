@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 class ProfileCliente extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final _token = Provider.of<LoginState>(context).isToken();
+    
     
     return Scaffold(
       backgroundColor: Colors.yellow,
@@ -19,7 +19,7 @@ class ProfileCliente extends StatelessWidget {
         ),
       ),
       body: Center(
-        child: Text('Bienvenido\n$_token'),
+        child: Text('Bienvenido Cliente'),
       ),
     );
   }

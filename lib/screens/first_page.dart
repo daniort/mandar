@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mandadero/Router/strings.dart';
@@ -11,11 +12,14 @@ class FirtsPage extends StatefulWidget {
 }
 
 class _FirtsPageState extends State<FirtsPage> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  
   @override
   Widget build(BuildContext context) {
     final alto = MediaQuery.of(context).size.height;
     final ancho = MediaQuery.of(context).size.width;
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Color(0xfff6f4f3),
       body: Center(
           child: Column(
@@ -119,9 +123,10 @@ class _FirtsPageState extends State<FirtsPage> {
                       left: 8.0, right: 8.0, bottom: 8.0, top: 16.0),
                   child: InkWell(
                     onTap: () {
-                      Provider.of<LoginState>(context, listen : false).setUser(2);
-                      Provider.of<LoginState>(context, listen : false).setStep(2);
-                      
+                      Provider.of<LoginState>(context, listen: false)
+                            .setUser(2);
+                        Provider.of<LoginState>(context, listen: false)
+                            .setStep(2);
                     },
                     child: Container(
                       width: ancho * 0.6,
@@ -145,8 +150,10 @@ class _FirtsPageState extends State<FirtsPage> {
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
                     onTap: () {
-                       Provider.of<LoginState>(context, listen : false).setUser(1);
-                      Provider.of<LoginState>(context, listen : false).setStep(2);
+                      Provider.of<LoginState>(context, listen: false)
+                            .setUser(1);
+                        Provider.of<LoginState>(context, listen: false)
+                            .setStep(2);
                     },
                     child: Container(
                       width: ancho * 0.6,

@@ -18,7 +18,7 @@ class Home extends StatelessWidget {
         //initialRoute: mainRoute,
         //title: "Mandaderos",
         routes: {
-          mainRoute: (BuildContext context) {
+          'mainRoute': (BuildContext context) {
             var stateuser = Provider.of<UserState>(context);
             if (stateuser.isTipe() == 1) {
               return ProfileCliente();

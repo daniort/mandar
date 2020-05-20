@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 class ProfileMandadero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final _token = Provider.of<LoginState>(context).isToken();
+    
     
     return Scaffold(
       backgroundColor: Colors.deepOrange,
@@ -19,7 +19,7 @@ class ProfileMandadero extends StatelessWidget {
         ),
       ),
       body: Center(
-        child: Text('Bienvenido Repartidor\n$_token'),
+        child: Text('Bienvenido Repartidor'),
       ),
     );
   }
