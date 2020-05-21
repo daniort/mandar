@@ -12,7 +12,7 @@ class Router {
       case signRoute:
         return MaterialPageRoute(builder: (_) => Sign());
       case perfilclienteRoute:
-        return MaterialPageRoute(builder: (_) => Perfil());
+        return MaterialPageRoute(builder: (_) => DataCliente());
       case editarCliente:
         return MaterialPageRoute(builder: (_) => EditarCliente());
       case loginClienteRoute:

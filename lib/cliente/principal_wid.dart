@@ -13,11 +13,11 @@ class PrincipalCliente extends StatefulWidget {
 class _PrincipalClienteState extends State<PrincipalCliente> {
   int page = 0;
   final List<Widget> lista = [
-    Perfil(),
+    DataCliente(),
     Pedidos(),
   ];
 
-  Widget inicio = Perfil();
+  Widget inicio = DataCliente();
 
   final PageStorageBucket bucket = PageStorageBucket();
 
@@ -41,7 +41,7 @@ class _PrincipalClienteState extends State<PrincipalCliente> {
                 onPressed: () {
                   setState(
                     () {
-                      inicio = Perfil();
+                      inicio = DataCliente();
                       page = 0;
                     },
                   );
