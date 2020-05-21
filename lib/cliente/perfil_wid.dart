@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mandadero/Router/strings.dart';
+import 'package:mandadero/services/cliente_services.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
@@ -11,7 +12,9 @@ class DataCliente extends StatefulWidget {
 class _DataClienteState extends State<DataCliente> {
   @override
   Widget build(BuildContext context) {
+    
     final _user = Provider.of<LoginState>(context, listen: false).currentUser();
+    //UserServices().newUser(_user);
     final alto = MediaQuery.of(context).size.height;
     final ancho = MediaQuery.of(context).size.width;
     return SafeArea(
@@ -64,6 +67,13 @@ class _DataClienteState extends State<DataCliente> {
                       ),
                     ),
                   ),
+                  Text(
+                    "Cliente",
+                    style: TextStyle(
+                        fontSize: 15,
+                        color: Color(0xff484349),
+                        fontWeight: FontWeight.normal,
+                  ),),
                   Text(
                     "${_user.displayName}",
                     style: TextStyle(

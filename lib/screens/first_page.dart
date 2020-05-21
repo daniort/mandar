@@ -1,9 +1,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mandadero/Router/strings.dart';
+
 import 'package:mandadero/state/loginstate.dart';
-import 'package:mandadero/state/userstate.dart';
+
 import 'package:provider/provider.dart';
 
 class FirtsPage extends StatefulWidget {

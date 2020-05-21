@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:mandadero/Router/strings.dart';
 import 'package:mandadero/cliente/pedidos_wid.dart';
 import 'package:mandadero/cliente/perfil_wid.dart';
+import 'package:mandadero/services/cliente_services.dart';
+import 'package:mandadero/state/loginstate.dart';
+import 'package:mandadero/state/loginstate.dart';
+import 'package:provider/provider.dart';
 
 class ProfileCliente extends StatefulWidget {
   @override
@@ -16,13 +20,17 @@ class _ProfileClienteState extends State<ProfileCliente> {
     DataCliente(),
     Pedidos(),
   ];
-
   Widget inicio = DataCliente();
-
   final PageStorageBucket bucket = PageStorageBucket();
 
   @override
   Widget build(BuildContext context) {
+    final _user = Provider.of<LoginState>(context, listen: false).currentUser();
+    try {
+      UserServices().newUser(_user);
+    } catch (e) {
+      print("lo intenté");
+    }
     final alto = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Color(0xfff6f9ff),

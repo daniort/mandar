@@ -17,7 +17,6 @@ class LoginState with ChangeNotifier {
 
   int _step = 1;
   int _type_user = 0;
-
   bool _inter = false;
   bool _login = false;
 
