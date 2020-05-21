@@ -25,16 +25,14 @@ class _ProfileClienteState extends State<ProfileCliente> {
   Widget build(BuildContext context) {
     final alto = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: Color(0xff36827f), 
-      
+      backgroundColor: Color(0xfff6f9ff),
       body: PageStorage(
         child: inicio,
         bucket: bucket,
       ),
       bottomNavigationBar: BottomAppBar(
         
-        //notchMargin: 1,
-        //shape: AutomaticNotchedShape(_),
+
         child: Container(
           height: 40,
           child: Row(
@@ -54,14 +52,10 @@ class _ProfileClienteState extends State<ProfileCliente> {
                   children: <Widget>[
                     Icon(
                       Icons.person,
-                      color: page == 0 ? Color(0xff36827f) : Colors.grey,
+                      color: page == 0
+                          ? Color(0xff484349)
+                          : Color.fromRGBO(20, 20, 20, 0.4),
                       size: 30,
-                    ),
-                    Text(
-                      'Perfil',
-                      style: TextStyle(
-                          color: page == 0 ? Color(0xff36827f) : Colors.grey,
-                          fontSize: 0),
                     ),
                   ],
                 ),
@@ -79,14 +73,10 @@ class _ProfileClienteState extends State<ProfileCliente> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Icon(Icons.note,
-                        color: page == 1 ? Color(0xff36827f) : Colors.grey,
+                        color: page == 1
+                            ? Color(0xff484349)
+                            : Color.fromRGBO(20, 20, 20, 0.4),
                         size: 30),
-                    Text(
-                      'Pedidos',
-                      style: TextStyle(
-                          color: page == 1 ? Color(0xff36827f) : Colors.grey,
-                          fontSize: 0),
-                    ),
                   ],
                 ),
               ),
@@ -96,7 +86,7 @@ class _ProfileClienteState extends State<ProfileCliente> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Color(0xff36827f),
+        backgroundColor: Color(0xffee6179),
         child: Icon(
           Icons.add,
           size: 30,

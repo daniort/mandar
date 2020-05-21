@@ -19,167 +19,225 @@ class _DataClienteState extends State<DataCliente> {
         children: <Widget>[
           Container(
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 IconButton(
                   icon: Icon(
-                    Icons.exit_to_app,
-                    color: Color.fromRGBO(240, 240, 240, 0.9),
+                    Icons.arrow_back_ios,
+                    color: Color.fromRGBO(20, 20, 20, 0.5),
                   ),
                   onPressed: () {
                     Provider.of<LoginState>(context, listen: false).logout();
                   },
+                ),
+                Text(
+                  'Salir',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Color.fromRGBO(20, 20, 20, 0.5),
+                  ),
                 )
               ],
             ),
           ),
           Expanded(
-            flex: 2,
             child: Container(
               child: Column(
                 children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Container(
-                        width: alto * .3,
-                        height: alto * .3,
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(color: Colors.white10, blurRadius: 25)
-                          ],
-                          image: new DecorationImage(
-                              image: new NetworkImage(
-                                "${_user.photoUrl}",
-                              ),
-                              fit: BoxFit.fill),
-                          borderRadius: BorderRadius.circular(150),
-                        )),
-                  ),
-                  Text(
-                    "${_user.displayName}",
-                    //textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 28, color: Colors.white),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(2.0),
-                    child: InkWell(
-                      onTap: () {},
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            'Editar Perfil',
-                            style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.black54,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(
-                            width: 3,
-                          ),
-                          Icon(
-                            Icons.edit,
-                            size: 11,
-                          )
+                      width: alto * .25,
+                      height: alto * .25,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                            color: Color.fromRGBO(20, 20, 20, 0.2), width: 5.0),
+                        boxShadow: [
+                          BoxShadow(color: Colors.white10, blurRadius: 25)
                         ],
+                        image: new DecorationImage(
+                            image: new NetworkImage(
+                              "${_user.photoUrl}",
+                            ),
+                            fit: BoxFit.fill),
+                        borderRadius: BorderRadius.circular(150),
                       ),
                     ),
                   ),
+                  Text(
+                    "${_user.displayName}",
+                    style: TextStyle(
+                        fontSize: 25,
+                        color: Color(0xff484349),
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    "${_user.email}",
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Color(0xff484349),
+                    ),
+                  ),
+                  
+                      
+                    
                 ],
               ),
             ),
           ),
-          Expanded(
-            flex: 2,
-            child: Container(
+          Container(
+            height: alto * 0.35,
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0xff484349),
+                  blurRadius: 20.0, // has the effect of softening the shadow
+                  spreadRadius: 3.0, // has the effect of extending the shadow
+                  offset: Offset(
+                    0.0, // horizontal, move right 10
+                    10.0, // vertical, move down 10
+                  ),
+                )
+              ],
               color: Colors.white,
-              child: Column(
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.only(right: 25),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                              color: Color(0xff36827f),
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Icon(
-                            Icons.home,
-                            color: Colors.white,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.only(left: 10),
-                          child: Text(
-                            'Calle Guerrero No. 15',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.only(right: 25),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                              color: Color(0xff36827f),
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Icon(
-                            Icons.email,
-                            color: Colors.white,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.only(left: 10),
-                          child: Text(
-                            'juanpelaez@gmail.com',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.only(right: 25),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                              color: Color(0xff36827f),
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Icon(
-                            Icons.credit_card,
-                            color: Colors.white,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.only(left: 10),
-                          child: Text(
-                            '1254864581256324',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(30.0),
+                topRight: Radius.circular(30.0),
               ),
             ),
-          )
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  flex: 6,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.0),
+                            color: Color(0xfff6f9ff),
+                          ),
+                          width: ancho * 0.5,
+                          height: alto * 0.06,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Icon(
+                                Icons.pin_drop,
+                                size: 17,
+                                color: Color.fromRGBO(20, 20, 20, 0.5),
+                              ),
+                              SizedBox(
+                                width: 2.0,
+                              ),
+                              Text(
+                                'Calle Guerrero No. 15',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Color.fromRGBO(20, 20, 20, 0.5),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.0),
+                            color: Color(0xfff6f9ff),
+                          ),
+                          width: ancho * 0.5,
+                          height: alto * 0.06,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Text(
+                                'Editar Datos',
+                                style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.black54,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(
+                                width: 4,
+                              ),
+                              Icon(
+                                Icons.edit,
+                                size: 15,
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  flex: 4,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        width: ancho * 0.35,
+                        height: alto * 0.27,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          gradient: LinearGradient(
+                              colors: [Color(0xfff6f9ff), Color(0xfff6f9ff)],
+                              begin: Alignment.topLeft),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                'Número de\nPedidos:',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: Color(0xff484349),
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                '0',
+                                style: TextStyle(
+                                    color: Color(0xff484349),
+                                    fontSize: 35,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                '¡Comienza Ahora!',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: Color(0xff484349),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.normal),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
