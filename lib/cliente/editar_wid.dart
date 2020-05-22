@@ -10,14 +10,20 @@ class EditarCliente extends StatefulWidget {
 class _EditarClienteState extends State<EditarCliente> {
   TextEditingController _emailController;
   TextEditingController _direccionController;
+  TextEditingController _notaController;
   TextEditingController _nameController;
   TextEditingController _cardController;
+  TextEditingController _mesController;
+  TextEditingController _anoController;
 
   void initState() {
     _direccionController = TextEditingController();
+    _notaController = TextEditingController();
     _emailController = TextEditingController();
     _nameController = TextEditingController();
     _cardController = TextEditingController();
+    _mesController = TextEditingController();
+    _anoController = TextEditingController();
     super.initState();
   }
 
@@ -115,12 +121,12 @@ class _EditarClienteState extends State<EditarCliente> {
                           padding: const EdgeInsets.only(
                               top: 2.0, left: 15.0, right: 15.0, bottom: 2.0),
                           child: TextField(
-                            controller: _direccionController,
+                            controller: _notaController,
                             maxLength: 50,
                             cursorColor: Color(0xff11151C),
                             decoration: InputDecoration(
                                 icon:
-                                    Icon(Icons.home, color: Color(0xff11151C)),
+                                    Icon(Icons.note, color: Color(0xff11151C)),
                                 labelText:
                                     'Agregar etiqueta (p.ej. color de casa)'),
                             autocorrect: false,
@@ -149,7 +155,7 @@ class _EditarClienteState extends State<EditarCliente> {
                                 height: 40,
                                 width: 100,
                                 child: TextField(
-                                  controller: _cardController,
+                                  controller: _mesController,
                                   maxLength: 2,
                                   cursorColor: Color(0xff11151C),
                                   decoration: InputDecoration(
@@ -166,7 +172,7 @@ class _EditarClienteState extends State<EditarCliente> {
                                 height: 40,
                                 width: 100,
                                 child: TextField(
-                                  controller: _cardController,
+                                  controller: _anoController,
                                   maxLength: 2,
                                   cursorColor: Color(0xff11151C),
                                   decoration: InputDecoration(
