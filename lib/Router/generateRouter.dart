@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mandadero/Router/strings.dart';
+import 'package:mandadero/cliente/nuevo_pedido.dart';
 import 'package:mandadero/cliente/principal_wid.dart';
 import 'package:mandadero/main.dart';
 
@@ -14,6 +15,8 @@ class Router {
         return MaterialPageRoute(builder: (_) => MyApp());
       case signRoute:
         return MaterialPageRoute(builder: (_) => Sign());
+      case nuevoPedidoRoute:
+        return MaterialPageRoute(builder: (_) => NuevoPedido());
       case perfilclienteRoute:
         return MaterialPageRoute(builder: (_) => ProfileCliente());
       case loginRoute:

@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:mandadero/services/cliente_services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginState with ChangeNotifier {
@@ -14,11 +15,38 @@ class LoginState with ChangeNotifier {
   LoginState() {
     loginState();
   }
-
-  int _step = 1;
-  int _type_user = 0;
-  bool _inter = false;
   bool _login = false;
+  int _steplogin = 1;
+  int _type_user = 0;
+  //bool _inter = false;
+
+  int _stepPedido = 0;
+  int _tipoPedido = 1;
+
+  isStepPedido() => _stepPedido;
+  isTipoPedido() => _tipoPedido;
+
+  setTipoPedido(int n) {
+    _tipoPedido = n;
+    notifyListeners();
+    print("tipo:" + _tipoPedido.toString());
+  }
+
+  setStepPedido(int n) {
+    _stepPedido = n;
+    notifyListeners();
+    print("paso:" + _stepPedido.toString());
+  }
+
+  void backStep() {
+    _stepPedido = _stepPedido - 1;
+    notifyListeners();
+  }
+
+  void plusStep() {
+    _stepPedido = _stepPedido + 1;
+    notifyListeners();
+  }
 
   Future<bool> loginState() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -32,12 +60,12 @@ class LoginState with ChangeNotifier {
   }
 
   FirebaseUser currentUser() => _user;
-  int isLogin_Step() => _step;
+  int isLogin_Step() => _steplogin;
   int isType_User() => _type_user;
   bool islogin() => _login;
 
-  setStep(int n) {
-    _step = n;
+  setStepLogin(int n) {
+    _steplogin = n;
     notifyListeners();
   }
 
@@ -46,9 +74,11 @@ class LoginState with ChangeNotifier {
   }
 
   void logout() {
+    _stepPedido = 0;
+    _tipoPedido = 1;
     _prefs.clear();
     _login = false;
-    _step = 1;
+    _steplogin = 1;
     _type_user = 0;
     _auth.signOut();
     _googleSignIn.signOut();
@@ -68,6 +98,11 @@ class LoginState with ChangeNotifier {
                 _user = res.user;
                 //_prefs.setBool('islogin', true);
                 _login = true;
+                try {
+                  UserServices().newUser(_user);
+                } catch (e) {
+                  print("lo intenté");
+                }
                 print("Login Faceboon Hecho" + _user.displayName);
                 notifyListeners();
               }).catchError((e) {
@@ -96,6 +131,11 @@ class LoginState with ChangeNotifier {
           //_prefs.setBool("islogin", true);
 
           _login = true;
+          try {
+            UserServices().newUser(_user);
+          } catch (e) {
+            print("lo intenté");
+          }
           notifyListeners();
         }
         break;

@@ -126,7 +126,7 @@ class _FirtsPageState extends State<FirtsPage> {
                       Provider.of<LoginState>(context, listen: false)
                             .setUser(2);
                         Provider.of<LoginState>(context, listen: false)
-                            .setStep(2);
+                            .setStepLogin(2);
                     },
                     child: Container(
                       width: ancho * 0.6,
@@ -153,7 +153,7 @@ class _FirtsPageState extends State<FirtsPage> {
                       Provider.of<LoginState>(context, listen: false)
                             .setUser(1);
                         Provider.of<LoginState>(context, listen: false)
-                            .setStep(2);
+                            .setStepLogin(2);
                     },
                     child: Container(
                       width: ancho * 0.6,

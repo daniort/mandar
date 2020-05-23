@@ -33,7 +33,8 @@ dependencies:
   google_sign_in: ^4.4.6
   meta: ^1.1.6
   shared_preferences: ^0.5.7+2
-  cloud_firestore: ^0.13.5
+  cloud_firestore: ^0.13.5 
+  #cached_network_image: ^2.2.0+1
   
   
 
@@ -56,7 +57,7 @@ flutter:
  
   assets:
 
-    - lib/assets/logo.png
+    - lib/assets/
     
 
   # An image asset can refer to one or more resolution-specific "variants", see

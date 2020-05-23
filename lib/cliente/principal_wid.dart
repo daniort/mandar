@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:mandadero/Router/strings.dart';
+import 'package:mandadero/cliente/nuevo_pedido.dart';
 import 'package:mandadero/cliente/pedidos_wid.dart';
 import 'package:mandadero/cliente/perfil_wid.dart';
 import 'package:mandadero/services/cliente_services.dart';
@@ -25,12 +26,7 @@ class _ProfileClienteState extends State<ProfileCliente> {
 
   @override
   Widget build(BuildContext context) {
-    final _user = Provider.of<LoginState>(context, listen: false).currentUser();
-    try {
-      UserServices().newUser(_user);
-    } catch (e) {
-      print("lo intenté");
-    }
+    
     final alto = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Color(0xfff6f9ff),
@@ -39,8 +35,6 @@ class _ProfileClienteState extends State<ProfileCliente> {
         bucket: bucket,
       ),
       bottomNavigationBar: BottomAppBar(
-        
-
         child: Container(
           height: 40,
           child: Row(
@@ -101,7 +95,14 @@ class _ProfileClienteState extends State<ProfileCliente> {
         ),
         onPressed: () {
           print('presionaste');
-          //Navigator.pushNamed(context, nuevopedido);
+          
+          Navigator.of(context).pushNamed(nuevoPedidoRoute);
+          //showModalBottomSheet(
+            //  context: context,
+              //isScrollControlled: true,
+              //builder: (context) {
+//                return NuevoPedido();
+  //            });
         },
       ),
     );

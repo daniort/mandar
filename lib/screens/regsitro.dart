@@ -41,7 +41,7 @@ class _SignState extends State<Sign> {
                     color: Colors.grey,
                   ),
                   onPressed: () {
-                    Provider.of<LoginState>(context, listen: false).setStep(2);
+                    Provider.of<LoginState>(context, listen: false).setStepLogin(2);
                     Navigator.pop(context);
                   },
                 )
@@ -159,7 +159,7 @@ class _SignState extends State<Sign> {
                               print("nullo");
                             } else {
                               Provider.of<LoginState>(context, listen: false)
-                                  .setStep(2);
+                                  .setStepLogin(2);
                               Navigator.pop(context);
                             }
                           } else {
