@@ -8,38 +8,29 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:711253959249:android:5371f8b817af8bee33ce70",
+        "mobilesdk_app_id": "1:711253959249:android:0f34dc310ab9946333ce70",
         "android_client_info": {
           "package_name": "sp.delivery.mandadero.mandadero"
         }
       },
       "oauth_client": [
         {
-          "client_id": "711253959249-73k3avkti8tn44g3hnlkde8u0adf8h4g.apps.googleusercontent.com",
+          "client_id": "711253959249-b2e21bss3r80vjlb2fv2fqjq0qa3i8cu.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "sp.delivery.mandadero.mandadero",
-            "certificate_hash": "dbc17d362e095bdb693172250710a6b5b8f7e642"
+            "certificate_hash": "be63787e8d6b6cb3db2c541bf3a1de687e7835bd"
           }
-        },
-        {
-          "client_id": "711253959249-8pn7nesg6m9avi4q31uhshkmbb5g2d7b.apps.googleusercontent.com",
-          "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDGxBnRiymda1qdrsw_C4gAef-xO3PBNDE"
+          "current_key": "AIzaSyAyAzi2VNW1Kv_HlB8PLsc1OPLhc14FA4A"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "711253959249-8pn7nesg6m9avi4q31uhshkmbb5g2d7b.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

@@ -23,6 +23,8 @@ class LoginState with ChangeNotifier {
   int _stepPedido = 0;
   int _tipoPedido = 1;
 
+  bool _cvvfocus = false;
+
   isStepPedido() => _stepPedido;
   isTipoPedido() => _tipoPedido;
 
@@ -173,5 +175,12 @@ class LoginState with ChangeNotifier {
     } catch (e) {
       return null;
     }
+  }
+
+  bool isCVVFocus() => _cvvfocus;
+
+  setCVVState(bool state) {
+    _cvvfocus = state;
+    notifyListeners();
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_credit_card/flutter_credit_card.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -15,11 +16,20 @@ class _NuevoPedidoState extends State<NuevoPedido> {
   TextEditingController _tituloController;
   TextEditingController _cantidadController;
   TextEditingController _ubicacionController;
+  TextEditingController _cardNumberController;
+  TextEditingController _cardHolderNameController;
+  TextEditingController _cvvCodeController;
+  TextEditingController _expiryDateController;
 
   void initState() {
     _tituloController = TextEditingController();
     _cantidadController = TextEditingController();
     _ubicacionController = TextEditingController();
+
+    _expiryDateController = TextEditingController();
+    _cardNumberController = TextEditingController();
+    _cardHolderNameController = TextEditingController();
+    _cvvCodeController = TextEditingController();
     super.initState();
   }
 
@@ -156,7 +166,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                         }
 
                         //Provider.of<LoginState>(context, listen: false)
-                          //  .plusStep();
+                        //  .plusStep();
                       },
                       child: Container(
                         height: 45.0,
@@ -202,6 +212,9 @@ class _NuevoPedidoState extends State<NuevoPedido> {
         //}
         break;
       case 2:
+        return _pagoCard(ancho, alto);
+        break;
+      case 3:
         return _esperaRepartidor(ancho, alto);
         break;
       default:
@@ -425,6 +438,93 @@ class _NuevoPedidoState extends State<NuevoPedido> {
           style: TextStyle(fontSize: 20),
         ),
       ],
+    );
+  }
+
+  Widget _pagoCard(double ancho, double alto) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 200.0),
+        child: Column(
+          children: <Widget>[
+            Container(
+              width: ancho * .8,
+              child: CreditCardWidget(
+                cardNumber: _cardNumberController.text,
+                expiryDate: _expiryDateController.text,
+                cardHolderName: _cardHolderNameController.text,
+                cvvCode: _cvvCodeController.text,
+                cardBgColor: Color(0xff0a2342),
+                height: alto * .20,
+                textStyle: TextStyle(
+                  color: Color(0xfff7f0f0),
+                ),
+                width: MediaQuery.of(context).size.width,
+                animationDuration: Duration(milliseconds: 1000),
+                //showBackView: false,
+                showBackView: Provider.of<LoginState>(context, listen: true)
+                  .isCVVFocus(), //true when you want to show cvv(back) view
+              ),
+            ),
+         
+               Padding(
+                 padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
+                 child: TextField(
+                    onSubmitted: (Provider.of<LoginState>(context, listen: false)
+                        .setCVVState(false)),
+                    controller: _cardNumberController,
+                    keyboardType: TextInputType.number,
+                    maxLength: 16,
+                    decoration: InputDecoration(
+                        labelText: 'Número de Tarjeta',
+                        prefixIcon: Icon(Icons.credit_card))),
+               ),
+            
+            Padding(
+              padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
+              child: TextField(
+                  onSubmitted: (Provider.of<LoginState>(context, listen: false)
+                      .setCVVState(false)),
+                  controller: _cardHolderNameController,
+                  keyboardType: TextInputType.text,
+                  maxLength: 40,
+                  decoration: InputDecoration(
+                      labelText: 'Nombre del Titular',
+                      prefixIcon: Icon(Icons.people))),
+            ),
+            Row(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(top: 2.0,  left: 15.0, right: 15.0),
+                  child: TextField(
+                    expands: false,
+                      onSubmitted: (Provider.of<LoginState>(context, listen: false)
+                          .setCVVState(false)),
+                      controller: _expiryDateController,
+                      keyboardType: TextInputType.number,
+                      maxLength: 5,
+                      decoration: InputDecoration(
+                          labelText: 'Fecha de Expiración',
+                          prefixIcon: Icon(Icons.date_range))),
+                ),
+                Padding(
+              padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
+              child: TextField(
+                expands: false,
+                  onSubmitted: (Provider.of<LoginState>(context, listen: false)
+                      .setCVVState(true)),
+                  controller: _cvvCodeController,
+                  keyboardType: TextInputType.text,
+                  maxLength: 3,
+                  decoration: InputDecoration(
+                      labelText: 'CVV', prefixIcon: Icon(Icons.edit))),
+            ),
+              ],
+            ),
+            
+          ],
+        ),
+      ),
     );
   }
 }
