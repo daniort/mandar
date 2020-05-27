@@ -3,9 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mandadero/cliente/principal_wid.dart';
+import 'package:mandadero/services/cliente_services.dart';
+
+import 'package:mandadero/services/payment-service.dart';
 
 import 'package:mandadero/state/loginstate.dart';
+
 import 'package:provider/provider.dart';
+import 'package:stripe_payment/stripe_payment.dart';
 
 class NuevoPedido extends StatefulWidget {
   @override
@@ -20,6 +26,19 @@ class _NuevoPedidoState extends State<NuevoPedido> {
   TextEditingController _cardHolderNameController;
   TextEditingController _cvvCodeController;
   TextEditingController _expiryDateController;
+  GlobalKey _scaffoldKey = GlobalKey();
+  Token _paymentToken;
+  PaymentMethod _paymentMethod;
+  String _error;
+  final String _currentSecret = null; //set this yourself, e.g using curl
+  PaymentIntentResult _paymentIntent;
+  Source _source;
+  ScrollController _controller = ScrollController();
+  final CreditCard testCard = CreditCard(
+    number: '4000002760003184',
+    expMonth: 12,
+    expYear: 21,
+  );
 
   void initState() {
     _tituloController = TextEditingController();
@@ -31,6 +50,10 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     _cardHolderNameController = TextEditingController();
     _cvvCodeController = TextEditingController();
     super.initState();
+    StripePayment.setOptions(StripeOptions(
+        publishableKey: "pk_test_aSaULNS8cJU6Tvo20VAXy6rp",
+        merchantId: "Test",
+        androidPayMode: 'test'));
   }
 
   final _formPedidoKey = GlobalKey<FormState>();
@@ -40,6 +63,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     final ancho = MediaQuery.of(context).size.width;
     final _state = Provider.of<LoginState>(context, listen: true);
     return Scaffold(
+      key: _scaffoldKey,
       resizeToAvoidBottomPadding: false,
       backgroundColor: Color(0xfff6f9ff),
       body: SafeArea(
@@ -84,26 +108,9 @@ class _NuevoPedidoState extends State<NuevoPedido> {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 20.0),
-              child: _firstForm(ancho, alto),
+              padding: const EdgeInsets.only(top: 100.0),
+              child: _firstForm(context, ancho, alto),
             ),
-            //_state.isStep() >= 1
-            //? Align(
-            //                alignment: Alignment.bottomCenter,
-            //              child: Container(
-            //              height: alto * .3,
-            //            color: Color.fromRGBO(20, 40, 67, 0.7),
-            //          child: ListView.builder(
-            //          itemCount: _ticket.length,
-            //        itemBuilder: (context, index) {
-            //        return ListTile(
-            //        title: Text('${_ticket[index]}'),
-            //    );
-//                        },
-            //                    ),
-            //                ),
-            //            )
-            //: Text(''),
             Align(
               alignment: Alignment.bottomCenter,
               child: Row(
@@ -111,14 +118,18 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                   Expanded(
                     child: InkWell(
                       onTap: () {
-                        int _paso =
+                        switch (_state.isStepPedido()) {
+                          case 0:
+                            Navigator.of(context).pop();
+                            break;
+                          case 1:
                             Provider.of<LoginState>(context, listen: false)
-                                .isStepPedido();
-                        if (_paso >= 1) {
-                          Provider.of<LoginState>(context, listen: false)
-                              .backStep();
-                        } else {
-                          Navigator.of(context).pop();
+                                .backStep();
+                            break;
+                          case 2:
+                            Navigator.of(context).pop();
+                            break;
+                          default:
                         }
                       },
                       child: Container(
@@ -160,13 +171,10 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                             }
                             break;
                           case 2:
-                            print('Paso dos');
+                            Navigator.pop(context);
                             break;
                           default:
                         }
-
-                        //Provider.of<LoginState>(context, listen: false)
-                        //  .plusStep();
                       },
                       child: Container(
                         height: 45.0,
@@ -197,7 +205,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     );
   }
 
-  _firstForm(double ancho, double alto) {
+  _firstForm(BuildContext context, double ancho, double alto) {
     final _stados = Provider.of<LoginState>(context, listen: true);
     switch (_stados.isStepPedido()) {
       case 0:
@@ -212,10 +220,20 @@ class _NuevoPedidoState extends State<NuevoPedido> {
         //}
         break;
       case 2:
-        return _pagoCard(ancho, alto);
+        final _user =
+            Provider.of<LoginState>(context, listen: false).currentUser();
+        UserServices().newPedidoPagoServicios(
+            _tituloController.text,
+            _cantidadController.text,
+            _ubicacionController.text,
+            "nada de datos",
+            _user);
+        print('Paso ${_stados.isStepPedido()}');
+        return _esperaRepartidor(ancho, alto);
         break;
       case 3:
-        return _esperaRepartidor(ancho, alto);
+        print('Paso ${_stados.isStepPedido()}');
+        return _pagoChoose(ancho, alto);
         break;
       default:
     }
@@ -233,7 +251,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                 Provider.of<LoginState>(context, listen: false)
                     .setTipoPedido(1);
                 Provider.of<LoginState>(context, listen: false)
-                    .setStepPedido(1);
+                    .plusStep();
               });
             },
             child: Container(
@@ -432,6 +450,11 @@ class _NuevoPedidoState extends State<NuevoPedido> {
   Widget _esperaRepartidor(double ancho, double alto) {
     return Column(
       children: <Widget>[
+        Text(
+          '¡Tu Pedido esta registrado!',
+          style: TextStyle(
+              fontSize: 18, color: Colors.grey, fontStyle: FontStyle.italic),
+        ),
         Image.asset('lib/assets/giphy.gif'),
         Text(
           'Buscando Repartidor...',
@@ -444,7 +467,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
   Widget _pagoCard(double ancho, double alto) {
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 50.0),
+        padding: const EdgeInsets.only(bottom: 300.0),
         child: Column(
           children: <Widget>[
             Container(
@@ -461,25 +484,23 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                 ),
                 width: MediaQuery.of(context).size.width,
                 animationDuration: Duration(milliseconds: 1000),
-                //showBackView: false,
-                showBackView: Provider.of<LoginState>(context, listen: true)
-                  .isCVVFocus(), //true when you want to show cvv(back) view
+                showBackView: false,
+                //showBackView: Provider.of<LoginState>(context, listen: true)
+                //.isCVVFocus(), //true when you want to show cvv(back) view
               ),
             ),
-         
-               Padding(
-                 padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
-                 child: TextField(
-                    onSubmitted: (Provider.of<LoginState>(context, listen: false)
-                        .setCVVState(false)),
-                    controller: _cardNumberController,
-                    keyboardType: TextInputType.number,
-                    maxLength: 16,
-                    decoration: InputDecoration(
-                        labelText: 'Número de Tarjeta',
-                        prefixIcon: Icon(Icons.credit_card))),
-               ),
-            
+            Padding(
+              padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
+              child: TextField(
+                  onSubmitted: (Provider.of<LoginState>(context, listen: false)
+                      .setCVVState(false)),
+                  controller: _cardNumberController,
+                  keyboardType: TextInputType.number,
+                  maxLength: 16,
+                  decoration: InputDecoration(
+                      labelText: 'Número de Tarjeta',
+                      prefixIcon: Icon(Icons.credit_card))),
+            ),
             Padding(
               padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
               child: TextField(
@@ -492,25 +513,23 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                       labelText: 'Nombre del Titular',
                       prefixIcon: Icon(Icons.people))),
             ),
-            Row(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.only(top: 2.0,  left: 15.0, right: 15.0),
-                  child: TextField(
-                    expands: false,
-                      onSubmitted: (Provider.of<LoginState>(context, listen: false)
-                          .setCVVState(false)),
-                      controller: _expiryDateController,
-                      keyboardType: TextInputType.number,
-                      maxLength: 5,
-                      decoration: InputDecoration(
-                          labelText: 'Fecha de Expiración',
-                          prefixIcon: Icon(Icons.date_range))),
-                ),
-                Padding(
+            Padding(
               padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
               child: TextField(
-                expands: false,
+                  expands: false,
+                  onSubmitted: (Provider.of<LoginState>(context, listen: false)
+                      .setCVVState(false)),
+                  controller: _expiryDateController,
+                  keyboardType: TextInputType.number,
+                  maxLength: 5,
+                  decoration: InputDecoration(
+                      labelText: 'Fecha de Expiración',
+                      prefixIcon: Icon(Icons.date_range))),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
+              child: TextField(
+                  expands: false,
                   onSubmitted: (Provider.of<LoginState>(context, listen: false)
                       .setCVVState(true)),
                   controller: _cvvCodeController,
@@ -519,12 +538,204 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                   decoration: InputDecoration(
                       labelText: 'CVV', prefixIcon: Icon(Icons.edit))),
             ),
-              ],
-            ),
-            
           ],
         ),
       ),
     );
+  }
+
+  Widget _pagoChoose(double ancho, double alto) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 300.0),
+        child: Column(
+          children: <Widget>[
+            RaisedButton(
+              child: Text("Create Source"),
+              onPressed: () {
+                StripePayment.createSourceWithParams(SourceParams(
+                  type: 'ideal',
+                  amount: 1099,
+                  currency: 'eur',
+                  returnURL: 'example://stripe-redirect',
+                )).then((source) {
+                  print('Received ${source.sourceId}');
+                  //_scaffoldKey.currentState.showSnackBar(
+                  //  SnackBar(content: Text('Received ${source.sourceId}')));
+                  //setState(() {
+                  _source = source;
+                  //});
+                }).catchError(setError);
+              },
+            ),
+            Divider(),
+            RaisedButton(
+              child: Text("Create Token with Card Form"),
+              onPressed: () {
+                StripePayment.paymentRequestWithCardForm(
+                        CardFormPaymentRequest())
+                    .then((paymentMethod) {
+                  print('Received ${paymentMethod.id}');
+                  //_scaffoldKey.currentState.showSnackBar(
+                  ////  SnackBar(content: Text('Received ${paymentMethod.id}')));
+                  //setState(() {
+//                    _paymentMethod = paymentMethod;
+                  //                });
+                }).catchError(setError);
+              },
+            ),
+            RaisedButton(
+              child: Text("Create Token with Card"),
+              onPressed: () {
+                StripePayment.createTokenWithCard(
+                  testCard,
+                ).then((token) {
+                  print('Received ${token.tokenId}');
+                  //_scaffoldKey.currentState.showSnackBar(
+                  //  SnackBar(content: Text('Received ${token.tokenId}')));
+                  //setState(() {
+                  //                    _paymentToken = token;
+                  //                });
+                }).catchError(setError);
+              },
+            ),
+            Divider(),
+            RaisedButton(
+              child: Text("Create Payment Method with Card"),
+              onPressed: () {
+                StripePayment.createPaymentMethod(
+                  PaymentMethodRequest(
+                    card: testCard,
+                  ),
+                ).then((paymentMethod) {
+                  print('Received ${paymentMethod.id}');
+                  //_scaffoldKey.currentState.showSnackBar(
+                  //SnackBar(content: Text('Received ${paymentMethod.id}')));
+                  //setState(() {
+                  //                    _paymentMethod = paymentMethod;
+                  //                });
+                }).catchError(setError);
+              },
+            ),
+            RaisedButton(
+              child: Text("Create Payment Method with existing token"),
+              onPressed: _paymentToken == null
+                  ? null
+                  : () {
+                      StripePayment.createPaymentMethod(
+                        PaymentMethodRequest(
+                          card: CreditCard(
+                            token: _paymentToken.tokenId,
+                          ),
+                        ),
+                      ).then((paymentMethod) {
+                        print('Received ');
+                        //_scaffoldKey.currentState.showSnackBar(SnackBar(
+                        //  content: Text('Received ${paymentMethod.id}')));
+                        //setState(() {
+                        //                          _paymentMethod = paymentMethod;
+                        //});
+                      }).catchError(setError);
+                    },
+            ),
+            Divider(),
+            RaisedButton(
+              child: Text("Confirm Payment Intent"),
+              onPressed: _paymentMethod == null || _currentSecret == null
+                  ? null
+                  : () {
+                      StripePayment.confirmPaymentIntent(
+                        PaymentIntent(
+                          clientSecret: _currentSecret,
+                          paymentMethodId: _paymentMethod.id,
+                        ),
+                      ).then((paymentIntent) {
+                        print('Received ');
+                        //_scaffoldKey.currentState.showSnackBar(SnackBar(
+                        //content: Text(
+                        //'Received ${paymentIntent.paymentIntentId}')));
+                        //setState(() {
+                        //                          _paymentIntent = paymentIntent;
+                        //                      });
+                      }).catchError(setError);
+                    },
+            ),
+            RaisedButton(
+              child: Text("Authenticate Payment Intent"),
+              onPressed: _currentSecret == null
+                  ? null
+                  : () {
+                      StripePayment.authenticatePaymentIntent(
+                              clientSecret: _currentSecret)
+                          .then((paymentIntent) {
+                        //_scaffoldKey.currentState.showSnackBar(SnackBar(
+                        //content: Text(
+                        //  'Received ${paymentIntent.paymentIntentId}')));
+                        //setState(() {
+                        //                          _paymentIntent = paymentIntent;
+                        //                      });
+                      }).catchError(setError);
+                    },
+            ),
+            RaisedButton(
+              child: Text("Native payment"),
+              onPressed: () {
+                StripePayment.paymentRequestWithNativePay(
+                  androidPayOptions: AndroidPayPaymentRequest(
+                    totalPrice: "1.20",
+                    currencyCode: "EUR",
+                  ),
+                  applePayOptions: ApplePayPaymentOptions(
+                    countryCode: 'DE',
+                    currencyCode: 'EUR',
+                    items: [
+                      ApplePayItem(
+                        label: 'Test',
+                        amount: '13',
+                      )
+                    ],
+                  ),
+                ).then((token) {
+                  setState(() {
+                    //_scaffoldKey.currentState.showSnackBar(
+                    //  SnackBar(content: Text('Received ${token.tokenId}')));
+                    //_paymentToken = token;
+                  });
+                }).catchError(setError);
+              },
+            ),
+            RaisedButton(
+              child: Text("Complete Native Payment"),
+              onPressed: () {
+                StripePayment.completeNativePayRequest().then((_) {
+                  //_scaffoldKey.currentState.showSnackBar(
+                  //  SnackBar(content: Text('Completed successfully')));
+                }).catchError(setError);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  payViaNewCard() async {
+    //ProgressDialog dialog = new ProgressDialog(context);
+    //dialog.style(message: 'Please wait...');
+    //await dialog.show();
+
+    var response =
+        await StripeService.payWithNewCard(amount: '15000', currency: 'USD');
+    //await dialog.hide();
+    //Scaffold.of(context).showSnackBar(SnackBar(
+
+    //content: Text(response.message),
+    //duration:
+    //  new Duration(milliseconds: response.success == true ? 1200 : 3000),
+    //));
+  }
+
+  setError() {
+    print('set error dice');
   }
 }

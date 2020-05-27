@@ -12,10 +12,10 @@ import 'package:provider/provider.dart';
 
 class ProfileCliente extends StatefulWidget {
   @override
-  _ProfileClienteState createState() => _ProfileClienteState();
+  ProfileClienteState createState() => ProfileClienteState();
 }
 
-class _ProfileClienteState extends State<ProfileCliente> {
+class ProfileClienteState extends State<ProfileCliente> {
   int page = 0;
   final List<Widget> lista = [
     DataCliente(),
@@ -26,7 +26,6 @@ class _ProfileClienteState extends State<ProfileCliente> {
 
   @override
   Widget build(BuildContext context) {
-    
     final alto = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Color(0xfff6f9ff),
@@ -95,16 +94,17 @@ class _ProfileClienteState extends State<ProfileCliente> {
         ),
         onPressed: () {
           print('presionaste');
-          
+
           Navigator.of(context).pushNamed(nuevoPedidoRoute);
           //showModalBottomSheet(
-            //  context: context,
-              //isScrollControlled: true,
-              //builder: (context) {
+          //  context: context,
+          //isScrollControlled: true,
+          //builder: (context) {
 //                return NuevoPedido();
-  //            });
+          //            });
         },
       ),
     );
   }
+
 }

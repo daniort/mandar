@@ -33,4 +33,34 @@ class UserServices {
       });
     }
   }
+
+  void newPedidoPagoServicios(String titulo, String cantidad, String ubicacion,
+      String datos, FirebaseUser user) {
+    int dia = DateTime.now().day;
+    int mes = DateTime.now().month;
+    int ano = DateTime.now().year;
+    String horai =
+        DateTime.now().hour.toString() + ':' + DateTime.now().minute.toString();
+    Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection('pedidos')
+        .document()
+        .setData({
+      "tipo": 'pago',
+      "titulo": titulo,
+      "cantidad": cantidad,
+      "ubicacion": ubicacion,
+      "datos": datos,
+      "cliente": user.uid,
+      "status": "espera",
+      "dia": dia,
+      "mes": mes,
+      "year": ano,
+      "horai": horai,
+      "urlrecibocliente": "null",
+      "fin_repartidor": false,
+      "fin_cleinte": false,
+    });
+  }
 }

@@ -42,11 +42,13 @@ class LoginState with ChangeNotifier {
 
   void backStep() {
     _stepPedido = _stepPedido - 1;
+    print("regresaste al paso: " + _stepPedido.toString());
     notifyListeners();
   }
 
   void plusStep() {
     _stepPedido = _stepPedido + 1;
+    print("pasaste al paso: " + _stepPedido.toString());
     notifyListeners();
   }
 
