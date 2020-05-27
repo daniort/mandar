@@ -58,9 +58,7 @@ class _DataClienteState extends State<DataCliente> {
                           BoxShadow(color: Colors.white10, blurRadius: 25)
                         ],
                         image: new DecorationImage(
-                            image: new NetworkImage(
-                              "${_user.photoUrl}",
-                            ),
+                            image: _user.photoUrl!= null ? NetworkImage("${_user.photoUrl}"):Image.asset('lib/assets/logo.png'),
                             fit: BoxFit.fill),
                         borderRadius: BorderRadius.circular(150),
                       ),

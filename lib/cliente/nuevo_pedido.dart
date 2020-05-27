@@ -84,7 +84,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 120.0),
+              padding: const EdgeInsets.only(top: 20.0),
               child: _firstForm(ancho, alto),
             ),
             //_state.isStep() >= 1
@@ -444,7 +444,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
   Widget _pagoCard(double ancho, double alto) {
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 200.0),
+        padding: const EdgeInsets.only(bottom: 50.0),
         child: Column(
           children: <Widget>[
             Container(
