@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mandadero/Router/strings.dart';
-import 'package:mandadero/services/cliente_services.dart';
+
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
@@ -12,7 +12,6 @@ class DataCliente extends StatefulWidget {
 class _DataClienteState extends State<DataCliente> {
   @override
   Widget build(BuildContext context) {
-    
     final _user = Provider.of<LoginState>(context, listen: false).currentUser();
     //UserServices().newUser(_user);
     final alto = MediaQuery.of(context).size.height;
@@ -68,10 +67,11 @@ class _DataClienteState extends State<DataCliente> {
                   Text(
                     "Cliente",
                     style: TextStyle(
-                        fontSize: 15,
-                        color: Color(0xff484349),
-                        fontWeight: FontWeight.normal,
-                  ),),
+                      fontSize: 15,
+                      color: Color(0xff484349),
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
                   Text(
                     "${_user.displayName}",
                     style: TextStyle(
@@ -86,9 +86,6 @@ class _DataClienteState extends State<DataCliente> {
                       color: Color(0xff484349),
                     ),
                   ),
-                  
-                      
-                    
                 ],
               ),
             ),
@@ -165,12 +162,17 @@ class _DataClienteState extends State<DataCliente> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
-                              Text(
-                                'Editar Datos',
-                                style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.black54,
-                                    fontWeight: FontWeight.bold),
+                              InkWell(
+                                child: Text(
+                                  'Editar Datos',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.black54,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                onTap: () {
+                                  Navigator.of(context).pushNamed(editar);
+                                },
                               ),
                               SizedBox(
                                 width: 4,
