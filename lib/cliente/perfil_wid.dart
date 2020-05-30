@@ -30,16 +30,58 @@ class _DataClienteState extends State<DataCliente> {
                     color: Color.fromRGBO(20, 20, 20, 0.5),
                   ),
                   onPressed: () {
-                    Provider.of<LoginState>(context, listen: false).logout();
+                    showDialog(
+                        context: context,
+                        builder: (_) {
+                          return AlertDialog(
+                              title: Center(child: Text('Cerrar Sesión')),
+                              actions: <Widget>[
+                                MaterialButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text(
+                                    'Cancelar',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                ),
+                                MaterialButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                      Provider.of<LoginState>(context, listen: false).logout();
+                                      
+                                  },
+                                  color:  Color(0xffee6179),
+                                  child: Text(
+                                    'Salir',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ],
+                              content: RichText(
+                                textAlign: TextAlign.center,
+                                text: TextSpan(
+                                  text: '¿Estas seguro de salir?',
+                                  style: DefaultTextStyle.of(context).style,
+                                  children: <TextSpan>[
+                                    TextSpan(
+                                        text: '\n',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                    TextSpan(text: 'Ya no podrás seguir tus pedidos.',style: TextStyle(color: Colors.grey),),
+                                  ],
+                                ),
+                              ));
+                        });
                   },
                 ),
                 Text(
-                  'Salir',
+                  'Cerrar Sesión',
                   style: TextStyle(
                     fontSize: 16,
                     color: Color.fromRGBO(20, 20, 20, 0.5),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -226,7 +268,6 @@ class _DataClienteState extends State<DataCliente> {
                               default:
                                 final _cantidad =
                                     snapshot.data.documents.length;
-                                print(_cantidad);
                                 return Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -255,7 +296,9 @@ class _DataClienteState extends State<DataCliente> {
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Text(
-                                       _cantidad==0? '¡Comienza Ahora!' : '¡Sigue así!',
+                                        _cantidad == 0
+                                            ? '¡Comienza Ahora!'
+                                            : '¡Sigue así!',
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                             color: Color(0xff484349),

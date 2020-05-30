@@ -21,19 +21,11 @@ class _PedidosState extends State<Pedidos> {
       appBar: AppBar(
           backgroundColor: Color(0xfff6f9ff),
           elevation: 0.0,
-          leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back_ios,
-              color: Color.fromRGBO(20, 20, 20, 0.5),
-            ),
-            onPressed: () {
-              //ProfileClienteState().backPerfil();
-            },
-          ),
+         centerTitle: true,
           title: Text(
             'Mis Pedidos',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 18,
               color: Color.fromRGBO(20, 20, 20, 0.5),
             ),
           )),
