@@ -10,6 +10,7 @@ import 'package:mandadero/state/loginstate.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
+
 class ProfileCliente extends StatefulWidget {
   @override
   ProfileClienteState createState() => ProfileClienteState();
@@ -73,7 +74,7 @@ class ProfileClienteState extends State<ProfileCliente> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Icon(Icons.note,
+                    Icon(Icons.view_list,
                         color: page == 1
                             ? Color(0xff484349)
                             : Color.fromRGBO(20, 20, 20, 0.4),

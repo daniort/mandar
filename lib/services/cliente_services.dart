@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mandadero/state/loginstate.dart';
+import 'package:provider/provider.dart';
 
 class UserServices {
   void newUser(FirebaseUser user) async {
@@ -34,33 +35,43 @@ class UserServices {
     }
   }
 
-  void newPedidoPagoServicios(String titulo, String cantidad, String ubicacion,
-      String datos, FirebaseUser user) {
+  bool newPedidoPagoServicios(String titulo, String cantidad,
+      String ubicacion, String datos, FirebaseUser user) {
     int dia = DateTime.now().day;
     int mes = DateTime.now().month;
     int ano = DateTime.now().year;
     String horai =
         DateTime.now().hour.toString() + ':' + DateTime.now().minute.toString();
-    Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection('pedidos')
-        .document()
-        .setData({
-      "tipo": 'pago',
-      "titulo": titulo,
-      "cantidad": cantidad,
-      "ubicacion": ubicacion,
-      "datos": datos,
-      "cliente": user.uid,
-      "status": "espera",
-      "dia": dia,
-      "mes": mes,
-      "year": ano,
-      "horai": horai,
-      "urlrecibocliente": "null",
-      "fin_repartidor": false,
-      "fin_cleinte": false,
-    });
+    try {
+      Firestore.instance
+          .collection('users')
+          .document(user.uid)
+          .collection('pedidos')
+          .document()
+          .setData({
+        "id_pedido": "",
+        "tipo": 'pago',
+        "titulo": titulo,
+        "cantidad": cantidad,
+        "ubicacion": ubicacion,
+        "datos": datos,
+        "cliente": user.uid,
+        "repartidor": "",
+        "status": "espera",
+        "dia": dia,
+        "mes": mes,
+        "year": ano,
+        "horai": horai,
+        "horaf": "",
+        "urlrecibocliente": "null",
+        "urlreciborepartidor": "null",
+        "fin_repartidor": false,
+        "fin_cliente": false,
+      });
+      return true;
+    } catch (e) {
+      print("error al guardar el pedido");
+      return false;
+    }
   }
 }

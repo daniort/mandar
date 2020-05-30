@@ -20,12 +20,15 @@ class NuevoPedido extends StatefulWidget {
 
 class _NuevoPedidoState extends State<NuevoPedido> {
   TextEditingController _tituloController;
+  TextEditingController _datosController;
   TextEditingController _cantidadController;
   TextEditingController _ubicacionController;
+
   TextEditingController _cardNumberController;
   TextEditingController _cardHolderNameController;
   TextEditingController _cvvCodeController;
   TextEditingController _expiryDateController;
+
   GlobalKey _scaffoldKey = GlobalKey();
   Token _paymentToken;
   PaymentMethod _paymentMethod;
@@ -42,6 +45,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
 
   void initState() {
     _tituloController = TextEditingController();
+    _datosController = TextEditingController();
     _cantidadController = TextEditingController();
     _ubicacionController = TextEditingController();
 
@@ -127,6 +131,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                                 .backStep();
                             break;
                           case 2:
+                            _cleanDataPedido();
                             Navigator.of(context).pop();
                             break;
                           default:
@@ -159,19 +164,20 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                       onTap: () {
                         switch (_state.isStepPedido()) {
                           case 1:
-                            if (_tituloController.text.isNotEmpty) {
-                              if (_cantidadController.text.isNotEmpty) {
-                                Provider.of<LoginState>(context, listen: false)
-                                    .plusStep();
-                              } else {
-                                print('no agregaste cantidad');
-                              }
-                            } else {
-                              print('no agregaste descripcion');
+                            if (_formPedidoKey.currentState.validate()) {
+                              print('valido, amonos');
+                              showModalBottomSheet(
+                                  elevation: alto * 0.35,
+                                  backgroundColor: Color.fromRGBO(0, 0, 0, 0.1),
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return _modalTicket(alto, ancho);
+                                  });
                             }
                             break;
                           case 2:
-                            Navigator.pop(context);
+                            _cleanDataPedido();
+                            Navigator.of(context).pop();
                             break;
                           default:
                         }
@@ -182,7 +188,6 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                           gradient: LinearGradient(
                               colors: [Color(0xffee6179), Color(0xffec506b)],
                               begin: Alignment.topLeft),
-                          //color: Color(0xffee6179),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.only(right: 20.0),
@@ -220,14 +225,6 @@ class _NuevoPedidoState extends State<NuevoPedido> {
         //}
         break;
       case 2:
-        final _user =
-            Provider.of<LoginState>(context, listen: false).currentUser();
-        UserServices().newPedidoPagoServicios(
-            _tituloController.text,
-            _cantidadController.text,
-            _ubicacionController.text,
-            "nada de datos",
-            _user);
         print('Paso ${_stados.isStepPedido()}');
         return _esperaRepartidor(ancho, alto);
         break;
@@ -250,8 +247,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
               setState(() {
                 Provider.of<LoginState>(context, listen: false)
                     .setTipoPedido(1);
-                Provider.of<LoginState>(context, listen: false)
-                    .plusStep();
+                Provider.of<LoginState>(context, listen: false).plusStep();
               });
             },
             child: Container(
@@ -348,34 +344,72 @@ class _NuevoPedidoState extends State<NuevoPedido> {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
-              child: TextField(
-                  controller: _tituloController,
-                  keyboardType: TextInputType.text,
-                  maxLength: 50,
-                  decoration: InputDecoration(
-                      labelText: 'Descrpción de Pago',
-                      prefixIcon: Icon(Icons.edit))),
+              child: TextFormField(
+                controller: _tituloController,
+                keyboardType: TextInputType.text,
+                maxLength: 50,
+                decoration: InputDecoration(
+                  labelText: 'Descrpción de Pago',
+                  prefixIcon: Icon(Icons.edit),
+                  //errorText: _validate ? 'Value Can\'t Be Empty' : null,
+                ),
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return '¿Que Pago haremos?';
+                  }
+                  return null;
+                },
+              ),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
-              child: TextField(
-                  controller: _cantidadController,
-                  keyboardType: TextInputType.number,
-                  maxLength: 5,
-                  decoration: InputDecoration(
-                      labelText: 'Cantidad a Pagar',
-                      prefixIcon: Icon(Icons.monetization_on))),
+              child: TextFormField(
+                controller: _datosController,
+                keyboardType: TextInputType.text,
+                maxLength: 50,
+                decoration: InputDecoration(
+                  labelText: 'Datos Para el Pago',
+                  prefixIcon: Icon(Icons.person),
+                  helperText:
+                      'Número de Usuario, de cliente ó algun dato extra.',
+                ),
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return '¿Seguro que no es necesario?';
+                  }
+                  return null;
+                },
+              ),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
-              child: TextField(
+              child: TextFormField(
+                controller: _cantidadController,
+                keyboardType: TextInputType.number,
+                maxLength: 5,
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return '¿Cuánto Pagaremos?';
+                  }
+                  return null;
+                },
+                decoration: InputDecoration(
+                  labelText: 'Cantidad a Pagar',
+                  prefixIcon: Icon(Icons.monetization_on),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: TextFormField(
                 controller: _ubicacionController,
                 keyboardType: TextInputType.text,
                 maxLength: 50,
                 decoration: InputDecoration(
-                    helperText: 'Si lo dejas vacio, el Rapartidor elige.',
-                    labelText: 'Lugar a Pagar',
-                    prefixIcon: Icon(Icons.pin_drop)),
+                  helperText: 'Si lo dejas vacio, el Rapartidor elige.',
+                  labelText: 'Lugar a Pagar',
+                  prefixIcon: Icon(Icons.pin_drop),
+                ),
               ),
             ),
             Padding(
@@ -386,30 +420,44 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                     flex: 1,
                     child: Padding(
                       padding: const EdgeInsets.all(25.0),
-                      child: RaisedButton(
-                        splashColor: Color(0xffee6179),
-                        onPressed: () {
-                          print('tomar foto');
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    top: 8.0, bottom: 0.0),
-                                child: Icon(Icons.photo, color: Colors.grey),
+                      child: Column(
+                        children: <Widget>[
+                          RaisedButton(
+                            splashColor: Color(0xffee6179),
+                            onPressed: () {
+                              print('tomar foto');
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 8.0, bottom: 0.0),
+                                    child:
+                                        Icon(Icons.photo, color: Colors.grey),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text('Tomar Foto a Recibo',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(color: Colors.grey)),
+                                  )
+                                ],
                               ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text('Tomar Foto a Recibo',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(color: Colors.grey)),
-                              )
-                            ],
+                            ),
                           ),
-                        ),
+                          Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Text(
+                              'Si cuentas con uno, seria de gran ayuda.',
+                              textAlign: TextAlign.center,
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 10.0),
+                            ),
+                          )
+                        ],
                       ),
                     ),
                   ),
@@ -579,7 +627,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                   //_scaffoldKey.currentState.showSnackBar(
                   ////  SnackBar(content: Text('Received ${paymentMethod.id}')));
                   //setState(() {
-//                    _paymentMethod = paymentMethod;
+                  //                    _paymentMethod = paymentMethod;
                   //                });
                 }).catchError(setError);
               },
@@ -737,5 +785,189 @@ class _NuevoPedidoState extends State<NuevoPedido> {
 
   setError() {
     print('set error dice');
+  }
+
+  Widget _modalTicket(double alto, double ancho) {
+    return Container(
+      height: alto * 0.35,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(40.0),
+          topRight: Radius.circular(40.0),
+        ),
+      ),
+      child: Column(
+        children: [
+          ListTile(
+            leading: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Icon(Icons.arrow_back_ios, color: Colors.grey))),
+            title: Text("Mi Ticket", style: TextStyle(color: Colors.grey)),
+          ),
+          Divider(),
+          Row(
+            //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              Expanded(
+                flex: 5,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            "Cantidad a Pagar:   ",
+                            style:
+                                TextStyle(fontSize: 16.0, color: Colors.grey),
+                          ),
+                          Icon(
+                            Icons.attach_money,
+                            size: 15,
+                            color: Colors.grey,
+                          )
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            "Costo Servicio:   ",
+                            style:
+                                TextStyle(fontSize: 16.0, color: Colors.grey),
+                          ),
+                          Icon(
+                            Icons.attach_money,
+                            size: 15,
+                            color: Colors.grey,
+                          )
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            "Total:   ",
+                            style: TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey),
+                          ),
+                          Icon(
+                            Icons.attach_money,
+                            size: 15,
+                            color: Colors.grey,
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(_cantidadController.value.text),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text("20"),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text("520"),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[],
+                ),
+              ),
+            ],
+          ),
+          Divider(),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                OutlineButton(
+                  splashColor: Colors.red[300],
+                  textColor: Colors.red[300],
+                  onPressed: () {
+                    print('ticket cancelado');
+                    Navigator.of(context).pop();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 30.0, right: 30.0),
+                    child: Text('Cancelar'),
+                  ),
+                ),
+                OutlineButton(
+                  onPressed: () {
+                    print('si estoy seguro');
+                    final _user =
+                        Provider.of<LoginState>(context, listen: false)
+                            .currentUser();
+                    var _pedidoregistrado = UserServices()
+                        .newPedidoPagoServicios(
+                            _tituloController.text,
+                            _cantidadController.text,
+                            _ubicacionController.text,
+                            _datosController.text,
+                            _user);
+
+                    if (_pedidoregistrado) {
+                      Navigator.of(context).pop();
+                      Provider.of<LoginState>(context, listen: false)
+                          .plusStep();
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 30.0, right: 30.0),
+                    child: Text('Confirmar'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _cleanDataPedido() {
+    _tituloController.clear();
+    _datosController.clear();
+    _cantidadController.clear();
+    _ubicacionController.clear();
+    Provider.of<LoginState>(context, listen: false).setStepPedido(0);
   }
 }

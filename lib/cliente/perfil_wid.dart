@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mandadero/Router/strings.dart';
 
@@ -58,7 +59,9 @@ class _DataClienteState extends State<DataCliente> {
                           BoxShadow(color: Colors.white10, blurRadius: 25)
                         ],
                         image: new DecorationImage(
-                            image: _user.photoUrl!= null ? NetworkImage("${_user.photoUrl}"):Image.asset('lib/assets/logo.png'),
+                            image: _user.photoUrl != null
+                                ? NetworkImage("${_user.photoUrl}")
+                                : Image.asset('lib/assets/logo.png'),
                             fit: BoxFit.fill),
                         borderRadius: BorderRadius.circular(150),
                       ),
@@ -203,43 +206,67 @@ class _DataClienteState extends State<DataCliente> {
                               colors: [Color(0xfff6f9ff), Color(0xfff6f9ff)],
                               begin: Alignment.topLeft),
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                'Número de\nPedidos:',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: Color(0xff484349),
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                '0',
-                                style: TextStyle(
-                                    color: Color(0xff484349),
-                                    fontSize: 35,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                '¡Comienza Ahora!',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: Color(0xff484349),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.normal),
-                              ),
-                            ),
-                          ],
+                        child: StreamBuilder<QuerySnapshot>(
+                          stream: Firestore.instance
+                              .collection('users')
+                              .document(_user.uid)
+                              .collection('pedidos')
+                              .orderBy('status')
+                              .snapshots(),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<QuerySnapshot> snapshot) {
+                            if (snapshot.hasError)
+                              return new Text('Error: ${snapshot.error}');
+                            switch (snapshot.connectionState) {
+                              case ConnectionState.waiting:
+                                return new Center(
+                                    child: CircularProgressIndicator(
+                                  backgroundColor: Colors.grey,
+                                ));
+                              default:
+                                final _cantidad =
+                                    snapshot.data.documents.length;
+                                print(_cantidad);
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        'Número de\nPedidos:',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: Color(0xff484349),
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        '$_cantidad',
+                                        style: TextStyle(
+                                            color: Color(0xff484349),
+                                            fontSize: 35,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                       _cantidad==0? '¡Comienza Ahora!' : '¡Sigue así!',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: Color(0xff484349),
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.normal),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                            }
+                          },
                         ),
                       ),
                     ],
