@@ -4,26 +4,26 @@ import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
 class UserServices {
-  void newUser(FirebaseUser user) async {
-    var _mail = "null";
+  void newUser(FirebaseUser user, int type_user) async {
+    var _existe = false;
     try {
-      print('vamos a intentar el try');
       Firestore.instance
-          .collection('users')
+          .collection(type_user == 1 ? 'users' : 'repartidores')
           .document(user.uid)
           .collection('datos')
           .document(user.uid)
           .get()
           .then((DocumentSnapshot doc) {
-        _mail = doc["email"];
+        _existe = true;
+        print('si esta el usuario');
       });
     } catch (e) {
       print(e);
       print('error en checar si ya esta el usuario');
     }
-    if (_mail == "null") {
+    if (!_existe) {
       Firestore.instance
-          .collection('users')
+          .collection(type_user == 1 ? 'users' : 'repartidores')
           .document(user.uid)
           .collection('datos')
           .document(user.uid)
@@ -35,8 +35,8 @@ class UserServices {
     }
   }
 
-  bool newPedidoPagoServicios(String titulo, String cantidad,
-      String ubicacion, String datos, FirebaseUser user) {
+  bool newPedidoPagoServicios(String titulo, String cantidad, String ubicacion,
+      String datos, FirebaseUser user) {
     int dia = DateTime.now().day;
     int mes = DateTime.now().month;
     int ano = DateTime.now().year;
@@ -44,8 +44,8 @@ class UserServices {
         DateTime.now().hour.toString() + ':' + DateTime.now().minute.toString();
     try {
       Firestore.instance
-          .collection('users')
-          .document(user.uid)
+          //.collection('users')
+          //.document(user.uid)
           .collection('pedidos')
           .document()
           .setData({
@@ -67,6 +67,8 @@ class UserServices {
         "urlreciborepartidor": "null",
         "fin_repartidor": false,
         "fin_cliente": false,
+      }).then((value) {
+        print('hola');
       });
       return true;
     } catch (e) {

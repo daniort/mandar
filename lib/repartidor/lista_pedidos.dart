@@ -5,12 +5,12 @@ import 'package:mandadero/cliente/principal_wid.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
-class Pedidos extends StatefulWidget {
+class MisPedidos extends StatefulWidget {
   @override
-  _PedidosState createState() => _PedidosState();
+  _MisPedidosState createState() => _MisPedidosState();
 }
 
-class _PedidosState extends State<Pedidos> {
+class _MisPedidosState extends State<MisPedidos> {
   @override
   Widget build(BuildContext context) {
     final _user = Provider.of<LoginState>(context, listen: false).currentUser();
@@ -34,12 +34,10 @@ class _PedidosState extends State<Pedidos> {
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: Firestore.instance
-                  //.collection('users')
-                  //.document(_user.uid)
+                  .collection('repartidores')
+                  .document(_user.uid)
                   .collection('pedidos')
-                  //.document()
-                  .where("iud", isEqualTo: "${_user.uid}")
-                  //.orderBy('status')
+                  .orderBy('status')
                   .snapshots(),
               builder: (BuildContext context,
                   AsyncSnapshot<QuerySnapshot> snapshot) {
