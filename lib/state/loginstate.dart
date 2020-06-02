@@ -103,7 +103,7 @@ class LoginState with ChangeNotifier {
                 //_prefs.setBool('islogin', true);
                 _login = true;
                 try {
-                  UserServices().newUser(_user);
+                  UserServices().newUser(_user, _type_user);
                 } catch (e) {
                   print("lo intenté");
                 }
@@ -136,7 +136,7 @@ class LoginState with ChangeNotifier {
 
           _login = true;
           try {
-            UserServices().newUser(_user);
+            UserServices().newUser(_user, _type_user);
           } catch (e) {
             print("lo intenté");
           }

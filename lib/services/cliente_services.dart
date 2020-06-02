@@ -1,39 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mandadero/state/loginstate.dart';
 
 class UserServices {
-  void newUser(FirebaseUser user) async {
-    var _mail = "null";
-    try {
-      print('vamos a intentar el try');
-      Firestore.instance
-          .collection('users')
-          .document(user.uid)
-          .collection('datos')
-          .document(user.uid)
-          .get()
-          .then((DocumentSnapshot doc) {
-        _mail = doc["email"];
-      });
-    } catch (e) {
-      print(e);
-      print('error en checar si ya esta el usuario');
-    }
-    if (_mail == "null") {
-      Firestore.instance
-          .collection('users')
-          .document(user.uid)
-          .collection('datos')
-          .document(user.uid)
-          .setData({
-        "email": user.email,
-        "nombre": user.displayName,
-        "telefono": user.phoneNumber,
-      });
-    }
-  }
-
   void newPedidoPagoServicios(String titulo, String cantidad, String ubicacion,
       String datos, FirebaseUser user) {
     int dia = DateTime.now().day;
@@ -61,6 +29,58 @@ class UserServices {
       "urlrecibocliente": "null",
       "fin_repartidor": false,
       "fin_cleinte": false,
+    });
+  }
+
+  void newUser(FirebaseUser user, int type_user) async {
+    var _existe = false;
+    try {
+      print('vamos a intentar el try');
+      Firestore.instance
+          .collection(type_user == 1 ? 'users' : 'repartidores')
+          .document(user.uid)
+          .collection('datos')
+          .document(user.uid)
+          .get()
+          .then((DocumentSnapshot doc) {
+        _existe = true;
+        print('si esta el usuario');
+      });
+    } catch (e) {
+      print(e);
+      print('error en checar si ya esta el usuario');
+    }
+    if (!_existe) {
+      Firestore.instance
+          .collection(type_user == 1 ? 'users' : 'repartidores')
+          .document(user.uid)
+          .collection('datos')
+          .document(user.uid)
+          .setData({
+        "email": user.email,
+        "nombre": user.displayName,
+        "telefono": user.phoneNumber,
+        "direccion": "null",
+        "nota": "null",
+        "tarjeta": "null",
+        "mes": "null",
+        "ano": "null",
+        "cliente": "null",
+      });
+    }
+  }
+}
+
+class Update {
+  void updateuser(FirebaseUser user, nuevo) {
+    Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection('datos')
+        .document(user.uid)
+        .updateData(nuevo)
+        .catchError((e) {
+      print(e);
     });
   }
 }

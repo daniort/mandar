@@ -58,7 +58,9 @@ class _DataClienteState extends State<DataCliente> {
                           BoxShadow(color: Colors.white10, blurRadius: 25)
                         ],
                         image: new DecorationImage(
-                            image: _user.photoUrl!= null ? NetworkImage("${_user.photoUrl}"):Image.asset('lib/assets/logo.png'),
+                            image: _user.photoUrl != null
+                                ? NetworkImage("${_user.photoUrl}")
+                                : Image.asset('lib/assets/logo.png'),
                             fit: BoxFit.fill),
                         borderRadius: BorderRadius.circular(150),
                       ),
@@ -152,36 +154,38 @@ class _DataClienteState extends State<DataCliente> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10.0),
-                            color: Color(0xfff6f9ff),
-                          ),
-                          width: ancho * 0.5,
-                          height: alto * 0.06,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              InkWell(
-                                child: Text(
-                                  'Editar Datos',
-                                  style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.black54,
-                                      fontWeight: FontWeight.bold),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.of(context).pushNamed(editar);
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10.0),
+                              color: Color(0xfff6f9ff),
+                            ),
+                            width: ancho * 0.5,
+                            height: alto * 0.06,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Container(
+                                  child: Text(
+                                    'Editar Datos',
+                                    style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.black54,
+                                        fontWeight: FontWeight.bold),
+                                  ),
                                 ),
-                                onTap: () {
-                                  Navigator.of(context).pushNamed(editar);
-                                },
-                              ),
-                              SizedBox(
-                                width: 4,
-                              ),
-                              Icon(
-                                Icons.edit,
-                                size: 15,
-                              )
-                            ],
+                                SizedBox(
+                                  width: 4,
+                                ),
+                                Icon(
+                                  Icons.edit,
+                                  size: 15,
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       ),
