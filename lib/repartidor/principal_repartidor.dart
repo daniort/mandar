@@ -1,33 +1,32 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'package:mandadero/Router/strings.dart';
-import 'package:mandadero/cliente/nuevo_pedido.dart';
-import 'package:mandadero/cliente/pedidos_wid.dart';
-import 'package:mandadero/cliente/perfil_wid.dart';
-import 'package:mandadero/services/cliente_services.dart';
-import 'package:mandadero/state/loginstate.dart';
+import 'package:mandadero/repartidor/lista_pedidos.dart';
+import 'package:mandadero/repartidor/perfil_repartidor.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
-
-class ProfileCliente extends StatefulWidget {
+class ProfileMandadero extends StatefulWidget {
   @override
-  ProfileClienteState createState() => ProfileClienteState();
+  ProfileMandaderoState createState() => ProfileMandaderoState();
 }
 
-class ProfileClienteState extends State<ProfileCliente> {
+class ProfileMandaderoState extends State<ProfileMandadero> {
   int page = 0;
   final List<Widget> lista = [
-    DataCliente(),
-    Pedidos(),
+    DataRepartidor(),
+    MisPedidos(),
   ];
-  Widget inicio = DataCliente();
+  Widget inicio = DataRepartidor();
   final PageStorageBucket bucket = PageStorageBucket();
 
   @override
   Widget build(BuildContext context) {
+    final _user = Provider.of<LoginState>(context, listen: false).currentUser();
     final alto = MediaQuery.of(context).size.height;
+    final ancho = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: Color(0xfff6f9ff),
       body: PageStorage(
@@ -44,7 +43,7 @@ class ProfileClienteState extends State<ProfileCliente> {
                 onPressed: () {
                   setState(
                     () {
-                      inicio = DataCliente();
+                      inicio = DataRepartidor();
                       page = 0;
                     },
                   );
@@ -66,7 +65,7 @@ class ProfileClienteState extends State<ProfileCliente> {
                 onPressed: () {
                   setState(
                     () {
-                      inicio = Pedidos();
+                      inicio = MisPedidos();
                       page = 1;
                     },
                   );
@@ -88,24 +87,16 @@ class ProfileClienteState extends State<ProfileCliente> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Color(0xffee6179),
+        backgroundColor: Color(0xff464d77), //Color(0xffee6179),
         child: Icon(
           Icons.add,
           size: 30,
         ),
         onPressed: () {
           print('presionaste');
-
-          Navigator.of(context).pushNamed(nuevoPedidoRoute);
-          //showModalBottomSheet(
-          //  context: context,
-          //isScrollControlled: true,
-          //builder: (context) {
-//                return NuevoPedido();
-          //            });
+         Navigator.of(context).pushNamed(tomarPedidoRoute);
         },
       ),
     );
   }
-
 }

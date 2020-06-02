@@ -4,6 +4,7 @@ import 'package:mandadero/cliente/nuevo_pedido.dart';
 import 'package:mandadero/cliente/principal_wid.dart';
 import 'package:mandadero/cliente/editar_wid.dart';
 import 'package:mandadero/main.dart';
+import 'package:mandadero/repartidor/tomarPedido.dart';
 
 import 'package:mandadero/screens/login.dart';
 
@@ -24,6 +25,8 @@ class Router {
         return MaterialPageRoute(builder: (_) => ProfileCliente());
       case loginRoute:
         return MaterialPageRoute(builder: (_) => Login());
+      case tomarPedidoRoute:
+        return MaterialPageRoute(builder: (_) => TomarPedido());
       default:
         return MaterialPageRoute(builder: (_) => MyApp());
     }

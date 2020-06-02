@@ -5,12 +5,12 @@ import 'package:mandadero/Router/strings.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
-class DataCliente extends StatefulWidget {
+class DataRepartidor extends StatefulWidget {
   @override
-  _DataClienteState createState() => _DataClienteState();
+  _DataRepartidorState createState() => _DataRepartidorState();
 }
 
-class _DataClienteState extends State<DataCliente> {
+class _DataRepartidorState extends State<DataRepartidor> {
   @override
   Widget build(BuildContext context) {
     final _user = Provider.of<LoginState>(context, listen: false).currentUser();
@@ -96,7 +96,7 @@ class _DataClienteState extends State<DataCliente> {
                       height: alto * .25,
                       decoration: BoxDecoration(
                         border: Border.all(
-                            color: Color.fromRGBO(20, 20, 20, 0.2), width: 5.0),
+                            color: Color.fromRGBO(70, 77, 119, 0.6), width: 5.0),
                         boxShadow: [
                           BoxShadow(color: Colors.white10, blurRadius: 25)
                         ],
@@ -109,15 +109,15 @@ class _DataClienteState extends State<DataCliente> {
                       ),
                     ),
                   ),
-                  Text(
-                    "Cliente",
+                 Text(
+                    "Repartidor",
                     style: TextStyle(
-                      fontSize: 15,
+                      fontSize: 19,
                       color: Color(0xff484349),
                       fontWeight: FontWeight.normal,
                     ),
                   ),
-                  Text(
+                 Text(
                     "${_user.displayName}",
                     style: TextStyle(
                         fontSize: 25,
@@ -131,6 +131,14 @@ class _DataClienteState extends State<DataCliente> {
                       color: Color(0xff484349),
                     ),
                   ):Text(''),
+                   _user.phoneNumber != null ?  Text(
+                    "${_user.phoneNumber}",
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Color(0xff484349),
+                    ),
+                  ):Text(''),
+                
                 ],
               ),
             ),
@@ -197,38 +205,36 @@ class _DataClienteState extends State<DataCliente> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.of(context).pushNamed(editar);
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10.0),
-                              color: Color(0xfff6f9ff),
-                            ),
-                            width: ancho * 0.5,
-                            height: alto * 0.06,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Container(
-                                  child: Text(
-                                    'Editar Datos',
-                                    style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.black54,
-                                        fontWeight: FontWeight.bold),
-                                  ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.0),
+                            color: Color(0xfff6f9ff),
+                          ),
+                          width: ancho * 0.5,
+                          height: alto * 0.06,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              InkWell(
+                                child: Text(
+                                  'Editar Datos',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.black54,
+                                      fontWeight: FontWeight.bold),
                                 ),
-                                SizedBox(
-                                  width: 4,
-                                ),
-                                Icon(
-                                  Icons.edit,
-                                  size: 15,
-                                )
-                              ],
-                            ),
+                                onTap: () {
+                                  Navigator.of(context).pushNamed(editar);
+                                },
+                              ),
+                              SizedBox(
+                                width: 4,
+                              ),
+                              Icon(
+                                Icons.edit,
+                                size: 15,
+                              )
+                            ],
                           ),
                         ),
                       ),
@@ -252,7 +258,7 @@ class _DataClienteState extends State<DataCliente> {
                         ),
                         child: StreamBuilder<QuerySnapshot>(
                           stream: Firestore.instance
-                              .collection('users')
+                              .collection('repartidores')
                               .document(_user.uid)
                               .collection('pedidos')
                               .orderBy('status')

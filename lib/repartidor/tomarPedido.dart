@@ -1,16 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:mandadero/cliente/perfil_wid.dart';
-import 'package:mandadero/cliente/principal_wid.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
-class Pedidos extends StatefulWidget {
+class TomarPedido extends StatefulWidget {
+  TomarPedido({Key key}) : super(key: key);
+
   @override
-  _PedidosState createState() => _PedidosState();
+  _TomarPedidoState createState() => _TomarPedidoState();
 }
 
-class _PedidosState extends State<Pedidos> {
+class _TomarPedidoState extends State<TomarPedido> {
   @override
   Widget build(BuildContext context) {
     final _user = Provider.of<LoginState>(context, listen: false).currentUser();
@@ -19,28 +19,34 @@ class _PedidosState extends State<Pedidos> {
     return Scaffold(
       backgroundColor: Color(0xfff6f9ff),
       appBar: AppBar(
-          backgroundColor: Color(0xfff6f9ff),
-          elevation: 0.0,
-         centerTitle: true,
-          title: Text(
-            'Mis Pedidos',
-            style: TextStyle(
-              fontSize: 18,
-              color: Color.fromRGBO(20, 20, 20, 0.5),
+        leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios,
+              color: Colors.grey,
             ),
-          )),
+            onPressed: () {
+              Navigator.of(context).pop();
+            }),
+        title: Text(
+          'Toma un Pedido',
+          style: TextStyle(color: Colors.grey),
+        ),
+        backgroundColor: Color(0xfff6f9ff),
+        elevation: 0.0,
+      ),
       body: Column(
         children: <Widget>[
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: Firestore.instance
-                  //.collection('users')
-                  //.document(_user.uid)
+                  .collection('users')
+                  .document()
                   .collection('pedidos')
-                  //.document()
-                  .where("iud", isEqualTo: "${_user.uid}")
-                  //.orderBy('status')
+                  //.document().get()
+                  //.where("status", isEqualTo: "espera")
                   .snapshots(),
+
+              //.snapshots(),
               builder: (BuildContext context,
                   AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasError)
@@ -51,24 +57,44 @@ class _PedidosState extends State<Pedidos> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         new Center(
-                            child: CircularProgressIndicator(
-                          backgroundColor: Colors.grey,
-                        )),
-                        new Text('Cargando...',
-                            style: TextStyle(color: Colors.grey)),
+                          child: CircularProgressIndicator(
+                            backgroundColor: Color(0xfff6f9ff),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.grey,
+                            ),
+                          ),
+                        ),
+                        new Text(
+                          'Cargando...',
+                          style: TextStyle(color: Colors.grey),
+                        ),
                       ],
                     );
                   default:
                     if (snapshot.data.documents.length == 0) {
-                      return Center(
-                        child: Text('No tienes Pedidos Aun,\n¡Comienza ahora!',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: Colors.grey[400],
-                                fontSize: 23,
-                                fontWeight: FontWeight.bold)),
+                      return Container(
+                        height: alto * 0.5,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Text('No hay pedidos disponibles por el momento',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: Colors.grey[400],
+                                    fontSize: 23,
+                                    fontWeight: FontWeight.bold)),
+                            Text('Vuelve en un momento',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.grey[400],
+                                  fontSize: 16,
+                                )),
+                          ],
+                        ),
                       );
                     } else {
+                      print(snapshot.data.documents.length);
                       return new ListView(
                         children: snapshot.data.documents
                             .map((DocumentSnapshot document) {

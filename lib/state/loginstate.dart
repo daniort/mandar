@@ -103,7 +103,7 @@ class LoginState with ChangeNotifier {
                 //_prefs.setBool('islogin', true);
                 _login = true;
                 try {
-                  UserServices().newUser(_user, _type_user);
+                  UserServices().newUser(_user, isType_User());
                 } catch (e) {
                   print("lo intenté");
                 }
@@ -136,7 +136,7 @@ class LoginState with ChangeNotifier {
 
           _login = true;
           try {
-            UserServices().newUser(_user, _type_user);
+            UserServices().newUser(_user, isType_User());
           } catch (e) {
             print("lo intenté");
           }
@@ -153,6 +153,11 @@ class LoginState with ChangeNotifier {
         .then((FirebaseUser) async {
       _user = currentUser();
       _login = true;
+      try {
+        UserServices().newUser(_user, isType_User());
+      } catch (e) {
+        print("lo intenté");
+      }
       notifyListeners();
       return FirebaseUser.user.uid;
     }).catchError((e) {
