@@ -48,10 +48,11 @@ class _DataClienteState extends State<DataCliente> {
                                 MaterialButton(
                                   onPressed: () {
                                     Navigator.of(context).pop();
-                                      Provider.of<LoginState>(context, listen: false).logout();
-                                      
+                                    Provider.of<LoginState>(context,
+                                            listen: false)
+                                        .logout();
                                   },
-                                  color:  Color(0xffee6179),
+                                  color: Color(0xffee6179),
                                   child: Text(
                                     'Salir',
                                     style: TextStyle(color: Colors.white),
@@ -68,7 +69,10 @@ class _DataClienteState extends State<DataCliente> {
                                         text: '\n',
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold)),
-                                    TextSpan(text: 'Ya no podrás seguir tus pedidos.',style: TextStyle(color: Colors.grey),),
+                                    TextSpan(
+                                      text: 'Ya no podrás seguir tus pedidos.',
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
                                   ],
                                 ),
                               ));
@@ -124,13 +128,15 @@ class _DataClienteState extends State<DataCliente> {
                         color: Color(0xff484349),
                         fontWeight: FontWeight.bold),
                   ),
-                  _user.email != null ?  Text(
-                    "${_user.email}",
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Color(0xff484349),
-                    ),
-                  ):Text(''),
+                  _user.email != null
+                      ? Text(
+                          "${_user.email}",
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Color(0xff484349),
+                          ),
+                        )
+                      : Text(''),
                 ],
               ),
             ),
@@ -197,36 +203,106 @@ class _DataClienteState extends State<DataCliente> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10.0),
-                            color: Color(0xfff6f9ff),
-                          ),
-                          width: ancho * 0.5,
-                          height: alto * 0.06,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              InkWell(
-                                child: Text(
-                                  'Editar Datos',
-                                  style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.black54,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                onTap: () {
-                                  Navigator.of(context).pushNamed(editar);
-                                },
-                              ),
-                              SizedBox(
-                                width: 4,
-                              ),
-                              Icon(
-                                Icons.edit,
-                                size: 15,
-                              )
-                            ],
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.of(context).pushNamed(editar);
+                          },
+                          child: Container(
+                            child: StreamBuilder<QuerySnapshot>(
+                              stream: Firestore.instance
+                                  .collection('users')
+                                  .document(_user.uid)
+                                  .collection('datos')
+                                  .snapshots(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                switch (snapshot.connectionState) {
+                                  default:
+                                    if (snapshot.data.documents.length == 1) {
+                                      return Column(
+                                        children: <Widget>[
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                                color: Color(0xfff6f9ff),
+                                              ),
+                                              width: ancho * 0.5,
+                                              height: alto * 0.06,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: <Widget>[
+                                                  Container(
+                                                    child: Text(
+                                                      'Editar Datos',
+                                                      style: TextStyle(
+                                                          fontSize: 13,
+                                                          color: Colors.black54,
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 4,
+                                                  ),
+                                                  Icon(
+                                                    Icons.edit,
+                                                    size: 15,
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    } else {
+                                      return Column(
+                                        children: <Widget>[
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                                color: Color(0xffee6179),
+                                              ),
+                                              width: ancho * 0.5,
+                                              height: alto * 0.06,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: <Widget>[
+                                                  Container(
+                                                    child: Text(
+                                                      'Escribe tus Datos',
+                                                      style: TextStyle(
+                                                          fontSize: 13,
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 4,
+                                                  ),
+                                                  Icon(
+                                                    Icons.edit,
+                                                    size: 15,
+                                                    color: Colors.white,
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    }
+                                }
+                              },
+                            ),
                           ),
                         ),
                       ),

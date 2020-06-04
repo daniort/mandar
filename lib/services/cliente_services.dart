@@ -18,18 +18,6 @@ class UserServices {
       print(e);
       print('error en checar si ya esta el usuario');
     }
-    if (!_existe) {
-      Firestore.instance
-          .collection(type_user == 1 ? 'users' : 'repartidores')
-          .document(user.uid)
-          .collection('datos')
-          .document(user.uid)
-          .setData({
-        "email": user.email,
-        "nombre": user.displayName,
-        "telefono": user.phoneNumber,
-      });
-    }
   }
 
   bool newPedidoPagoServicios(String titulo, String cantidad, String ubicacion,
