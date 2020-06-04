@@ -211,93 +211,83 @@ class _DataClienteState extends State<DataCliente> {
                             child: StreamBuilder<QuerySnapshot>(
                               stream: Firestore.instance
                                   .collection('users')
-                                  .document(_user.uid)
-                                  .collection('datos')
                                   .snapshots(),
                               builder: (BuildContext context,
                                   AsyncSnapshot<QuerySnapshot> snapshot) {
                                 switch (snapshot.connectionState) {
                                   default:
                                     if (snapshot.data.documents.length == 1) {
-                                      return Column(
-                                        children: <Widget>[
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(10.0),
-                                                color: Color(0xfff6f9ff),
-                                              ),
-                                              width: ancho * 0.5,
-                                              height: alto * 0.06,
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: <Widget>[
-                                                  Container(
-                                                    child: Text(
-                                                      'Editar Datos',
-                                                      style: TextStyle(
-                                                          fontSize: 13,
-                                                          color: Colors.black54,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 4,
-                                                  ),
-                                                  Icon(
-                                                    Icons.edit,
-                                                    size: 15,
-                                                  )
-                                                ],
-                                              ),
-                                            ),
+                                      return Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                            color: Color(0xfff6f9ff),
                                           ),
-                                        ],
+                                          width: ancho * 0.5,
+                                          height: alto * 0.06,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: <Widget>[
+                                              Container(
+                                                child: Text(
+                                                  'Editar Datos',
+                                                  style: TextStyle(
+                                                      fontSize: 13,
+                                                      color: Colors.black54,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 4,
+                                              ),
+                                              Icon(
+                                                Icons.edit,
+                                                size: 15,
+                                              )
+                                            ],
+                                          ),
+                                        ),
                                       );
                                     } else {
-                                      return Column(
-                                        children: <Widget>[
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(10.0),
-                                                color: Color(0xffee6179),
-                                              ),
-                                              width: ancho * 0.5,
-                                              height: alto * 0.06,
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: <Widget>[
-                                                  Container(
-                                                    child: Text(
-                                                      'Escribe tus Datos',
-                                                      style: TextStyle(
-                                                          fontSize: 13,
-                                                          color: Colors.white,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 4,
-                                                  ),
-                                                  Icon(
-                                                    Icons.edit,
-                                                    size: 15,
-                                                    color: Colors.white,
-                                                  )
-                                                ],
-                                              ),
-                                            ),
+                                      return Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                            color: Color(0xffee6179),
                                           ),
-                                        ],
+                                          width: ancho * 0.5,
+                                          height: alto * 0.06,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: <Widget>[
+                                              Container(
+                                                child: Text(
+                                                  'Escribe tus Datos',
+                                                  style: TextStyle(
+                                                      fontSize: 13,
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 4,
+                                              ),
+                                              Icon(
+                                                Icons.edit,
+                                                size: 15,
+                                                color: Colors.white,
+                                              )
+                                            ],
+                                          ),
+                                        ),
                                       );
                                     }
                                 }

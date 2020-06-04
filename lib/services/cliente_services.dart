@@ -64,4 +64,76 @@ class UserServices {
       return false;
     }
   }
+
+  void primero(
+      FirebaseUser user,
+      String nombre,
+      String correo,
+      String telefono,
+      String direccion,
+      String tarjeta,
+      String nota,
+      String mes,
+      String year,
+      bool ocupado) {
+    Firestore.instance.collection('users').document(user.uid).setData({
+      'nombre': nombre,
+      'email': correo,
+      'telefono': telefono,
+      'direccion': direccion,
+      'tarjeta': tarjeta,
+      'nota': nota,
+      'mes': mes,
+      'año': year,
+      'ocupado': false,
+    }, merge: true);
+  }
+
+  void name(FirebaseUser user, String nombre) {
+    Firestore.instance.collection('users').document(user.uid).updateData({
+      'nombre': nombre,
+    });
+  }
+
+  void email(FirebaseUser user, String correo) {
+    Firestore.instance.collection('users').document(user.uid).updateData({
+      'email': correo,
+    });
+  }
+
+  void tele(FirebaseUser user, String telefono) {
+    Firestore.instance.collection('users').document(user.uid).updateData({
+      'telefono': telefono,
+    });
+  }
+
+  void direc(FirebaseUser user, String direccion) {
+    Firestore.instance.collection('users').document(user.uid).updateData({
+      'direccion': direccion,
+    });
+  }
+
+  void card(FirebaseUser user, String tarjeta) {
+    Firestore.instance.collection('users').document(user.uid).updateData({
+      'tarjeta': tarjeta,
+    });
+  }
+
+  void note(FirebaseUser user, String nota) {
+    Firestore.instance.collection('users').document(user.uid).updateData({
+      'nota': nota,
+    });
+  }
+
+  void month(FirebaseUser user, String mes) {
+    Firestore.instance.collection('users').document(user.uid).updateData({
+      'mes': mes,
+    });
+  }
+
+  void ano(FirebaseUser user, String year) {
+    Firestore.instance.collection('users').document(user.uid).updateData({
+      'año': year,
+    });
+  }
 }
