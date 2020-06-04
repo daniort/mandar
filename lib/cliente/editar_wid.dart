@@ -2,8 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mandadero/Router/strings.dart';
-import 'package:mandadero/services/cliente_services.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
@@ -42,11 +40,14 @@ class _EditarClienteState extends State<EditarCliente> {
   String tarjeta;
   String mes;
   String year;
+  bool ocupa;
 
   final _llave = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     final _user = Provider.of<LoginState>(context, listen: false).currentUser();
+    final alto = MediaQuery.of(context).size.height;
+    final ancho = MediaQuery.of(context).size.width;
     return Scaffold(
       body: GestureDetector(
         onTap: () {
@@ -302,7 +303,7 @@ class _EditarClienteState extends State<EditarCliente> {
                                   height: 40,
                                   width: 150,
                                   decoration: BoxDecoration(
-                                      color: Color(0xff36827f),
+                                      color: Color(0xffee6179),
                                       borderRadius:
                                           BorderRadius.circular(10.0)),
                                   child: Center(
@@ -322,55 +323,224 @@ class _EditarClienteState extends State<EditarCliente> {
                                   bottom: 4.0,
                                   //left: 10.0,
                                   right: 5.0),
-                              child: InkWell(
-                                onTap: () {
-                                  if (_llave.currentState.validate()) {
-                                    FirebaseUser user;
+                              child: Container(
+                                child: StreamBuilder<QuerySnapshot>(
+                                  stream: Firestore.instance
+                                      .collection('users')
+                                      .document(_user.uid)
+                                      .collection('datos')
+                                      .snapshots(),
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                                    switch (snapshot.connectionState) {
+                                      default:
+                                        if (snapshot.data.documents.length ==
+                                            1) {
+                                          return InkWell(
+                                            onTap: () {
+                                              if (_llave.currentState
+                                                  .validate()) {
+                                                if (_nameController
+                                                    .text.isEmpty) {
+                                                  print('Nombre anterioro');
+                                                } else {
+                                                  name(
+                                                      _user,
+                                                      nombre =
+                                                          _nameController.text);
+                                                }
 
-                                    Update().updateuser(_user, {
-                                      _nameController.text,
-                                      _emailController.text,
-                                      _telefonoController.text,
-                                      _direccionController.text,
-                                      _notaController.text,
-                                      _cardController.text,
-                                      _mesController.text,
-                                      _anoController.text,
-                                    });
-                                    print(nombre);
-                                    print(correo);
-                                    print(telefono);
-                                    print(direccion);
-                                    print(nota);
-                                    print(tarjeta);
-                                    print(mes);
-                                    print(year);
-                                  }
+                                                if (_emailController
+                                                    .text.isEmpty) {
+                                                  print('Correo anterior');
+                                                } else {
+                                                  email(
+                                                      _user,
+                                                      correo = _emailController
+                                                          .text);
+                                                }
 
-                                  //_nameController.clear();
-                                  //_emailController.clear();
-                                  //_telefonoController.clear();
-                                  //_direccionController.clear();
-                                  //_notaController.clear();
-                                  //_cardController.clear();
-                                  //_mesController.clear();
-                                  //_anoController.clear();
-                                },
-                                child: Container(
-                                  height: 40,
-                                  width: 150,
-                                  decoration: BoxDecoration(
-                                      color: Color(0xff36827f),
-                                      borderRadius:
-                                          BorderRadius.circular(10.0)),
-                                  child: Center(
-                                    child: Text(
-                                      'Confirmar',
-                                      style: TextStyle(
-                                        color: Color(0xffffffff),
-                                      ),
-                                    ),
-                                  ),
+                                                if (_telefonoController
+                                                    .text.isEmpty) {
+                                                  print('Telefono anterior');
+                                                } else {
+                                                  tele(
+                                                      _user,
+                                                      telefono =
+                                                          _telefonoController
+                                                              .text);
+                                                }
+
+                                                if (_direccionController
+                                                    .text.isEmpty) {
+                                                  print('Direccion anterior');
+                                                } else {
+                                                  direc(
+                                                      _user,
+                                                      direccion =
+                                                          _direccionController
+                                                              .text);
+                                                }
+
+                                                if (_notaController
+                                                    .text.isEmpty) {
+                                                  print('Nota anterior');
+                                                } else {
+                                                  note(
+                                                      _user,
+                                                      nota =
+                                                          _notaController.text);
+                                                }
+
+                                                if (_cardController
+                                                    .text.isEmpty) {
+                                                  print('Tarjeta anterior');
+                                                } else {
+                                                  card(
+                                                      _user,
+                                                      tarjeta =
+                                                          _cardController.text);
+                                                }
+
+                                                if (_mesController
+                                                    .text.isEmpty) {
+                                                  print('Mes anterior');
+                                                } else {
+                                                  month(
+                                                      _user,
+                                                      mes =
+                                                          _mesController.text);
+                                                }
+                                                if (_anoController
+                                                    .text.isEmpty) {
+                                                  print('Año anterior');
+                                                } else {
+                                                  ano(
+                                                      _user,
+                                                      year =
+                                                          _anoController.text);
+                                                }
+                                                if (_nameController.text.isEmpty &&
+                                                    _emailController
+                                                        .text.isEmpty &&
+                                                    _telefonoController
+                                                        .text.isEmpty &&
+                                                    _direccionController
+                                                        .text.isEmpty &&
+                                                    _notaController
+                                                        .text.isEmpty &&
+                                                    _cardController
+                                                        .text.isEmpty &&
+                                                    _mesController
+                                                        .text.isEmpty &&
+                                                    _anoController
+                                                        .text.isEmpty) {
+                                                  print('No hace nada');
+                                                } else {
+                                                  Navigator.of(context).pop();
+                                                }
+
+                                                _nameController.clear();
+                                                _emailController.clear();
+                                                _telefonoController.clear();
+                                                _direccionController.clear();
+                                                _notaController.clear();
+                                                _cardController.clear();
+                                                _mesController.clear();
+                                                _anoController.clear();
+                                              }
+                                            },
+                                            child: Container(
+                                              height: 40,
+                                              width: 150,
+                                              decoration: BoxDecoration(
+                                                  color: Color(0xffee6179),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10.0)),
+                                              child: Center(
+                                                child: Text(
+                                                  'Editar',
+                                                  style: TextStyle(
+                                                    color: Color(0xffffffff),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        } else {
+                                          return InkWell(
+                                            onTap: () {
+                                              if (_llave.currentState
+                                                  .validate()) {
+                                                primero(
+                                                  _user,
+                                                  nombre = _nameController.text,
+                                                  correo =
+                                                      _emailController.text,
+                                                  telefono =
+                                                      _telefonoController.text,
+                                                  direccion =
+                                                      _direccionController.text,
+                                                  tarjeta =
+                                                      _cardController.text,
+                                                  nota = _notaController.text,
+                                                  mes = _mesController.text,
+                                                  year = _anoController.text,
+                                                  ocupa = false,
+                                                );
+                                                if (_nameController.text.isEmpty &&
+                                                    _emailController
+                                                        .text.isEmpty &&
+                                                    _telefonoController
+                                                        .text.isEmpty &&
+                                                    _direccionController
+                                                        .text.isEmpty &&
+                                                    _notaController
+                                                        .text.isEmpty &&
+                                                    _cardController
+                                                        .text.isEmpty &&
+                                                    _mesController
+                                                        .text.isEmpty &&
+                                                    _anoController
+                                                        .text.isEmpty &&
+                                                    ocupa) {
+                                                  print('No hace nada');
+                                                } else {
+                                                  Navigator.of(context).pop();
+                                                }
+
+                                                _nameController.clear();
+                                                _emailController.clear();
+                                                _telefonoController.clear();
+                                                _direccionController.clear();
+                                                _notaController.clear();
+                                                _cardController.clear();
+                                                _mesController.clear();
+                                                _anoController.clear();
+                                              }
+                                            },
+                                            child: Container(
+                                              height: 40,
+                                              width: 150,
+                                              decoration: BoxDecoration(
+                                                  color: Color(0xffee6179),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10.0)),
+                                              child: Center(
+                                                child: Text(
+                                                  'Confirmar',
+                                                  style: TextStyle(
+                                                    color: Color(0xffffffff),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                    }
+                                  },
                                 ),
                               ),
                             ),
@@ -386,5 +556,122 @@ class _EditarClienteState extends State<EditarCliente> {
         ),
       ),
     );
+  }
+
+  void name(FirebaseUser user, String nombre) {
+    Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection('datos')
+        .document(user.uid)
+        .updateData({
+      'nombre': nombre,
+    });
+  }
+
+  void email(FirebaseUser user, String correo) {
+    Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection('datos')
+        .document(user.uid)
+        .updateData({
+      'email': correo,
+    });
+  }
+
+  void tele(FirebaseUser user, String telefono) {
+    Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection('datos')
+        .document(user.uid)
+        .updateData({
+      'telefono': telefono,
+    });
+  }
+
+  void direc(FirebaseUser user, String direccion) {
+    Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection('datos')
+        .document(user.uid)
+        .updateData({
+      'direccion': direccion,
+    });
+  }
+
+  void card(FirebaseUser user, String tarjeta) {
+    Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection('datos')
+        .document(user.uid)
+        .updateData({
+      'tarjeta': tarjeta,
+    });
+  }
+
+  void note(FirebaseUser user, String nota) {
+    Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection('datos')
+        .document(user.uid)
+        .updateData({
+      'nota': nota,
+    });
+  }
+
+  void month(FirebaseUser user, String mes) {
+    Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection('datos')
+        .document(user.uid)
+        .updateData({
+      'mes': mes,
+    });
+  }
+
+  void ano(FirebaseUser user, String year) {
+    Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection('datos')
+        .document(user.uid)
+        .updateData({
+      'año': year,
+    });
+  }
+
+  void primero(
+      FirebaseUser user,
+      String nombre,
+      String correo,
+      String telefono,
+      String direccion,
+      String tarjeta,
+      String nota,
+      String mes,
+      String year,
+      bool ocupado) {
+    Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection('datos')
+        .document(user.uid)
+        .setData({
+      'nombre': nombre,
+      'email': correo,
+      'telefono': telefono,
+      'direccion': direccion,
+      'tarjeta': tarjeta,
+      'nota': nota,
+      'mes': mes,
+      'año': year,
+      'ocupado': false,
+    });
   }
 }

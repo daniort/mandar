@@ -21,77 +21,47 @@ class UserServices {
       print(e);
       print('error en checar si ya esta el usuario');
     }
-    if (!_existe) {
-      Firestore.instance
-          .collection(type_user == 1 ? 'users' : 'repartidores')
-          .document(user.uid)
-          .collection('datos')
-          .document(user.uid)
-          .setData({
-        "email": user.email,
-        "nombre": user.displayName,
-        "telefono": user.phoneNumber,
-        "direccion": "null",
-        "nota": "null",
-        "tarjeta": "null",
-        "mes": "null",
-        "ano": "null",
-        "cliente": "null",
-      });
-    }
   }
-}
 
-void updateuser(FirebaseUser user, nuevo) {
-  Firestore.instance
-      .collection('users')
-      .document(user.uid)
-      .collection('datos')
-      .document(user.uid)
-      .updateData(nuevo)
-      .catchError((e) {
-    print(e);
-  });
-}
-
-bool newPedidoPagoServicios(String titulo, String cantidad, String ubicacion,
-    String datos, FirebaseUser user) {
-  int dia = DateTime.now().day;
-  int mes = DateTime.now().month;
-  int ano = DateTime.now().year;
-  String horai =
-      DateTime.now().hour.toString() + ':' + DateTime.now().minute.toString();
-  try {
-    Firestore.instance
-        //.collection('users')
-        //.document(user.uid)
-        .collection('pedidos')
-        .document()
-        .setData({
-      "id_pedido": "",
-      "tipo": 'pago',
-      "titulo": titulo,
-      "cantidad": cantidad,
-      "ubicacion": ubicacion,
-      "datos": datos,
-      "cliente": user.uid,
-      "repartidor": "",
-      "status": "espera",
-      "dia": dia,
-      "mes": mes,
-      "year": ano,
-      "horai": horai,
-      "horaf": "",
-      "urlrecibocliente": "null",
-      "urlreciborepartidor": "null",
-      "fin_repartidor": false,
-      "fin_cliente": false,
-    }).then((value) {
-      print('hola');
-    });
-    return true;
-  } catch (e) {
-    print("error al guardar el pedido");
-    return false;
+  bool newPedidoPagoServicios(String titulo, String cantidad, String ubicacion,
+      String datos, FirebaseUser user) {
+    int dia = DateTime.now().day;
+    int mes = DateTime.now().month;
+    int ano = DateTime.now().year;
+    String horai =
+        DateTime.now().hour.toString() + ':' + DateTime.now().minute.toString();
+    try {
+      Firestore.instance
+          //.collection('users')
+          //.document(user.uid)
+          .collection('pedidos')
+          .document()
+          .setData({
+        "id_pedido": "",
+        "tipo": 'pago',
+        "titulo": titulo,
+        "cantidad": cantidad,
+        "ubicacion": ubicacion,
+        "datos": datos,
+        "cliente": user.uid,
+        "repartidor": "",
+        "status": "espera",
+        "dia": dia,
+        "mes": mes,
+        "year": ano,
+        "horai": horai,
+        "horaf": "",
+        "urlrecibocliente": "null",
+        "urlreciborepartidor": "null",
+        "fin_repartidor": false,
+        "fin_cliente": false,
+      }).then((value) {
+        print('hola');
+      });
+      return true;
+    } catch (e) {
+      print("error al guardar el pedido");
+      return false;
+    }
   }
 }
