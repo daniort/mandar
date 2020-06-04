@@ -155,19 +155,11 @@ class LoginState with ChangeNotifier {
         .then((FirebaseUser) async {
       _user = currentUser();
       _login = true;
-<<<<<<< HEAD
-      _prefs.setBool("islogin", true);
-=======
->>>>>>> 54de834224dfd0c322b2fda08774d3aa77126d5e
       try {
         UserServices().newUser(_user, isType_User());
       } catch (e) {
         print("lo intenté");
       }
-<<<<<<< HEAD
-
-=======
->>>>>>> 54de834224dfd0c322b2fda08774d3aa77126d5e
       notifyListeners();
       return FirebaseUser.user.uid;
     }).catchError((e) {
