@@ -6,15 +6,14 @@ import 'package:mandadero/services/cliente_services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginState with ChangeNotifier {
+  
+
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final _facebookLogin = FacebookLogin();
   FirebaseUser _user;
   SharedPreferences _prefs;
 
-  LoginState() {
-    loginState();
-  }
   bool _login = false;
   int _steplogin = 1;
   int _type_user = 0;
@@ -56,10 +55,14 @@ class LoginState with ChangeNotifier {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     _prefs = await SharedPreferences.getInstance();
     if (_prefs.containsKey('islogin')) {
-      _user = await _auth.currentUser();
+      //_user = await _auth.currentUser();
       _login = true;
+      notifyListeners();
+      //return true;
     } else {
       _login = false;
+      notifyListeners();
+      //return false;
     }
   }
 
@@ -80,7 +83,7 @@ class LoginState with ChangeNotifier {
   void logout() {
     _stepPedido = 0;
     _tipoPedido = 1;
-    _prefs.clear();
+    //_prefs.clear();
     _login = false;
     _steplogin = 1;
     _type_user = 0;
@@ -133,7 +136,6 @@ class LoginState with ChangeNotifier {
         _user = (await _auth.signInWithCredential(credential)).user;
         if (_user.displayName.isNotEmpty) {
           //_prefs.setBool("islogin", true);
-
           _login = true;
           try {
             UserServices().newUser(_user, isType_User());
@@ -152,12 +154,14 @@ class LoginState with ChangeNotifier {
         .signInWithEmailAndPassword(email: email, password: pass)
         .then((FirebaseUser) async {
       _user = currentUser();
-       _login = true;
-          try {
-            UserServices().newUser(_user, isType_User());
-          } catch (e) {
-            print("lo intenté");
-          }
+      _login = true;
+      _prefs.setBool("islogin", true);
+      try {
+        UserServices().newUser(_user, isType_User());
+      } catch (e) {
+        print("lo intenté");
+      }
+
       notifyListeners();
       return FirebaseUser.user.uid;
     }).catchError((e) {

@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mandadero/Router/strings.dart';
 
 import 'package:mandadero/state/loginstate.dart';
 
@@ -125,6 +126,7 @@ class _FirtsPageState extends State<FirtsPage> {
                     onTap: () {
                       Provider.of<LoginState>(context, listen: false)
                             .setUser(2);
+                            //Navigator.of(context).pushNamed(loginRoute);
                         Provider.of<LoginState>(context, listen: false)
                             .setStepLogin(2);
                     },
@@ -152,6 +154,7 @@ class _FirtsPageState extends State<FirtsPage> {
                     onTap: () {
                       Provider.of<LoginState>(context, listen: false)
                             .setUser(1);
+                       //Navigator.of(context).pushNamed(loginRoute);
                         Provider.of<LoginState>(context, listen: false)
                             .setStepLogin(2);
                     },

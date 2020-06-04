@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mandadero/state/loginstate.dart';
-import 'package:provider/provider.dart';
 
 class UserServices {
   void newUser(FirebaseUser user, int type_user) async {
@@ -15,7 +13,6 @@ class UserServices {
           .get()
           .then((DocumentSnapshot doc) {
         _existe = true;
-        print('si esta el usuario');
       });
     } catch (e) {
       print(e);
@@ -44,8 +41,6 @@ class UserServices {
         DateTime.now().hour.toString() + ':' + DateTime.now().minute.toString();
     try {
       Firestore.instance
-          //.collection('users')
-          //.document(user.uid)
           .collection('pedidos')
           .document()
           .setData({
@@ -69,6 +64,26 @@ class UserServices {
         "fin_cliente": false,
       }).then((value) {
         print('hola');
+      });
+      return true;
+    } catch (e) {
+      print("error al guardar el pedido");
+      return false;
+    }
+  }
+
+  static bool finalizaRepartidor(String documentID, FirebaseUser user) {
+    try {
+      Firestore.instance
+          .collection('pedidos')
+          .document(documentID)
+          .updateData({'fin_repartidor': true, "status" : "finalizado"}).then((value) {
+        Firestore.instance
+            .collection('repartidores')
+            .document(user.uid)
+            .collection('datos')
+            .document(user.uid)
+            .updateData({'ocupado': false});
       });
       return true;
     } catch (e) {

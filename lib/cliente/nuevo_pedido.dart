@@ -789,7 +789,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
 
   Widget _modalTicket(double alto, double ancho) {
     return Container(
-      height: alto * 0.35,
+      //height: alto * 0.35,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -797,168 +797,170 @@ class _NuevoPedidoState extends State<NuevoPedido> {
           topRight: Radius.circular(40.0),
         ),
       ),
-      child: Column(
-        children: [
-          ListTile(
-            leading: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Icon(Icons.arrow_back_ios, color: Colors.grey))),
-            title: Text("Mi Ticket", style: TextStyle(color: Colors.grey)),
-          ),
-          Divider(),
-          Row(
-            //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              Expanded(
-                flex: 5,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            "Cantidad a Pagar:   ",
-                            style:
-                                TextStyle(fontSize: 16.0, color: Colors.grey),
-                          ),
-                          Icon(
-                            Icons.attach_money,
-                            size: 15,
-                            color: Colors.grey,
-                          )
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            "Costo Servicio:   ",
-                            style:
-                                TextStyle(fontSize: 16.0, color: Colors.grey),
-                          ),
-                          Icon(
-                            Icons.attach_money,
-                            size: 15,
-                            color: Colors.grey,
-                          )
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            "Total:   ",
-                            style: TextStyle(
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey),
-                          ),
-                          Icon(
-                            Icons.attach_money,
-                            size: 15,
-                            color: Colors.grey,
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(_cantidadController.value.text),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text("20"),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text("520"),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[],
-                ),
-              ),
-            ],
-          ),
-          Divider(),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      child: SingleChildScrollView(
+              child: Column(
+          children: [
+            ListTile(
+              leading: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Icon(Icons.arrow_back_ios, color: Colors.grey))),
+              title: Text("Mi Ticket", style: TextStyle(color: Colors.grey)),
+            ),
+            Divider(),
+            Row(
+              //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                OutlineButton(
-                  splashColor: Colors.red[300],
-                  textColor: Colors.red[300],
-                  onPressed: () {
-                    print('ticket cancelado');
-                    Navigator.of(context).pop();
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 30.0, right: 30.0),
-                    child: Text('Cancelar'),
+                Expanded(
+                  flex: 5,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              "Cantidad a Pagar:   ",
+                              style:
+                                  TextStyle(fontSize: 16.0, color: Colors.grey),
+                            ),
+                            Icon(
+                              Icons.attach_money,
+                              size: 15,
+                              color: Colors.grey,
+                            )
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              "Costo Servicio:   ",
+                              style:
+                                  TextStyle(fontSize: 16.0, color: Colors.grey),
+                            ),
+                            Icon(
+                              Icons.attach_money,
+                              size: 15,
+                              color: Colors.grey,
+                            )
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              "Total:   ",
+                              style: TextStyle(
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey),
+                            ),
+                            Icon(
+                              Icons.attach_money,
+                              size: 15,
+                              color: Colors.grey,
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                OutlineButton(
-                  onPressed: () {
-                    print('si estoy seguro');
-                    final _user =
-                        Provider.of<LoginState>(context, listen: false)
-                            .currentUser();
-                    var _pedidoregistrado = UserServices()
-                        .newPedidoPagoServicios(
-                            _tituloController.text,
-                            _cantidadController.text,
-                            _ubicacionController.text,
-                            _datosController.text,
-                            _user);
-
-                    if (_pedidoregistrado) {
-                      Navigator.of(context).pop();
-                      Provider.of<LoginState>(context, listen: false)
-                          .plusStep();
-                    }
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 30.0, right: 30.0),
-                    child: Text('Confirmar'),
+                Expanded(
+                  flex: 1,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(_cantidadController.value.text),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("20"),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("520"),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[],
                   ),
                 ),
               ],
             ),
-          ),
-        ],
+            Divider(),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  OutlineButton(
+                    splashColor: Colors.red[300],
+                    textColor: Colors.red[300],
+                    onPressed: () {
+                      print('ticket cancelado');
+                      Navigator.of(context).pop();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 30.0, right: 30.0),
+                      child: Text('Cancelar'),
+                    ),
+                  ),
+                  OutlineButton(
+                    onPressed: () {
+                      print('si estoy seguro');
+                      final _user =
+                          Provider.of<LoginState>(context, listen: false)
+                              .currentUser();
+                      var _pedidoregistrado = UserServices()
+                          .newPedidoPagoServicios(
+                              _tituloController.text,
+                              _cantidadController.text,
+                              _ubicacionController.text,
+                              _datosController.text,
+                              _user);
+
+                      if (_pedidoregistrado) {
+                        Navigator.of(context).pop();
+                        Provider.of<LoginState>(context, listen: false)
+                            .plusStep();
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 30.0, right: 30.0),
+                      child: Text('Confirmar'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -250,10 +250,8 @@ class _DataClienteState extends State<DataCliente> {
                         ),
                         child: StreamBuilder<QuerySnapshot>(
                           stream: Firestore.instance
-                              .collection('users')
-                              .document(_user.uid)
                               .collection('pedidos')
-                              .orderBy('status')
+                              .where("cliente", isEqualTo: "${_user.uid}")
                               .snapshots(),
                           builder: (BuildContext context,
                               AsyncSnapshot<QuerySnapshot> snapshot) {

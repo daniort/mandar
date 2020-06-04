@@ -51,7 +51,7 @@ class _DataRepartidorState extends State<DataRepartidor> {
                                       Provider.of<LoginState>(context, listen: false).logout();
                                       
                                   },
-                                  color:  Color(0xffee6179),
+                                  color:   Color(0xff464d77),
                                   child: Text(
                                     'Salir',
                                     style: TextStyle(color: Colors.white),
@@ -100,6 +100,8 @@ class _DataRepartidorState extends State<DataRepartidor> {
                         boxShadow: [
                           BoxShadow(color: Colors.white10, blurRadius: 25)
                         ],
+
+                                 
                         image: new DecorationImage(
                             image: _user.photoUrl != null
                                 ? NetworkImage("${_user.photoUrl}")
@@ -258,10 +260,11 @@ class _DataRepartidorState extends State<DataRepartidor> {
                         ),
                         child: StreamBuilder<QuerySnapshot>(
                           stream: Firestore.instance
-                              .collection('repartidores')
-                              .document(_user.uid)
+                              //.collection('repartidores')
+                              //.document(_user.uid)
                               .collection('pedidos')
-                              .orderBy('status')
+                              .where('repartidor', isEqualTo: _user.uid)
+                              //.orderBy('status')
                               .snapshots(),
                           builder: (BuildContext context,
                               AsyncSnapshot<QuerySnapshot> snapshot) {
