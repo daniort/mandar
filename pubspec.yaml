@@ -30,6 +30,7 @@ dependencies:
   firebase_core: ^0.4.4+3
   firebase_auth: ^0.16.0
   flutter_facebook_login: ^3.0.0
+  firebase_storage: ^3.1.6
   google_sign_in: ^4.4.6
   meta: ^1.1.6
   shared_preferences: ^0.5.7+2
@@ -42,6 +43,12 @@ dependencies:
 
   http: ^0.12.1
   progress_dialog: ^1.2.2
+  image_picker: ^0.6.0+17
+  image_downloader: ^0.19.2
+  
+  
+  
+  
 
 dev_dependencies:
   flutter_test:

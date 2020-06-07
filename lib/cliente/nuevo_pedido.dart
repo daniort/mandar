@@ -1,15 +1,15 @@
+import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mandadero/cliente/principal_wid.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mandadero/services/cliente_services.dart';
-
 import 'package:mandadero/services/payment-service.dart';
-
 import 'package:mandadero/state/loginstate.dart';
-
 import 'package:provider/provider.dart';
 import 'package:stripe_payment/stripe_payment.dart';
 
@@ -19,6 +19,7 @@ class NuevoPedido extends StatefulWidget {
 }
 
 class _NuevoPedidoState extends State<NuevoPedido> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   TextEditingController _tituloController;
   TextEditingController _datosController;
   TextEditingController _cantidadController;
@@ -29,19 +30,22 @@ class _NuevoPedidoState extends State<NuevoPedido> {
   TextEditingController _cvvCodeController;
   TextEditingController _expiryDateController;
 
-  GlobalKey _scaffoldKey = GlobalKey();
   Token _paymentToken;
   PaymentMethod _paymentMethod;
-  String _error;
+
   final String _currentSecret = null; //set this yourself, e.g using curl
-  PaymentIntentResult _paymentIntent;
-  Source _source;
-  ScrollController _controller = ScrollController();
+
   final CreditCard testCard = CreditCard(
     number: '4000002760003184',
     expMonth: 12,
     expYear: 21,
   );
+  final _formPedidoKey = GlobalKey<FormState>();
+  String filePath = "recibos_clientes/${DateTime.now()}.png";
+  StorageUploadTask _uploadTask;
+  final ImagePicker picker = ImagePicker();
+  File _image;
+  final FirebaseStorage _sto = LoginState().isStorage();
 
   void initState() {
     _tituloController = TextEditingController();
@@ -60,7 +64,17 @@ class _NuevoPedidoState extends State<NuevoPedido> {
         androidPayMode: 'test'));
   }
 
-  final _formPedidoKey = GlobalKey<FormState>();
+  Future _pickImage() async {
+    try {
+      final select = await picker.getImage(source: ImageSource.camera);
+      setState(() {
+        _image = File(select.path);
+      });
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final alto = MediaQuery.of(context).size.height;
@@ -426,6 +440,11 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                             splashColor: Color(0xffee6179),
                             onPressed: () {
                               print('tomar foto');
+                              try {
+                                _pickImage();
+                              } catch (e) {
+                                print("Error wee $e");
+                              }
                             },
                             child: Padding(
                               padding: const EdgeInsets.all(2.0),
@@ -451,7 +470,9 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                           Padding(
                             padding: const EdgeInsets.all(12.0),
                             child: Text(
-                              'Si cuentas con uno, seria de gran ayuda.',
+                              _image == null
+                                  ? 'Si cuentas con uno, seria de gran ayuda.'
+                                  : 'Genial, lo Tenemos',
                               textAlign: TextAlign.center,
                               style:
                                   TextStyle(color: Colors.grey, fontSize: 10.0),
@@ -471,10 +492,34 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                               color: Color.fromRGBO(20, 20, 20, 0.2),
                               width: 5.0),
                         ),
-                        child: Image.asset(
-                          'lib/assets/error.png',
-                          width: 100.0,
-                        ),
+                        child: _image == null
+                            ? Center(
+                                child: Image.asset(
+                                'lib/assets/error.png',
+                              ))
+                            : Stack(
+                                children: <Widget>[
+                                  Center(
+                                    child: Image.file(
+                                      _image,
+                                    ),
+                                  ),
+                                  Align(
+                                    alignment: Alignment.topRight,
+                                    child: IconButton(
+                                        color: Color(0xffee6179),
+                                        icon: Icon(
+                                          Icons.close,
+                                          color: Colors.white,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            _image = null;
+                                          });
+                                        }),
+                                  ),
+                                ],
+                              ),
                       ),
                     ),
                   )
@@ -485,6 +530,24 @@ class _NuevoPedidoState extends State<NuevoPedido> {
         ),
       ),
     );
+  }
+
+  Future<String> _subirImagen(File image) async {
+    print('vamos a intrar al try');
+    try {
+      print('dentro del try');
+      setState(() {
+        _uploadTask = _sto.ref().child(filePath).putFile(_image);
+      });
+      // String url = 'null';
+      //var dowurl;
+      var dowurl = await (await _uploadTask.onComplete).ref.getDownloadURL();
+      var url = dowurl.toString();
+      print('acabando de subir la imagen');
+      return url;
+    } catch (e) {
+      return 'null';
+    }
   }
 
   Widget _buildItem(String item) {
@@ -611,7 +674,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                   //_scaffoldKey.currentState.showSnackBar(
                   //  SnackBar(content: Text('Received ${source.sourceId}')));
                   //setState(() {
-                  _source = source;
+                  //_source = source;
                   //});
                 }).catchError(setError);
               },
@@ -798,7 +861,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
         ),
       ),
       child: SingleChildScrollView(
-              child: Column(
+        child: Column(
           children: [
             ListTile(
               leading: Material(
@@ -932,23 +995,37 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                     ),
                   ),
                   OutlineButton(
-                    onPressed: () {
-                      print('si estoy seguro');
+                    onPressed: () async {
                       final _user =
                           Provider.of<LoginState>(context, listen: false)
                               .currentUser();
+                      var _urlim = await _subirImagen(_image);
+
                       var _pedidoregistrado = UserServices()
                           .newPedidoPagoServicios(
                               _tituloController.text,
                               _cantidadController.text,
                               _ubicacionController.text,
                               _datosController.text,
-                              _user);
+                              _user,
+                              _urlim);
 
                       if (_pedidoregistrado) {
                         Navigator.of(context).pop();
                         Provider.of<LoginState>(context, listen: false)
                             .plusStep();
+                      } else {
+                        Navigator.of(context).pop();
+                        _scaffoldKey.currentState.showSnackBar(SnackBar(
+                          content: Text('Algo Pasó, Intentalo de Nuevo'),
+                          backgroundColor: Color(0xffee6179),
+                          duration: Duration(milliseconds: 3000),
+                        ));
+                        //_scaffoldKey.currentState.showSnackBar(SnackBar(
+                        //content: Text('Algo Pasó, Intentalo de Nuevo'),
+                        //duration: Duration(milliseconds: 3000),
+                        //backgroundColor: Color(0xffee6179)//Color(0xff464d77),
+                        //));
                       }
                     },
                     child: Padding(
