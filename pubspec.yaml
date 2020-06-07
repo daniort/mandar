@@ -26,6 +26,27 @@ dependencies:
   font_awesome_flutter: ^8.8.1
   google_fonts: ^1.0.0
   provider: ^4.0.5+1
+
+  firebase_core: ^0.4.4+3
+  firebase_auth: ^0.16.0
+  flutter_facebook_login: ^3.0.0
+  firebase_storage: ^3.1.6
+  google_sign_in: ^4.4.6
+  meta: ^1.1.6
+  shared_preferences: ^0.5.7+2
+  cloud_firestore: ^0.13.5 
+
+  #awesome_card: ^1.1.0
+  flutter_credit_card: ^0.1.3
+  #cached_network_image: ^2.2.0+1
+  stripe_payment: ^1.0.7
+  
+  http: ^0.12.1
+  progress_dialog: ^1.2.2
+  image_picker: ^0.6.0+17
+  image_downloader: ^0.19.2
+  
+  
   
   
 
@@ -48,7 +69,7 @@ flutter:
  
   assets:
 
-    - lib/assets/logo.png
+    - lib/assets/
     
 
   # An image asset can refer to one or more resolution-specific "variants", see
