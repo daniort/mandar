@@ -7,85 +7,59 @@ import 'package:mandadero/services/cliente_services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginState with ChangeNotifier {
-  final FirebaseStorage storage = FirebaseStorage(storageBucket: 'gs://mandadero-d2649.appspot.com');
+  final FirebaseStorage storage =
+      FirebaseStorage(storageBucket: 'gs://mandadero-d2649.appspot.com');
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final _facebookLogin = FacebookLogin();
   FirebaseUser _user;
   SharedPreferences _prefs;
-
-  bool _login = false;
-  int _steplogin = 1;
-  int _type_user = 0;
-  //bool _inter = false;
-
-  int _stepPedido = 0;
-  int _tipoPedido = 1;
-
-  bool _cvvfocus = false;
-
   isStepPedido() => _stepPedido;
   isTipoPedido() => _tipoPedido;
-
   isStorage() => storage;
-
-  setTipoPedido(int n) {
-    _tipoPedido = n;
-    notifyListeners();
-    print("tipo:" + _tipoPedido.toString());
-  }
-
-  setStepPedido(int n) {
-    _stepPedido = n;
-    notifyListeners();
-    print("paso:" + _stepPedido.toString());
-  }
-
-  void backStep() {
-    _stepPedido = _stepPedido - 1;
-    print("regresaste al paso: " + _stepPedido.toString());
-    notifyListeners();
-  }
-
-  void plusStep() {
-    _stepPedido = _stepPedido + 1;
-    print("pasaste al paso: " + _stepPedido.toString());
-    notifyListeners();
-  }
-
-  Future<bool> loginState() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    _prefs = await SharedPreferences.getInstance();
-    if (_prefs.containsKey('islogin')) {
-      //_user = await _auth.currentUser();
-      _login = true;
-      notifyListeners();
-      //return true;
-    } else {
-      _login = false;
-      notifyListeners();
-      //return false;
-    }
-  }
-
   FirebaseUser currentUser() => _user;
   int isLogin_Step() => _steplogin;
   int isType_User() => _type_user;
   bool islogin() => _login;
+  bool isLoading() => _loading;
 
-  setStepLogin(int n) {
-    _steplogin = n;
-    notifyListeners();
+  LoginState() {
+    loginState();
   }
 
-  setUser(int n) {
-    _type_user = n;
+  void loginState() async {
+    _prefs = await SharedPreferences.getInstance();
+    if (_prefs.containsKey('isLoggedIn')) {
+      _user = await _auth.currentUser();
+      _login = _user != null;
+      _loading = false;
+      notifyListeners();
+    } else {
+      _loading = false;
+      notifyListeners();
+    }
+    if (_prefs.containsKey('tipe_user') == 1) {
+      _type_user = 1;
+      notifyListeners();
+    } else {
+      _type_user = 2;
+      notifyListeners();
+    }
   }
+
+  bool _login = false;
+  bool _loading = false;
+  int _steplogin = 1;
+  int _type_user = 0;
+  int _stepPedido = 0;
+  int _tipoPedido = 1;
+  bool _cvvfocus = false;
 
   void logout() {
     _stepPedido = 0;
     _tipoPedido = 1;
     //_prefs.clear();
+    removeValues();
     _login = false;
     _steplogin = 1;
     _type_user = 0;
@@ -96,6 +70,11 @@ class LoginState with ChangeNotifier {
   }
 
   socialLogin(int index) async {
+    _loading = true;
+    notifyListeners();
+
+    _loading = false;
+
     switch (index) {
       case 2: //facebook
         await _facebookLogin.logIn(['email', 'public_profile']).then((result) {
@@ -105,18 +84,23 @@ class LoginState with ChangeNotifier {
                   accessToken: result.accessToken.token);
               _auth.signInWithCredential(credential).then((res) {
                 _user = res.user;
-                //_prefs.setBool('islogin', true);
-                _login = true;
                 try {
                   UserServices().newUser(_user, isType_User());
                 } catch (e) {
                   print("lo intenté");
                 }
                 print("Login Faceboon Hecho" + _user.displayName);
-                notifyListeners();
               }).catchError((e) {
                 print(e);
               });
+              if (_user != null) {
+                _prefs.setBool('isLoggedIn', true);
+                _login = true;
+                notifyListeners();
+              } else {
+                _login = false;
+                notifyListeners();
+              }
               break;
             case FacebookLoginStatus.cancelledByUser:
               print('Login Facebook Cancelado por el Usuario.');
@@ -136,14 +120,12 @@ class LoginState with ChangeNotifier {
           idToken: googleAuth.idToken,
         );
         _user = (await _auth.signInWithCredential(credential)).user;
-        if (_user.displayName.isNotEmpty) {
-          //_prefs.setBool("islogin", true);
+        if (_user != null) {
+          _prefs.setBool('isLoggedIn', true);
           _login = true;
-          try {
-            UserServices().newUser(_user, isType_User());
-          } catch (e) {
-            print("lo intenté");
-          }
+          notifyListeners();
+        } else {
+          _login = false;
           notifyListeners();
         }
         break;
@@ -157,7 +139,8 @@ class LoginState with ChangeNotifier {
         .then((FirebaseUser) async {
       _user = currentUser();
       _login = true;
-      _prefs.setBool("islogin", true);
+      //prefs.setBool("islogin", true);
+      addLoginPref();
       try {
         UserServices().newUser(_user, isType_User());
       } catch (e) {
@@ -190,10 +173,55 @@ class LoginState with ChangeNotifier {
     }
   }
 
+  setTipoPedido(int n) {
+    _tipoPedido = n;
+    notifyListeners();
+    print("tipo:" + _tipoPedido.toString());
+  }
+
+  setStepPedido(int n) {
+    _stepPedido = n;
+    notifyListeners();
+    print("paso:" + _stepPedido.toString());
+  }
+
+  void backStep() {
+    _stepPedido = _stepPedido - 1;
+    print("regresaste al paso: " + _stepPedido.toString());
+    notifyListeners();
+  }
+
+  void plusStep() {
+    _stepPedido = _stepPedido + 1;
+    print("pasaste al paso: " + _stepPedido.toString());
+    notifyListeners();
+  }
+
+  setStepLogin(int n) {
+    _steplogin = n;
+    notifyListeners();
+  }
+
+  setUser(int n) {
+    _prefs.setInt('tipe_user', n);
+    _type_user = n;
+  }
+
   bool isCVVFocus() => _cvvfocus;
 
   setCVVState(bool state) {
     _cvvfocus = state;
     notifyListeners();
+  }
+
+  addLoginPref() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('islogin', true);
+  }
+
+  removeValues() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    prefs.remove("islogin");
   }
 }
