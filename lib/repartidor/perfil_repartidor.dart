@@ -226,7 +226,7 @@ class _DataRepartidorState extends State<DataRepartidor> {
                                       fontWeight: FontWeight.bold),
                                 ),
                                 onTap: () {
-                                  Navigator.of(context).pushNamed(editar);
+                                  Navigator.of(context).pushNamed(editarRoute);
                                 },
                               ),
                               SizedBox(

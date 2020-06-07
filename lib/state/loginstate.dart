@@ -84,11 +84,6 @@ class LoginState with ChangeNotifier {
                   accessToken: result.accessToken.token);
               _auth.signInWithCredential(credential).then((res) {
                 _user = res.user;
-                try {
-                  UserServices().newUser(_user, isType_User());
-                } catch (e) {
-                  print("lo intenté");
-                }
                 print("Login Faceboon Hecho" + _user.displayName);
               }).catchError((e) {
                 print(e);
@@ -139,13 +134,7 @@ class LoginState with ChangeNotifier {
         .then((FirebaseUser) async {
       _user = currentUser();
       _login = true;
-      //prefs.setBool("islogin", true);
-      addLoginPref();
-      try {
-        UserServices().newUser(_user, isType_User());
-      } catch (e) {
-        print("lo intenté");
-      }
+
       notifyListeners();
       return FirebaseUser.user.uid;
     }).catchError((e) {

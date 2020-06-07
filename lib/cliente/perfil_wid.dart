@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:mandadero/Router/strings.dart';
+import 'package:mandadero/screens/editar_wid.dart';
 
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class DataCliente extends StatefulWidget {
   @override
@@ -173,31 +176,62 @@ class _DataClienteState extends State<DataCliente> {
                         padding: const EdgeInsets.all(8.0),
                         child: Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10.0),
-                            color: Color(0xfff6f9ff),
-                          ),
-                          width: ancho * 0.5,
-                          height: alto * 0.06,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Icon(
-                                Icons.pin_drop,
-                                size: 17,
-                                color: Color.fromRGBO(20, 20, 20, 0.5),
-                              ),
-                              SizedBox(
-                                width: 2.0,
-                              ),
-                              Text(
-                                'Calle Guerrero No. 15',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color.fromRGBO(20, 20, 20, 0.5),
+                              color: Color(0xfff6f9ff),
+                              borderRadius: BorderRadius.circular(30)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                RatingBar(
+                                  initialRating: 3,
+                                  minRating: 1,
+                                  direction: Axis.horizontal,
+                                  allowHalfRating: true,
+                                  itemCount: 5,
+                                  itemPadding:
+                                      EdgeInsets.symmetric(horizontal: 2.0),
+                                  itemBuilder: (context, _) => FaIcon(
+                                    FontAwesomeIcons.solidStar,
+                                    color: Colors.amber[200],
+                                  ),
+                                  onRatingUpdate: (rating) {
+                                    print(rating);
+                                  },
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                              color: Color(0xfff6f9ff),
+                              borderRadius: BorderRadius.circular(30)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                FaIcon(
+                                  FontAwesomeIcons.store,
+                                  color: Colors.grey,
+                                ),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                  'Mis Tiendas',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.black54,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -205,107 +239,43 @@ class _DataClienteState extends State<DataCliente> {
                         padding: const EdgeInsets.all(8.0),
                         child: InkWell(
                           onTap: () {
-                            Navigator.of(context).pushNamed(editar);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditarUser(),
+                              ),
+                            );
                           },
                           child: Container(
-                            child: StreamBuilder<QuerySnapshot>(
-                              stream: Firestore.instance
-                                  .collection('users')
-                                  .document(_user.uid)
-                                  .collection('datos')
-                                  .snapshots(),
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                                switch (snapshot.connectionState) {
-                                  default:
-                                    if (snapshot.data.documents.length == 1) {
-                                      return Column(
-                                        children: <Widget>[
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(10.0),
-                                                color: Color(0xfff6f9ff),
-                                              ),
-                                              width: ancho * 0.5,
-                                              height: alto * 0.06,
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: <Widget>[
-                                                  Container(
-                                                    child: Text(
-                                                      'Editar Datos',
-                                                      style: TextStyle(
-                                                          fontSize: 13,
-                                                          color: Colors.black54,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 4,
-                                                  ),
-                                                  Icon(
-                                                    Icons.edit,
-                                                    size: 15,
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    } else {
-                                      return Column(
-                                        children: <Widget>[
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(10.0),
-                                                color: Color(0xffee6179),
-                                              ),
-                                              width: ancho * 0.5,
-                                              height: alto * 0.06,
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: <Widget>[
-                                                  Container(
-                                                    child: Text(
-                                                      'Escribe tus Datos',
-                                                      style: TextStyle(
-                                                          fontSize: 13,
-                                                          color: Colors.white,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 4,
-                                                  ),
-                                                  Icon(
-                                                    Icons.edit,
-                                                    size: 15,
-                                                    color: Colors.white,
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    }
-                                }
-                              },
+                            decoration: BoxDecoration(
+                                color: Color(0xfff6f9ff),
+                                borderRadius: BorderRadius.circular(30)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  FaIcon(
+                                    FontAwesomeIcons.edit,
+                                    color: Colors.grey,
+                                  ),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text(
+                                    'Mis Datos',
+                                    style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.black54,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                      )
                     ],
                   ),
                 ),

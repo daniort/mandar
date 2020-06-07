@@ -45,6 +45,8 @@ dependencies:
   progress_dialog: ^1.2.2
   image_picker: ^0.6.0+17
   image_downloader: ^0.19.2
+  flutter_rating_bar: ^3.0.1+1
+  
   
   
   

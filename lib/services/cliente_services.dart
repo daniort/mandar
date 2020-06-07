@@ -6,23 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:mandadero/state/loginstate.dart';
 
 class UserServices {
-  void newUser(FirebaseUser user, int type_user) async {
-    var _existe = false;
-    try {
-      Firestore.instance
-          .collection(type_user == 1 ? 'users' : 'repartidores')
-          .document(user.uid)
-          .collection('datos')
-          .document(user.uid)
-          .get()
-          .then((DocumentSnapshot doc) {
-        _existe = true;
-      });
-    } catch (e) {
-      print(e);
-      print('error en checar si ya esta el usuario');
-    }
-  }
+
 
   bool newPedidoPagoServicios(String titulo, String cantidad, String ubicacion,
       String datos, FirebaseUser user, String image) {
