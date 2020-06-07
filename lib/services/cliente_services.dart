@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:mandadero/state/loginstate.dart';
 
 class UserServices {
   void newUser(FirebaseUser user, int type_user) async {
@@ -33,17 +37,16 @@ class UserServices {
   }
 
   bool newPedidoPagoServicios(String titulo, String cantidad, String ubicacion,
-      String datos, FirebaseUser user) {
+      String datos, FirebaseUser user, String image) {
     int dia = DateTime.now().day;
     int mes = DateTime.now().month;
     int ano = DateTime.now().year;
     String horai =
         DateTime.now().hour.toString() + ':' + DateTime.now().minute.toString();
+   
+
     try {
-      Firestore.instance
-          .collection('pedidos')
-          .document()
-          .setData({
+      Firestore.instance.collection('pedidos').document().setData({
         "id_pedido": "",
         "tipo": 'pago',
         "titulo": titulo,
@@ -58,7 +61,7 @@ class UserServices {
         "year": ano,
         "horai": horai,
         "horaf": "",
-        "urlrecibocliente": "null",
+        "urlrecibocliente": image,
         "urlreciborepartidor": "null",
         "fin_repartidor": false,
         "fin_cliente": false,
@@ -72,12 +75,10 @@ class UserServices {
     }
   }
 
-  static bool finalizaRepartidor(String documentID, FirebaseUser user) {
+  bool finalizaRepartidor(String documentID, FirebaseUser user, String urlim) {
     try {
-      Firestore.instance
-          .collection('pedidos')
-          .document(documentID)
-          .updateData({'fin_repartidor': true, "status" : "finalizado"}).then((value) {
+      Firestore.instance.collection('pedidos').document(documentID).updateData(
+          {'fin_repartidor': true, "status": "finalizado"}).then((value) {
         Firestore.instance
             .collection('repartidores')
             .document(user.uid)
@@ -91,4 +92,6 @@ class UserServices {
       return false;
     }
   }
+
+
 }

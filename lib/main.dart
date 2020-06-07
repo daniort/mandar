@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider<LoginState>(
       create: (BuildContext context) => LoginState(),
       child: MaterialApp(
-        debugShowCheckedModeBanner: false,
+        
         onGenerateRoute: Router().generateRoute,
 
         initialRoute: mainRoute,

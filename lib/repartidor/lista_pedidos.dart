@@ -1,10 +1,11 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:mandadero/cliente/perfil_wid.dart';
-import 'package:mandadero/cliente/principal_wid.dart';
-import 'package:mandadero/services/cliente_services.dart';
+import 'package:mandadero/repartidor/finalizar_pedido.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
+import 'package:image_downloader/image_downloader.dart';
 
 class MisPedidos extends StatefulWidget {
   @override
@@ -18,6 +19,7 @@ class _MisPedidosState extends State<MisPedidos> {
     final alto = MediaQuery.of(context).size.height;
     final ancho = MediaQuery.of(context).size.width;
     final _scaffoldKey = GlobalKey<ScaffoldState>();
+
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Color(0xfff6f9ff),
@@ -133,6 +135,90 @@ class _MisPedidosState extends State<MisPedidos> {
                                               .toString()
                                               .toUpperCase()),
                                     ),
+                                    document['urlrecibocliente'] != 'null'
+                                        ? ListTile(
+                                            leading: Icon(Icons.photo),
+                                            title: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  right: 100.0),
+                                              child: Container(
+                                                child: Stack(
+                                                  children: <Widget>[
+                                                    Center(
+                                                      child: Image.network(
+                                                        document[
+                                                            'urlrecibocliente'],
+                                                        fit: BoxFit.cover,
+                                                      ),
+                                                    ),
+                                                    Align(
+                                                      alignment:
+                                                          Alignment.topRight,
+                                                      child: IconButton(
+                                                          color:
+                                                              Color(0xffee6179),
+                                                          visualDensity:
+                                                              VisualDensity
+                                                                  .comfortable,
+                                                          icon: Icon(
+                                                            Icons
+                                                                .remove_red_eye,
+                                                            color: Colors.white,
+                                                          ),
+                                                          onPressed: () {
+                                                            print('Ver Ticket');
+                                                          }),
+                                                    ),
+                                                    Align(
+                                                      alignment:
+                                                          Alignment.bottomLeft,
+                                                      child: IconButton(
+                                                          color:
+                                                              Color(0xffee6179),
+                                                          icon: Icon(
+                                                            Icons.file_download,
+                                                            color: Colors.white,
+                                                          ),
+                                                          onPressed: () async {
+                                                            try {
+                                                              var imageId = await ImageDownloader
+                                                                  .downloadImage(
+                                                                      document[
+                                                                              'urlrecibocliente']
+                                                                          .toString());
+                                                              if (imageId ==
+                                                                  null) {
+                                                                return;
+                                                              }
+                                                              _scaffoldKey.currentState.showSnackBar(
+                                                                  SnackBar(
+                                                                      content:
+                                                                          Text(
+                                                                        'Imagen Guardada',
+                                                                        style: TextStyle(
+                                                                            color:
+                                                                                Colors.white),
+                                                                      ),
+                                                                      duration: Duration(
+                                                                          milliseconds:
+                                                                              1500),
+                                                                      backgroundColor:
+                                                                          Color.fromRGBO(
+                                                                              0,
+                                                                              0,
+                                                                              0,
+                                                                              0.6)));
+                                                            } catch (error) {
+                                                              print(error);
+                                                            }
+                                                          }),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        : SizedBox(),
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceEvenly,
@@ -159,83 +245,16 @@ class _MisPedidosState extends State<MisPedidos> {
                                                 splashColor: Colors.white,
                                                 color: Color(0xff464d77),
                                                 onPressed: () {
-                                                  print('finalziar pedido');
-                                                  showDialog(
-                                                      context: context,
-                                                      builder: (_) {
-                                                        return AlertDialog(
-                                                          title: Center(
-                                                              child: Text(
-                                                                  "¿Estas seguro?")),
-                                                          actions: <Widget>[
-                                                            MaterialButton(
-                                                              onPressed: () {
-                                                                Navigator.of(
-                                                                        context)
-                                                                    .pop();
-                                                              },
-                                                              child: Text(
-                                                                'Cancelar',
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .grey),
-                                                              ),
-                                                            ),
-                                                            MaterialButton(
-                                                               onPressed: () {
-                                                                //Finalizar Pedido
-                                                                bool
-                                                                    _finalRepartidor =
-                                                                    UserServices.finalizaRepartidor(
-                                                                        document
-                                                                            .documentID,
-                                                                        _user);
-                                                                if (_finalRepartidor) {
-                                                                  Navigator.of(
-                                                                          context)
-                                                                      .pop();
-                                                                  _scaffoldKey.currentState.showSnackBar(SnackBar(
-                                                                      content: Text(
-                                                                          'Genial, Sigue así'),
-                                                                      duration: Duration(
-                                                                          milliseconds:
-                                                                              3000),
-                                                                      backgroundColor:
-                                                                          Color(
-                                                                              0xff464d77) //Color(0xffd1495b),
-                                                                      ));
-                                                                } else {
-                                                                  Navigator.of(
-                                                                          context)
-                                                                      .pop();
-                                                                  _scaffoldKey.currentState.showSnackBar(SnackBar(
-                                                                      content: Text(
-                                                                          'Disculpa, Intentalo de Nuevo'),
-                                                                      duration: Duration(
-                                                                          milliseconds:
-                                                                              3000),
-                                                                      backgroundColor:
-                                                                          Colors
-                                                                              .orange));
-                                                                }
-                                                              },
-                                                              color: Color(
-                                                                  0xff464d77),
-                                                              child: Text(
-                                                                'Finalizar',
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .white),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                          content: Text(
-                                                              '¿Estas Seguro de que ya finalizaste?',
-                                                              style: TextStyle(
-                                                                  color: Colors
-                                                                      .grey)),
-                                                        );
-                                                      });
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          FinalizarPedido(
+                                                              data: document
+                                                                  .documentID
+                                                                  .toString()),
+                                                    ),
+                                                  );
                                                 },
                                                 child: Text(
                                                   'Finalizé el Pedido',
@@ -251,10 +270,7 @@ class _MisPedidosState extends State<MisPedidos> {
                               ),
                             );
                           } else {
-                            return Text(
-                              ' ',
-                              style: TextStyle(fontSize: 1),
-                            );
+                            return SizedBox();
                           }
                         }).toList(),
                       );

@@ -136,6 +136,41 @@ class _TomarPedidoState extends State<TomarPedido> {
                                       title: Text(
                                           "Info Extra: " + document['datos']),
                                     ),
+                                    document['urlrecibocliente'] != 'null'
+                                        ? ListTile(
+                                            title: Container(
+                                              child: Stack(
+                                                children: <Widget>[
+                                                  Center(
+                                                    child: Image.network(
+                                                      document[
+                                                          'urlrecibocliente'],
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                              .size
+                                                              .width,
+                                                    ),
+                                                  ),
+                                                  Align(
+                                                    alignment:
+                                                        Alignment.topRight,
+                                                    child: IconButton(
+                                                        color:
+                                                            Color(0xffee6179),
+                                                        icon: Icon(
+                                                          Icons.remove_red_eye,
+                                                          color: Colors.white,
+                                                        ),
+                                                        onPressed: () {
+                                                         print('Ver Ticket');
+                                                        }),
+                                                  ),
+                                                  
+                                                ],
+                                              ),
+                                            ),
+                                          )
+                                        : SizedBox(),
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Row(
