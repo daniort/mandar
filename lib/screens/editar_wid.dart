@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mandadero/services/cliente_services.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
@@ -343,64 +344,64 @@ class _EditarUserState extends State<EditarUser> {
                                           if (_nameController.text.isEmpty) {
                                             print('Nombre anterioro');
                                           } else {
-                                            //saveData(_user,  nombre,  _nameController.text );
-
-                                            name(_user,
-                                                nombre = _nameController.text);
+                                            UserServices().saveData(_user,
+                                                'nombre', _nameController.text);
                                           }
 
                                           if (_emailController.text.isEmpty) {
                                             print('Correo anterior');
                                           } else {
-                                            email(_user,
-                                                correo = _emailController.text);
+                                            UserServices().saveData(_user,
+                                                'email', _emailController.text);
                                           }
 
                                           if (_telefonoController
                                               .text.isEmpty) {
                                             print('Telefono anterior');
                                           } else {
-                                            tele(
+                                            UserServices().saveData(
                                                 _user,
-                                                telefono =
-                                                    _telefonoController.text);
+                                                'telefono',
+                                                _telefonoController.text);
                                           }
 
                                           if (_direccionController
                                               .text.isEmpty) {
                                             print('Direccion anterior');
                                           } else {
-                                            direc(
+                                            UserServices().saveData(
                                                 _user,
-                                                direccion =
-                                                    _direccionController.text);
+                                                'direccion',
+                                                _direccionController.text);
                                           }
 
                                           if (_notaController.text.isEmpty) {
                                             print('Nota anterior');
                                           } else {
-                                            note(_user,
-                                                nota = _notaController.text);
+                                            UserServices().saveData(_user,
+                                                'nota', _notaController.text);
                                           }
 
                                           if (_cardController.text.isEmpty) {
                                             print('Tarjeta anterior');
                                           } else {
-                                            card(_user,
-                                                tarjeta = _cardController.text);
+                                            UserServices().saveData(
+                                                _user,
+                                                'tarjeta',
+                                                _cardController.text);
                                           }
 
                                           if (_mesController.text.isEmpty) {
                                             print('Mes anterior');
                                           } else {
-                                            month(_user,
-                                                mes = _mesController.text);
+                                            UserServices().saveData(_user,
+                                                'mes', _mesController.text);
                                           }
                                           if (_anoController.text.isEmpty) {
                                             print('Año anterior');
                                           } else {
-                                            ano(_user,
-                                                year = _anoController.text);
+                                            UserServices().saveData(_user,
+                                                'año', _anoController.text);
                                           }
                                           if (_nameController.text.isEmpty &&
                                               _emailController.text.isEmpty &&
@@ -447,7 +448,7 @@ class _EditarUserState extends State<EditarUser> {
                                     return InkWell(
                                       onTap: () {
                                         if (_llave.currentState.validate()) {
-                                          primero(
+                                          UserServices().primero(
                                             _user,
                                             nombre = _nameController.text,
                                             correo = _emailController.text,
@@ -518,135 +519,5 @@ class _EditarUserState extends State<EditarUser> {
         ),
       ),
     );
-  }
-
-
-    void saveData(FirebaseUser user, String campo, String valor) {
-    Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection('datos')
-        .document(user.uid)
-        .updateData({
-      '$campo': valor,
-    });
-  }
-
-
-  void name(FirebaseUser user, String nombre) {
-    Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection('datos')
-        .document(user.uid)
-        .updateData({
-      'nombre': nombre,
-    });
-  }
-
-  void email(FirebaseUser user, String correo) {
-    Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection('datos')
-        .document(user.uid)
-        .updateData({
-      'email': correo,
-    });
-  }
-
-  void tele(FirebaseUser user, String telefono) {
-    Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection('datos')
-        .document(user.uid)
-        .updateData({
-      'telefono': telefono,
-    });
-  }
-
-  void direc(FirebaseUser user, String direccion) {
-    Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection('datos')
-        .document(user.uid)
-        .updateData({
-      'direccion': direccion,
-    });
-  }
-
-  void card(FirebaseUser user, String tarjeta) {
-    Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection('datos')
-        .document(user.uid)
-        .updateData({
-      'tarjeta': tarjeta,
-    });
-  }
-
-  void note(FirebaseUser user, String nota) {
-    Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection('datos')
-        .document(user.uid)
-        .updateData({
-      'nota': nota,
-    });
-  }
-
-  void month(FirebaseUser user, String mes) {
-    Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection('datos')
-        .document(user.uid)
-        .updateData({
-      'mes': mes,
-    });
-  }
-
-  void ano(FirebaseUser user, String year) {
-    Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection('datos')
-        .document(user.uid)
-        .updateData({
-      'año': year,
-    });
-  }
-
-  void primero(
-      FirebaseUser user,
-      String nombre,
-      String correo,
-      String telefono,
-      String direccion,
-      String tarjeta,
-      String nota,
-      String mes,
-      String year,
-      bool ocupado) {
-    Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection('datos')
-        .document(user.uid)
-        .setData({
-      'nombre': nombre,
-      'email': correo,
-      'telefono': telefono,
-      'direccion': direccion,
-      'tarjeta': tarjeta,
-      'nota': nota,
-      'mes': mes,
-      'año': year,
-      'ocupado': false,
-    });
   }
 }

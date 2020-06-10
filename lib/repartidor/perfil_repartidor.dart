@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mandadero/Router/strings.dart';
+import 'package:mandadero/screens/editar_wid.dart';
 
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +11,8 @@ class DataRepartidor extends StatefulWidget {
   @override
   _DataRepartidorState createState() => _DataRepartidorState();
 }
+
+int dato;
 
 class _DataRepartidorState extends State<DataRepartidor> {
   @override
@@ -48,10 +52,11 @@ class _DataRepartidorState extends State<DataRepartidor> {
                                 MaterialButton(
                                   onPressed: () {
                                     Navigator.of(context).pop();
-                                      Provider.of<LoginState>(context, listen: false).logout();
-                                      
+                                    Provider.of<LoginState>(context,
+                                            listen: false)
+                                        .logout();
                                   },
-                                  color:   Color(0xff464d77),
+                                  color: Color(0xff464d77),
                                   child: Text(
                                     'Salir',
                                     style: TextStyle(color: Colors.white),
@@ -68,7 +73,10 @@ class _DataRepartidorState extends State<DataRepartidor> {
                                         text: '\n',
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold)),
-                                    TextSpan(text: 'Ya no podrás seguir tus pedidos.',style: TextStyle(color: Colors.grey),),
+                                    TextSpan(
+                                      text: 'Ya no podrás seguir tus pedidos.',
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
                                   ],
                                 ),
                               ));
@@ -96,12 +104,11 @@ class _DataRepartidorState extends State<DataRepartidor> {
                       height: alto * .25,
                       decoration: BoxDecoration(
                         border: Border.all(
-                            color: Color.fromRGBO(70, 77, 119, 0.6), width: 5.0),
+                            color: Color.fromRGBO(70, 77, 119, 0.6),
+                            width: 5.0),
                         boxShadow: [
                           BoxShadow(color: Colors.white10, blurRadius: 25)
                         ],
-
-                                 
                         image: new DecorationImage(
                             image: _user.photoUrl != null
                                 ? NetworkImage("${_user.photoUrl}")
@@ -111,7 +118,7 @@ class _DataRepartidorState extends State<DataRepartidor> {
                       ),
                     ),
                   ),
-                 Text(
+                  Text(
                     "Repartidor",
                     style: TextStyle(
                       fontSize: 19,
@@ -119,28 +126,31 @@ class _DataRepartidorState extends State<DataRepartidor> {
                       fontWeight: FontWeight.normal,
                     ),
                   ),
-                 Text(
+                  Text(
                     "${_user.displayName}",
                     style: TextStyle(
                         fontSize: 25,
                         color: Color(0xff484349),
                         fontWeight: FontWeight.bold),
                   ),
-                  _user.email != null ?  Text(
-                    "${_user.email}",
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Color(0xff484349),
-                    ),
-                  ):Text(''),
-                   _user.phoneNumber != null ?  Text(
-                    "${_user.phoneNumber}",
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Color(0xff484349),
-                    ),
-                  ):Text(''),
-                
+                  _user.email != null
+                      ? Text(
+                          "${_user.email}",
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Color(0xff484349),
+                          ),
+                        )
+                      : Text(''),
+                  _user.phoneNumber != null
+                      ? Text(
+                          "${_user.phoneNumber}",
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Color(0xff484349),
+                          ),
+                        )
+                      : Text(''),
                 ],
               ),
             ),
@@ -207,39 +217,64 @@ class _DataRepartidorState extends State<DataRepartidor> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10.0),
-                            color: Color(0xfff6f9ff),
-                          ),
-                          width: ancho * 0.5,
-                          height: alto * 0.06,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              InkWell(
-                                child: Text(
-                                  'Editar Datos',
-                                  style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.black54,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                onTap: () {
-                                  Navigator.of(context).pushNamed(editarRoute);
-                                },
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditarUser(),
                               ),
-                              SizedBox(
-                                width: 4,
-                              ),
-                              Icon(
-                                Icons.edit,
-                                size: 15,
-                              )
-                            ],
-                          ),
+                            );
+                          },
+                          child: StreamBuilder<QuerySnapshot>(
+                              stream: Firestore.instance
+                                  .collection('repartidores')
+                                  .document(_user.uid)
+                                  .collection('datos')
+                                  .snapshots(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                dato = snapshot.data.documents.length;
+                                switch (snapshot.connectionState) {
+                                  default:
+                                    return Container(
+                                      decoration: BoxDecoration(
+                                          color: dato == 1
+                                              ? Color(0xfff6f9ff)
+                                              : Colors.red,
+                                          //Color(0xfff6f9ff),
+                                          borderRadius:
+                                              BorderRadius.circular(30)),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: <Widget>[
+                                            FaIcon(
+                                              FontAwesomeIcons.edit,
+                                              color: Colors.grey,
+                                            ),
+                                            SizedBox(
+                                              width: 5,
+                                            ),
+                                            Text(
+                                              'Mis Datos',
+                                              style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.black54,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                }
+                              }),
                         ),
-                      ),
+                      )
                     ],
                   ),
                 ),

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:mandadero/Router/strings.dart';
+
 import 'package:mandadero/screens/editar_wid.dart';
 
 import 'package:mandadero/state/loginstate.dart';
@@ -14,6 +14,8 @@ class DataCliente extends StatefulWidget {
 }
 
 class _DataClienteState extends State<DataCliente> {
+  int dato;
+
   @override
   Widget build(BuildContext context) {
     final _user = Provider.of<LoginState>(context, listen: false).currentUser();
@@ -246,34 +248,53 @@ class _DataClienteState extends State<DataCliente> {
                               ),
                             );
                           },
-                          child: Container(
-                            decoration: BoxDecoration(
-                                color: Color(0xfff6f9ff),
-                                borderRadius: BorderRadius.circular(30)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: <Widget>[
-                                  FaIcon(
-                                    FontAwesomeIcons.edit,
-                                    color: Colors.grey,
-                                  ),
-                                  SizedBox(
-                                    width: 5,
-                                  ),
-                                  Text(
-                                    'Mis Datos',
-                                    style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.black54,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                          child: StreamBuilder<QuerySnapshot>(
+                              stream: Firestore.instance
+                                  .collection('users')
+                                  .document(_user.uid)
+                                  .collection('datos')
+                                  .snapshots(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                dato = snapshot.data.documents.length;
+                                switch (snapshot.connectionState) {
+                                  default:
+                                    return Container(
+                                      decoration: BoxDecoration(
+                                          color: dato == 1
+                                              ? Color(0xfff6f9ff)
+                                              : Colors.red,
+                                          //Color(0xfff6f9ff),
+                                          borderRadius:
+                                              BorderRadius.circular(30)),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: <Widget>[
+                                            FaIcon(
+                                              FontAwesomeIcons.edit,
+                                              color: Colors.grey,
+                                            ),
+                                            SizedBox(
+                                              width: 5,
+                                            ),
+                                            Text(
+                                              'Mis Datos',
+                                              style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.black54,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                }
+                              }),
                         ),
                       )
                     ],

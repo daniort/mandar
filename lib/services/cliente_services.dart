@@ -1,13 +1,7 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:mandadero/state/loginstate.dart';
 
 class UserServices {
-
-
   bool newPedidoPagoServicios(String titulo, String cantidad, String ubicacion,
       String datos, FirebaseUser user, String image) {
     int dia = DateTime.now().day;
@@ -15,7 +9,6 @@ class UserServices {
     int ano = DateTime.now().year;
     String horai =
         DateTime.now().hour.toString() + ':' + DateTime.now().minute.toString();
-   
 
     try {
       Firestore.instance.collection('pedidos').document().setData({
@@ -65,5 +58,47 @@ class UserServices {
     }
   }
 
+  void saveData(
+    FirebaseUser user,
+    String campo,
+    String valor,
+  ) {
+    Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection('datos')
+        .document(user.uid)
+        .updateData({
+      '$campo': valor,
+    });
+  }
 
+  void primero(
+      FirebaseUser user,
+      String nombre,
+      String correo,
+      String telefono,
+      String direccion,
+      String tarjeta,
+      String nota,
+      String mes,
+      String year,
+      bool ocupado) {
+    Firestore.instance
+        .collection('users')
+        .document(user.uid)
+        .collection('datos')
+        .document(user.uid)
+        .setData({
+      'nombre': nombre,
+      'email': correo,
+      'telefono': telefono,
+      'direccion': direccion,
+      'tarjeta': tarjeta,
+      'nota': nota,
+      'mes': mes,
+      'año': year,
+      'ocupado': false,
+    });
+  }
 }
