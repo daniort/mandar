@@ -2,6 +2,52 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class UserServices {
+  void saveData(
+    int type_user,
+    FirebaseUser user,
+    String campo,
+    String valor,
+  ) {
+    Firestore.instance
+        .collection(type_user == 1 ? 'users' : 'repartidores')
+        .document(user.uid)
+        .collection('datos')
+        .document(user.uid)
+        .updateData({
+      '$campo': valor,
+    });
+  }
+
+  void primero(
+      int type_user,
+      FirebaseUser user,
+      String nombre,
+      String correo,
+      String telefono,
+      String direccion,
+      String tarjeta,
+      String nota,
+      String mes,
+      String year,
+      bool ocupado) {
+    Firestore.instance
+        .collection(type_user == 1 ? 'users' : 'repartidores')
+        .document(user.uid)
+        .collection('datos')
+        .document(user.uid)
+        .setData({
+      'nombre': nombre,
+      'email': correo,
+      'telefono': telefono,
+      'direccion': direccion,
+      'tarjeta': tarjeta,
+      'nota': nota,
+      'mes': mes,
+      'año': year,
+      'ocupado': false,
+    });
+  }
+
   bool newPedidoPagoServicios(String titulo, String cantidad, String ubicacion,
       String datos, FirebaseUser user, String image) {
     int dia = DateTime.now().day;
@@ -56,49 +102,5 @@ class UserServices {
       print("error al guardar el pedido");
       return false;
     }
-  }
-
-  void saveData(
-    FirebaseUser user,
-    String campo,
-    String valor,
-  ) {
-    Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection('datos')
-        .document(user.uid)
-        .updateData({
-      '$campo': valor,
-    });
-  }
-
-  void primero(
-      FirebaseUser user,
-      String nombre,
-      String correo,
-      String telefono,
-      String direccion,
-      String tarjeta,
-      String nota,
-      String mes,
-      String year,
-      bool ocupado) {
-    Firestore.instance
-        .collection('users')
-        .document(user.uid)
-        .collection('datos')
-        .document(user.uid)
-        .setData({
-      'nombre': nombre,
-      'email': correo,
-      'telefono': telefono,
-      'direccion': direccion,
-      'tarjeta': tarjeta,
-      'nota': nota,
-      'mes': mes,
-      'año': year,
-      'ocupado': false,
-    });
   }
 }

@@ -47,6 +47,8 @@ class _EditarUserState extends State<EditarUser> {
   @override
   Widget build(BuildContext context) {
     final _user = Provider.of<LoginState>(context, listen: false).currentUser();
+    final _type_user =
+        Provider.of<LoginState>(context, listen: false).isType_User();
     final alto = MediaQuery.of(context).size.height;
     final ancho = MediaQuery.of(context).size.width;
     return Scaffold(
@@ -344,15 +346,21 @@ class _EditarUserState extends State<EditarUser> {
                                           if (_nameController.text.isEmpty) {
                                             print('Nombre anterioro');
                                           } else {
-                                            UserServices().saveData(_user,
-                                                'nombre', _nameController.text);
+                                            UserServices().saveData(
+                                                _type_user,
+                                                _user,
+                                                'nombre',
+                                                _nameController.text);
                                           }
 
                                           if (_emailController.text.isEmpty) {
                                             print('Correo anterior');
                                           } else {
-                                            UserServices().saveData(_user,
-                                                'email', _emailController.text);
+                                            UserServices().saveData(
+                                                _type_user,
+                                                _user,
+                                                'email',
+                                                _emailController.text);
                                           }
 
                                           if (_telefonoController
@@ -360,6 +368,7 @@ class _EditarUserState extends State<EditarUser> {
                                             print('Telefono anterior');
                                           } else {
                                             UserServices().saveData(
+                                                _type_user,
                                                 _user,
                                                 'telefono',
                                                 _telefonoController.text);
@@ -370,6 +379,7 @@ class _EditarUserState extends State<EditarUser> {
                                             print('Direccion anterior');
                                           } else {
                                             UserServices().saveData(
+                                                _type_user,
                                                 _user,
                                                 'direccion',
                                                 _direccionController.text);
@@ -378,14 +388,18 @@ class _EditarUserState extends State<EditarUser> {
                                           if (_notaController.text.isEmpty) {
                                             print('Nota anterior');
                                           } else {
-                                            UserServices().saveData(_user,
-                                                'nota', _notaController.text);
+                                            UserServices().saveData(
+                                                _type_user,
+                                                _user,
+                                                'nota',
+                                                _notaController.text);
                                           }
 
                                           if (_cardController.text.isEmpty) {
                                             print('Tarjeta anterior');
                                           } else {
                                             UserServices().saveData(
+                                                _type_user,
                                                 _user,
                                                 'tarjeta',
                                                 _cardController.text);
@@ -394,14 +408,20 @@ class _EditarUserState extends State<EditarUser> {
                                           if (_mesController.text.isEmpty) {
                                             print('Mes anterior');
                                           } else {
-                                            UserServices().saveData(_user,
-                                                'mes', _mesController.text);
+                                            UserServices().saveData(
+                                                _type_user,
+                                                _user,
+                                                'mes',
+                                                _mesController.text);
                                           }
                                           if (_anoController.text.isEmpty) {
                                             print('Año anterior');
                                           } else {
-                                            UserServices().saveData(_user,
-                                                'año', _anoController.text);
+                                            UserServices().saveData(
+                                                _type_user,
+                                                _user,
+                                                'año',
+                                                _anoController.text);
                                           }
                                           if (_nameController.text.isEmpty &&
                                               _emailController.text.isEmpty &&
@@ -449,6 +469,7 @@ class _EditarUserState extends State<EditarUser> {
                                       onTap: () {
                                         if (_llave.currentState.validate()) {
                                           UserServices().primero(
+                                            _type_user,
                                             _user,
                                             nombre = _nameController.text,
                                             correo = _emailController.text,
