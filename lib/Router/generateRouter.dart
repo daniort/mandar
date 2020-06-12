@@ -20,7 +20,10 @@ class Router {
 
       case editarRoute:
         return MaterialPageRoute(builder: (_) => EditarUser());
-        
+
+      case agregarTiendasRoute:
+        return MaterialPageRoute(builder: (_) => EditarUser());
+
       case perfilclienteRoute:
         return MaterialPageRoute(builder: (_) => ProfileCliente());
       case loginRoute:

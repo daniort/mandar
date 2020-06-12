@@ -6,3 +6,4 @@ const String perfilclienteRoute = 'perfilcliente';
 const String homeRoute = 'home';
 const String tomarPedidoRoute = 'tomarPedido';
 const String editarRoute = 'editaruser';
+const String agregarTiendasRoute = 'agregarTiendas';
