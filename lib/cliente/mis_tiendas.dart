@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mandadero/services/cliente_services.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
+import 'Dart:ui' as ui;
 
 class MisTiendas extends StatefulWidget {
   @override
@@ -188,9 +191,23 @@ class BuscarMapa extends StatefulWidget {
 class _BuscarMapaState extends State<BuscarMapa> {
   GoogleMapController mapController;
   TextEditingController _tituloController;
+
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
+  bool _buscadoUbicacion = true;
+  Position _currentPosition;
   String ubicacion;
-  String market;
+  LatLng miMarker;
+  static LatLng _center = new LatLng(19.4284706, -99.1276627);
+
+  final Set<Marker> _markers = {};
+
+  void initState() {
+    _tituloController = TextEditingController();
+    _getCurrentLocation();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final _user = Provider.of<LoginState>(context, listen: false).currentUser();
@@ -233,103 +250,228 @@ class _BuscarMapaState extends State<BuscarMapa> {
             children: <Widget>[
               Expanded(
                 flex: 1,
-                child: GoogleMap(
-                  onMapCreated: onMapCreated,
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(22.7490841, -102.5159751),
-                    zoom: 18.0,
-                  ),
-                ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.only(bottom: 45.0, left: 10, right: 10),
-                child: TextField(
-                  controller: _tituloController,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Nombra esta Dirección',
-                      helperText: 'Ejemplo: Mercado Revolución',
-                      prefixIcon: Icon(Icons.store)),
-                ),
-              ),
-            ],
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: InkWell(
-              onTap: () {
-                return showDialog<void>(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('Guardar Dirección'),
-                        content: SingleChildScrollView(
-                          child: ListBody(
-                            children: <Widget>[
-                              Text(''),
-                            ],
+                child: _buscadoUbicacion
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          backgroundColor: Colors.grey,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Color.fromRGBO(238, 97, 121, 0.7),
                           ),
                         ),
-                        actions: <Widget>[
-                          FlatButton(
-                            child: Text(
-                              'Cancelar',
-                              style: TextStyle(color: Colors.grey),
+                      )
+                    : GoogleMap(
+                        onTap: (val) {
+                          setState(() {
+                            miMarker = val;
+                          });
+                          _updateMarker(val);
+                        },
+                        markers: _markers,
+                        onMapCreated: onMapCreated,
+                        myLocationEnabled: true,
+                        initialCameraPosition: CameraPosition(
+                          target: LatLng(_currentPosition.latitude,
+                              _currentPosition.longitude),
+                          zoom: 18.0,
+                        ),
+                      ),
+              ),
+              _markers.length != 0
+                  ? Container(
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0xff484349),
+                            blurRadius:
+                                20.0, // has the effect of softening the shadow
+                            spreadRadius:
+                                3.0, // has the effect of extending the shadow
+                            offset: Offset(
+                              0.0, // horizontal, move right 10
+                              10.0, // vertical, move down 10
                             ),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
+                          )
+                        ],
+                        color: Color(0xfff6f9ff),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(30.0),
+                          topRight: Radius.circular(30.0),
+                        ),
+                      ),
+                      child: Column(
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Icon(
+                                  Icons.pin_drop,
+                                  color: Colors.grey,
+                                ),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                    'Colegio Militar Ote. 83 Guadaalupe Zacatecas',
+                                    style: TextStyle(color: Colors.grey)),
+                              ],
+                            ),
                           ),
-                          FlatButton(
-                            child: Text('Guardar'),
-                            color: Color(0xffee6179),
-                            onPressed: () async {
-                              bool _eliminar = await guardarDireccion(
-                                  _user.uid, _tituloController.text);
-                              if (_eliminar) {
-                                Navigator.of(context).pop();
-                                _scaffoldKey.currentState.showSnackBar(SnackBar(
-                                  content: Text('Dirección Eliminada '),
-                                  duration: Duration(milliseconds: 1500),
-                                  backgroundColor: Color(0xffee6179),
-                                ));
-                              } else {
-                                Navigator.of(context).pop();
-                                _scaffoldKey.currentState.showSnackBar(SnackBar(
-                                  content: Text(
-                                      'Algo salió mal, Intenta nuevamente'),
-                                  duration: Duration(milliseconds: 2500),
-                                  backgroundColor: Color(0xffee6179),
-                                ));
-                              }
-                            },
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                bottom: 45.0, left: 10, right: 10),
+                            child: TextField(
+                              controller: _tituloController,
+                              decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: 'Nombra esta Dirección',
+                                  helperText: 'Ejemplo: Mercado Revolución',
+                                  prefixIcon: Icon(Icons.store)),
+                            ),
                           ),
                         ],
-                      );
-                    });
-              },
-              child: Container(
-                width: ancho,
-                height: 40.0,
-                color: Color(0xffee6179),
-                child: Center(
-                  child: Text(
-                    'Guardar',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
-            ),
+                      ),
+                    )
+                  : SizedBox(),
+            ],
           ),
+          _tituloController.text.isNotEmpty
+              ? Align(
+                  alignment: Alignment.bottomCenter,
+                  child: InkWell(
+                    onTap: () {
+                      return showDialog<void>(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Guardar Dirección'),
+                              content: SingleChildScrollView(
+                                child: ListBody(
+                                  children: <Widget>[
+                                    Text(
+                                        'Colegio Militar Ote. 83 Guadaalupe Zacatecas',
+                                        style: TextStyle(color: Colors.grey)),
+                                    Text('como:',
+                                        style: TextStyle(
+                                            fontSize: 12, color: Colors.grey)),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Row(
+                                        children: <Widget>[
+                                          Icon(
+                                            Icons.store,
+                                            color: Colors.blueGrey,
+                                          ),
+                                          SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text(
+                                            _tituloController.text
+                                                .toUpperCase(),
+                                            style: TextStyle(
+                                              color: Colors.blueGrey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              actions: <Widget>[
+                                FlatButton(
+                                  child: Text(
+                                    'Cancelar',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                FlatButton(
+                                  child: Text('Guardar'),
+                                  color: Color(0xffee6179),
+                                  onPressed: () async {
+                                    bool _guardado =
+                                        UserServices().guardarNuevaUbicacion(
+                                      _tituloController.text,
+                                      'Colegio Militar Ote. 83',
+                                      _user.uid,
+                                      miMarker.latitude,
+                                      miMarker.longitude,
+                                    );
+
+                                    if (_guardado) {
+                                      Navigator.of(context).pop();
+                                      Navigator.of(context).pop();
+                                    } else {
+                                      Navigator.of(context).pop();
+                                      _scaffoldKey.currentState
+                                          .showSnackBar(SnackBar(
+                                        content: Text(
+                                            'Algo salió mal, Intenta nuevamente'),
+                                        duration: Duration(milliseconds: 2500),
+                                        backgroundColor: Color(0xffee6179),
+                                      ));
+                                    }
+                                  },
+                                ),
+                              ],
+                            );
+                          });
+                    },
+                    child: Container(
+                      width: ancho,
+                      height: 40.0,
+                      color: Color(0xffee6179),
+                      child: Center(
+                        child: Text(
+                          'Guardar',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : SizedBox(),
         ],
       ),
     );
   }
 
+  _getCurrentLocation() {
+    geolocator
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
+        .then((Position position) {
+      setState(() {
+        _currentPosition = position;
+        _buscadoUbicacion = false;
+      });
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+  _getAddressFromLatLng() async {
+    try {
+      List<Placemark> p = await geolocator.placemarkFromCoordinates(
+          _currentPosition.latitude, _currentPosition.longitude);
+
+      Placemark place = p[0];
+
+      // setState(() {
+      // _lati = "${_currentPosition.latitude}";
+      //_longi = "${_currentPosition.longitude}";
+      //});
+    } catch (e) {
+      print(e);
+    }
+  }
+
   buscarDireccion() {
-    if (ubicacion != null) {
+    if (_tituloController.text != null) {
       Geolocator().placemarkFromAddress(ubicacion).then((value) {
         mapController.animateCamera(
           CameraUpdate.newCameraPosition(
@@ -339,8 +481,17 @@ class _BuscarMapaState extends State<BuscarMapa> {
                 zoom: 10.0),
           ),
         );
+        //mapController.showMarkerInfoWindow(markerId);
       });
     }
+  }
+
+  Future<void> _actualizarMarcador() async {
+    double lat = 40.7128;
+    double long = -74.0060;
+    GoogleMapController controller = await mapController;
+    controller.animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, long), 10));
+    setState(() {});
   }
 
   void onMapCreated(GoogleMapController controller) {
@@ -350,6 +501,26 @@ class _BuscarMapaState extends State<BuscarMapa> {
   }
 
   guardarDireccion(uid, String text) {
+    print('guardar ubicacion');
+    print(uid);
+    print(uid);
+    print(uid);
     return true;
+  }
+
+  void _updateMarker(LatLng val) {
+    LatLng _ubi = new LatLng(val.latitude, val.longitude);
+    setState(() {
+      _markers.add(
+        Marker(
+          markerId: MarkerId("tienda"),
+          position: _ubi,
+          infoWindow: InfoWindow(
+            title: 'Aquí',
+            snippet: '¿Quieres guardame?',
+          ),
+        ),
+      );
+    });
   }
 }
