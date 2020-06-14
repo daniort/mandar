@@ -1,9 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:mandadero/Router/strings.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+
+import 'package:mandadero/cliente/mis_tiendas.dart';
+import 'package:mandadero/screens/editar_wid.dart';
 
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 
 class DataCliente extends StatefulWidget {
   @override
@@ -48,10 +53,11 @@ class _DataClienteState extends State<DataCliente> {
                                 MaterialButton(
                                   onPressed: () {
                                     Navigator.of(context).pop();
-                                      Provider.of<LoginState>(context, listen: false).logout();
-                                      
+                                    Provider.of<LoginState>(context,
+                                            listen: false)
+                                        .logout();
                                   },
-                                  color:  Color(0xffee6179),
+                                  color: Color(0xffee6179),
                                   child: Text(
                                     'Salir',
                                     style: TextStyle(color: Colors.white),
@@ -68,7 +74,10 @@ class _DataClienteState extends State<DataCliente> {
                                         text: '\n',
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold)),
-                                    TextSpan(text: 'Ya no podrás seguir tus pedidos.',style: TextStyle(color: Colors.grey),),
+                                    TextSpan(
+                                      text: 'Ya no podrás seguir tus pedidos.',
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
                                   ],
                                 ),
                               ));
@@ -124,13 +133,25 @@ class _DataClienteState extends State<DataCliente> {
                         color: Color(0xff484349),
                         fontWeight: FontWeight.bold),
                   ),
-                  _user.email != null ?  Text(
-                    "${_user.email}",
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Color(0xff484349),
-                    ),
-                  ):Text(''),
+                   RatingBar(
+                                initialRating: 3,
+                                minRating: 1,
+                                direction: Axis.horizontal,
+                                allowHalfRating: true,
+                                itemCount: 5,
+                                itemSize: 25,
+                                ignoreGestures: true,
+                                itemPadding:
+                                    EdgeInsets.symmetric(horizontal: 1.0),
+                                itemBuilder: (context, _) => Icon(
+                                  Icons.star,
+                                  
+                                  color: Colors.amber[200],
+                                ),
+                                onRatingUpdate: (rating) {
+                                  print(rating);
+                                },
+                              ),
                 ],
               ),
             ),
@@ -163,73 +184,89 @@ class _DataClienteState extends State<DataCliente> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
+                     
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10.0),
-                            color: Color(0xfff6f9ff),
-                          ),
-                          width: ancho * 0.5,
-                          height: alto * 0.06,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Icon(
-                                Icons.pin_drop,
-                                size: 17,
-                                color: Color.fromRGBO(20, 20, 20, 0.5),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MisTiendas(),
                               ),
-                              SizedBox(
-                                width: 2.0,
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: Color(0xfff6f9ff),
+                                borderRadius: BorderRadius.circular(30)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  FaIcon(
+                                    FontAwesomeIcons.store,
+                                    color: Colors.grey,
+                                  ),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text(
+                                    'Mis Tiendas',
+                                    style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.black54,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                'Calle Guerrero No. 15',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color.fromRGBO(20, 20, 20, 0.5),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10.0),
-                            color: Color(0xfff6f9ff),
-                          ),
-                          width: ancho * 0.5,
-                          height: alto * 0.06,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              InkWell(
-                                child: Text(
-                                  'Editar Datos',
-                                  style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.black54,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                onTap: () {
-                                  Navigator.of(context).pushNamed(editar);
-                                },
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditarUser(),
                               ),
-                              SizedBox(
-                                width: 4,
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: Color(0xfff6f9ff),
+                                borderRadius: BorderRadius.circular(30)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  FaIcon(
+                                    FontAwesomeIcons.edit,
+                                    color: Colors.grey,
+                                  ),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text(
+                                    'Mis Datos',
+                                    style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.black54,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
                               ),
-                              Icon(
-                                Icons.edit,
-                                size: 15,
-                              )
-                            ],
+                            ),
                           ),
                         ),
-                      ),
+                      )
                     ],
                   ),
                 ),

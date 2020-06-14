@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:mandadero/Router/strings.dart';
 import 'package:mandadero/cliente/nuevo_pedido.dart';
 import 'package:mandadero/cliente/principal_wid.dart';
-import 'package:mandadero/cliente/editar_wid.dart';
 import 'package:mandadero/main.dart';
 import 'package:mandadero/repartidor/tomarPedido.dart';
-
+import 'package:mandadero/screens/editar_wid.dart';
 import 'package:mandadero/screens/login.dart';
-
 import 'package:mandadero/screens/regsitro.dart';
 
 class Router {
@@ -19,8 +17,13 @@ class Router {
         return MaterialPageRoute(builder: (_) => Sign());
       case nuevoPedidoRoute:
         return MaterialPageRoute(builder: (_) => NuevoPedido());
-      case editar:
-        return MaterialPageRoute(builder: (_) => EditarCliente());
+
+      case editarRoute:
+        return MaterialPageRoute(builder: (_) => EditarUser());
+
+      case agregarTiendasRoute:
+        return MaterialPageRoute(builder: (_) => EditarUser());
+
       case perfilclienteRoute:
         return MaterialPageRoute(builder: (_) => ProfileCliente());
       case loginRoute:

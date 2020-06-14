@@ -13,6 +13,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   TextEditingController _emailController;
   TextEditingController _passwordController;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   void initState() {
     _passwordController = TextEditingController();
@@ -25,6 +26,7 @@ class _LoginState extends State<Login> {
     final alto = MediaQuery.of(context).size.height;
     final ancho = MediaQuery.of(context).size.width;
     return Scaffold(
+      key: _scaffoldKey,
       resizeToAvoidBottomPadding: false,
       body: SafeArea(
         child: Stack(
@@ -169,14 +171,13 @@ class _LoginState extends State<Login> {
                                 .socialLogin(2);
                           },
                           child: Container(
-                            decoration: BoxDecoration(
-                                color: Color(0xff3b5998),
-                                borderRadius: BorderRadius.circular(90)),
-                            width: 40,
-                            height: 40,
-                            child: Icon(FontAwesomeIcons.facebookF,
-                                size: 20, color: Color(0xfff6f4f3)),
-                          ),
+                              decoration: BoxDecoration(
+                                  color: Color(0xff3b5998),
+                                  borderRadius: BorderRadius.circular(90)),
+                              width: 40,
+                              height: 40,
+                              child: Icon(FontAwesomeIcons.facebookF,
+                                  size: 20, color: Color(0xfff6f4f3))),
                         ),
                         SizedBox(
                           width: ancho * 0.01,
@@ -233,6 +234,33 @@ class _LoginState extends State<Login> {
                               fontWeight: FontWeight.bold),
                         )),
                       ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Provider.of<LoginState>(context, listen: true)
+                              .isLoading()
+                          ? CircularProgressIndicator()
+                          : SizedBox(),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Provider.of<LoginState>(context, listen: true)
+                              .isError()
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                FaIcon(
+                                  FontAwesomeIcons.exclamationCircle,
+                                  color: Colors.grey,
+                                ),
+                                SizedBox(width: 6,),
+                                Text(
+                                  'Algo pasó,\nintenta nuevamente',
+                                  style: TextStyle(color: Colors.grey, fontSize: 15)
+                                )
+                              ],
+                            )
+                          : SizedBox(),
                     ),
                   ],
                 ),

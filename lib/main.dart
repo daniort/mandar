@@ -6,7 +6,7 @@ import 'package:mandadero/screens/first_page.dart';
 import 'package:mandadero/screens/login.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
-import 'Router/generateRouter.dart';
+
 
 void main() => runApp(MyApp());
 
