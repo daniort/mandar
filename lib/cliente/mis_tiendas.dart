@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -15,8 +17,7 @@ class MisTiendas extends StatefulWidget {
 
 class _MisTiendasState extends State<MisTiendas> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  GoogleMapController mapController;
-  String ubicacion;
+  bool _edit = false;
   @override
   Widget build(BuildContext context) {
     final _user = Provider.of<LoginState>(context, listen: false).currentUser();
@@ -86,76 +87,104 @@ class _MisTiendasState extends State<MisTiendas> {
                         .map((DocumentSnapshot document) {
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: new ListTile(
-                          title: new Text(document['nombre']),
-                          subtitle: new Text(document['direccion']),
-                          trailing: IconButton(
-                              icon: Icon(Icons.delete),
-                              color: Color.fromRGBO(238, 97, 121, 0.7),
-                              onPressed: () {
-                                return showDialog<void>(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: Text('Eliminar Tienda'),
-                                      content: SingleChildScrollView(
-                                        child: ListBody(
-                                          children: <Widget>[
-                                            Text(
-                                                '¿Estas seguro de eliminar este lugar?'),
-                                          ],
-                                        ),
-                                      ),
-                                      actions: <Widget>[
-                                        FlatButton(
-                                          child: Text(
-                                            'Cancelar',
-                                            style:
-                                                TextStyle(color: Colors.grey),
+                        child: Row(
+                          children: <Widget>[
+                            Expanded(
+                              flex: 5,
+                              child: RichText(
+                                text: TextSpan(
+                                  text: document['nombre'],
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.black54),
+                                  children: <TextSpan>[
+                                    TextSpan(
+                                      text: '\n',
+                                    ),
+                                    TextSpan(
+                                      text:
+                                          "${document['calle']}, #${document['numero']}, ${document['localidad']}, ${document['ciudad']}",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 8),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: IconButton(
+                                  icon: Icon(Icons.delete),
+                                  color: Color.fromRGBO(238, 97, 121, 0.7),
+                                  onPressed: () {
+                                    return showDialog<void>(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: Text('Eliminar Tienda'),
+                                          content: SingleChildScrollView(
+                                            child: ListBody(
+                                              children: <Widget>[
+                                                Text(
+                                                    '¿Estas seguro de eliminar este lugar?'),
+                                              ],
+                                            ),
                                           ),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                        ),
-                                        FlatButton(
-                                          child: Text('Eliminar'),
-                                          color: Color(0xffee6179),
-                                          onPressed: () async {
-                                            bool _eliminar =
-                                                await _eliminarPedido(
-                                                    document.documentID,
-                                                    _user.uid);
-                                            if (_eliminar) {
-                                              Navigator.of(context).pop();
-                                              _scaffoldKey.currentState
-                                                  .showSnackBar(SnackBar(
-                                                content: Text(
-                                                    'Dirección Eliminada '),
-                                                duration: Duration(
-                                                    milliseconds: 1500),
-                                                backgroundColor:
-                                                    Color(0xffee6179),
-                                              ));
-                                            } else {
-                                              Navigator.of(context).pop();
-                                              _scaffoldKey.currentState
-                                                  .showSnackBar(SnackBar(
-                                                content: Text(
-                                                    'Algo salió mal, Intenta nuevamente'),
-                                                duration: Duration(
-                                                    milliseconds: 2500),
-                                                backgroundColor:
-                                                    Color(0xffee6179),
-                                              ));
-                                            }
-                                          },
-                                        ),
-                                      ],
+                                          actions: <Widget>[
+                                            FlatButton(
+                                              child: Text(
+                                                'Cancelar',
+                                                style: TextStyle(
+                                                    color: Colors.grey),
+                                              ),
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                            FlatButton(
+                                              child: Text('Eliminar'),
+                                              color: Color(0xffee6179),
+                                              onPressed: () async {
+                                                bool _eliminar =
+                                                    await UserServices()
+                                                        .eliminarPedido(
+                                                            document.documentID,
+                                                            _user.uid);
+                                                if (_eliminar) {
+                                                  Navigator.of(context).pop();
+                                                  _scaffoldKey.currentState
+                                                      .showSnackBar(SnackBar(
+                                                    content: Text(
+                                                        'Dirección Eliminada '),
+                                                    duration: Duration(
+                                                        milliseconds: 1500),
+                                                    backgroundColor:
+                                                        Color(0xffee6179),
+                                                  ));
+                                                } else {
+                                                  Navigator.of(context).pop();
+                                                  _scaffoldKey.currentState
+                                                      .showSnackBar(SnackBar(
+                                                    content: Text(
+                                                        'Algo salió mal, Intenta nuevamente'),
+                                                    duration: Duration(
+                                                        milliseconds: 2500),
+                                                    backgroundColor:
+                                                        Color(0xffee6179),
+                                                  ));
+                                                }
+                                              },
+                                            ),
+                                          ],
+                                        );
+                                      },
                                     );
-                                  },
-                                );
-                              }),
+                                  }),
+                            ),
+                          ],
                         ),
                       );
                     }).toList(),
@@ -166,20 +195,6 @@ class _MisTiendasState extends State<MisTiendas> {
         ),
       ),
     );
-  }
-
-  Future<bool> _eliminarPedido(String documentID, String uid) async {
-    try {
-      Firestore.instance
-          .collection('users')
-          .document(uid)
-          .collection('tiendas')
-          .document(documentID)
-          .delete();
-      return true;
-    } catch (e) {
-      return false;
-    }
   }
 }
 
@@ -196,11 +211,12 @@ class _BuscarMapaState extends State<BuscarMapa> {
   final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
   bool _buscadoUbicacion = true;
   Position _currentPosition;
-  String ubicacion;
+  String ubicacion = ' ';
+  String numero = '0';
   LatLng miMarker;
-  static LatLng _center = new LatLng(19.4284706, -99.1276627);
 
   final Set<Marker> _markers = {};
+  Placemark place;
 
   void initState() {
     _tituloController = TextEditingController();
@@ -224,19 +240,28 @@ class _BuscarMapaState extends State<BuscarMapa> {
             hintText: "Buscar una Dirección",
             border: InputBorder.none,
           ),
-          onChanged: (val) {
+          onSubmitted: (val) {
             setState(() {
               ubicacion = val;
             });
-          },
-          onSubmitted: (val) {
-            buscarDireccion();
           },
         ),
         actions: <Widget>[
           IconButton(
             onPressed: () {
-              buscarDireccion();
+              if (ubicacion.length >= 6) {
+                try {
+                  buscarDireccion();
+                } catch (e) {
+                  print(e);
+                }
+              } else {
+                _scaffoldKey.currentState.showSnackBar(SnackBar(
+                  content: Text('Ingresa algo más'),
+                  duration: Duration(milliseconds: 2500),
+                  backgroundColor: Color(0xffee6179),
+                ));
+              }
             },
             icon: Icon(Icons.search),
           ),
@@ -261,6 +286,7 @@ class _BuscarMapaState extends State<BuscarMapa> {
                       )
                     : GoogleMap(
                         onTap: (val) {
+                          _getAddressFromLatLng(val.latitude, val.longitude);
                           setState(() {
                             miMarker = val;
                           });
@@ -294,8 +320,8 @@ class _BuscarMapaState extends State<BuscarMapa> {
                         ],
                         color: Color(0xfff6f9ff),
                         borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(30.0),
-                          topRight: Radius.circular(30.0),
+                          topLeft: Radius.circular(20.0),
+                          topRight: Radius.circular(20.0),
                         ),
                       ),
                       child: Column(
@@ -312,9 +338,11 @@ class _BuscarMapaState extends State<BuscarMapa> {
                                 SizedBox(
                                   width: 5,
                                 ),
-                                Text(
-                                    'Colegio Militar Ote. 83 Guadaalupe Zacatecas',
-                                    style: TextStyle(color: Colors.grey)),
+                                Flexible(
+                                  child: Text(
+                                      "${place.thoroughfare}, ${place.subThoroughfare}, ${place.subLocality}, ${place.locality}",
+                                      style: TextStyle(color: Colors.grey)),
+                                ),
                               ],
                             ),
                           ),
@@ -351,7 +379,7 @@ class _BuscarMapaState extends State<BuscarMapa> {
                                 child: ListBody(
                                   children: <Widget>[
                                     Text(
-                                        'Colegio Militar Ote. 83 Guadaalupe Zacatecas',
+                                        '${place.thoroughfare}, ${place.subThoroughfare}, ${place.subLocality}, ${place.locality}',
                                         style: TextStyle(color: Colors.grey)),
                                     Text('como:',
                                         style: TextStyle(
@@ -397,7 +425,10 @@ class _BuscarMapaState extends State<BuscarMapa> {
                                     bool _guardado =
                                         UserServices().guardarNuevaUbicacion(
                                       _tituloController.text,
-                                      'Colegio Militar Ote. 83',
+                                      place.thoroughfare,
+                                      place.subThoroughfare,
+                                      place.subLocality,
+                                      place.locality,
                                       _user.uid,
                                       miMarker.latitude,
                                       miMarker.longitude,
@@ -445,44 +476,53 @@ class _BuscarMapaState extends State<BuscarMapa> {
     geolocator
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
         .then((Position position) {
+      print('obteniendo ubicacion');
       setState(() {
         _currentPosition = position;
         _buscadoUbicacion = false;
       });
+      _getAddressFromLatLng(
+          _currentPosition.latitude, _currentPosition.longitude);
     }).catchError((e) {
       print(e);
     });
   }
 
-  _getAddressFromLatLng() async {
+  _getAddressFromLatLng(double latitude, double longitude) async {
     try {
-      List<Placemark> p = await geolocator.placemarkFromCoordinates(
-          _currentPosition.latitude, _currentPosition.longitude);
+      List<Placemark> p =
+          await geolocator.placemarkFromCoordinates(latitude, longitude);
 
-      Placemark place = p[0];
-
-      // setState(() {
-      // _lati = "${_currentPosition.latitude}";
-      //_longi = "${_currentPosition.longitude}";
-      //});
+      setState(() {
+        place = p[0];
+        numero = place.subThoroughfare;
+      });
     } catch (e) {
       print(e);
     }
   }
 
   buscarDireccion() {
-    if (_tituloController.text != null) {
-      Geolocator().placemarkFromAddress(ubicacion).then((value) {
-        mapController.animateCamera(
-          CameraUpdate.newCameraPosition(
-            CameraPosition(
-                target: LatLng(
-                    value[0].position.latitude, value[0].position.longitude),
-                zoom: 10.0),
-          ),
-        );
-        //mapController.showMarkerInfoWindow(markerId);
-      });
+    if (ubicacion.length >= 6) {
+      try {
+        Geolocator().placemarkFromAddress(ubicacion).then((value) {
+          print("error we >777777777777777777777777>>>>>>>>>>>>>>>");
+          mapController.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(
+                  target: LatLng(
+                      value[0].position.latitude, value[0].position.longitude),
+                  zoom: 10.0),
+            ),
+          );
+        }).catchError((onError) {
+          print("error we >>>>>>>>>>>>>>>>");
+          print(onError);
+        });
+      } catch (e) {
+        print("error we >>>>>>>>>>>>>>>>");
+        print(e);
+      }
     }
   }
 
@@ -500,14 +540,6 @@ class _BuscarMapaState extends State<BuscarMapa> {
     });
   }
 
-  guardarDireccion(uid, String text) {
-    print('guardar ubicacion');
-    print(uid);
-    print(uid);
-    print(uid);
-    return true;
-  }
-
   void _updateMarker(LatLng val) {
     LatLng _ubi = new LatLng(val.latitude, val.longitude);
     setState(() {
@@ -517,7 +549,8 @@ class _BuscarMapaState extends State<BuscarMapa> {
           position: _ubi,
           infoWindow: InfoWindow(
             title: 'Aquí',
-            snippet: '¿Quieres guardame?',
+            snippet:
+                '${place.thoroughfare}, ${place.subThoroughfare}, ${place.subLocality}, ${place.locality}',
           ),
         ),
       );

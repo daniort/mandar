@@ -62,8 +62,15 @@ class UserServices {
     }
   }
 
-  bool guardarNuevaUbicacion(String label, String direccion, String uid,
-      double latitude, double longitude) {
+  bool guardarNuevaUbicacion(
+      String label,
+      String calle,
+      String numero,
+      String localidad,
+      String ciudad,
+      String uid,
+      double latitude,
+      double longitude) {
     try {
       Firestore.instance
           .collection('users')
@@ -72,7 +79,10 @@ class UserServices {
           .document()
           .setData({
         "nombre": label.toUpperCase(),
-        "direccion": direccion,
+        "calle": calle,
+        "numero": numero,
+        "localidad": localidad,
+        "ciudad": ciudad,
         "latitud": latitude,
         "longitud": longitude,
       }).then((value) {
@@ -81,6 +91,35 @@ class UserServices {
       return true;
     } catch (e) {
       print("error al guardar el pedido");
+      return false;
+    }
+  }
+
+  Future<bool> eliminarPedido(String documentID, String uid) async {
+    try {
+      Firestore.instance
+          .collection('users')
+          .document(uid)
+          .collection('tiendas')
+          .document(documentID)
+          .delete();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> actualizarNumero(
+      String text, String documentID, String userID) async {
+    try {
+      Firestore.instance
+          .collection('users')
+          .document(userID)
+          .collection('tiendas')
+          .document(documentID)
+          .updateData({'numero': text});
+      return true;
+    } catch (e) {
       return false;
     }
   }
