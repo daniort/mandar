@@ -10,7 +10,6 @@ import 'package:mandadero/state/loginstate.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
-
 class ProfileCliente extends StatefulWidget {
   @override
   ProfileClienteState createState() => ProfileClienteState();
@@ -96,7 +95,15 @@ class ProfileClienteState extends State<ProfileCliente> {
         onPressed: () {
           print('presionaste');
 
-          Navigator.of(context).pushNamed(nuevoPedidoRoute);
+          //Navigator.of(context).pushNamed(nuevoPedidoRoute);
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => NuevoPedido(),
+            ),
+          );
+
           //showModalBottomSheet(
           //  context: context,
           //isScrollControlled: true,
@@ -107,5 +114,4 @@ class ProfileClienteState extends State<ProfileCliente> {
       ),
     );
   }
-
 }

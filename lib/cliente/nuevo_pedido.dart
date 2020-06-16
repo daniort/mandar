@@ -127,7 +127,9 @@ class _NuevoPedidoState extends State<NuevoPedido> {
             ),
             Padding(
               padding: const EdgeInsets.only(top: 100.0),
-              child: _firstForm(context, ancho, alto),
+              child: SingleChildScrollView(
+                child: _firstForm(context, ancho, alto),
+              ),
             ),
             Align(
               alignment: Alignment.bottomCenter,
@@ -232,7 +234,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
         break;
       case 1:
         if (_stados.isTipoPedido() == 1) {
-          return _formServicio();
+          return _formServicio(ancho, alto);
         }
         //if (_stados.isTipo() == 2) {
         //return _formProducto();
@@ -348,7 +350,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     );
   }
 
-  Widget _formServicio() {
+  Widget _formServicio(double ancho, double alto) {
     return Padding(
       padding:
           const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0, bottom: 2.0),
@@ -413,640 +415,659 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: TextFormField(
-                controller: _ubicacionController,
-                keyboardType: TextInputType.text,
-                maxLength: 50,
-                decoration: InputDecoration(
-                  helperText: 'Si lo dejas vacio, el Rapartidor elige.',
-                  labelText: 'Lugar a Pagar',
-                  prefixIcon: Icon(Icons.pin_drop),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    flex: 1,
-                    child: Padding(
-                      padding: const EdgeInsets.all(25.0),
-                      child: Column(
-                        children: <Widget>[
-                          RaisedButton(
-                            splashColor: Color(0xffee6179),
-                            onPressed: () {
-                              print('tomar foto');
-                              try {
-                                _pickImage();
-                              } catch (e) {
-                                print("Error wee $e");
-                              }
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(2.0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        top: 8.0, bottom: 0.0),
-                                    child:
-                                        Icon(Icons.photo, color: Colors.grey),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text('Tomar Foto a Recibo',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(color: Colors.grey)),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Text(
-                              _image == null
-                                  ? 'Si cuentas con uno, seria de gran ayuda.'
-                                  : 'Genial, lo Tenemos',
-                              textAlign: TextAlign.center,
-                              style:
-                                  TextStyle(color: Colors.grey, fontSize: 10.0),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                              color: Color.fromRGBO(20, 20, 20, 0.2),
-                              width: 5.0),
-                        ),
-                        child: _image == null
-                            ? Center(
-                                child: Image.asset(
-                                'lib/assets/error.png',
-                              ))
-                            : Stack(
-                                children: <Widget>[
-                                  Center(
-                                    child: Image.file(
-                                      _image,
-                                    ),
-                                  ),
-                                  Align(
-                                    alignment: Alignment.topRight,
-                                    child: IconButton(
-                                        color: Color(0xffee6179),
-                                        icon: Icon(
-                                          Icons.close,
-                                          color: Colors.white,
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            _image = null;
-                                          });
-                                        }),
-                                  ),
-                                ],
-                              ),
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<String> _subirImagen(File image) async {
-    print('vamos a intrar al try');
-    try {
-      print('dentro del try');
-      setState(() {
-        _uploadTask = _sto.ref().child(filePath).putFile(_image);
-      });
-      // String url = 'null';
-      //var dowurl;
-      var dowurl = await (await _uploadTask.onComplete).ref.getDownloadURL();
-      var url = dowurl.toString();
-      print('acabando de subir la imagen');
-      return url;
-    } catch (e) {
-      return 'null';
-    }
-  }
-
-  Widget _buildItem(String item) {
-    return new ListTile(
-      title: new Text(item.toString()),
-      //subtitle: new Text('Capital: ${item.capital}'),
-      leading: new Icon(Icons.map),
-    );
-  }
-
-  Widget _esperaRepartidor(double ancho, double alto) {
-    return Column(
-      children: <Widget>[
-        Text(
-          '¡Tu Pedido esta registrado!',
-          style: TextStyle(
-              fontSize: 18, color: Colors.grey, fontStyle: FontStyle.italic),
-        ),
-        Image.asset('lib/assets/giphy.gif'),
-        Text(
-          'Buscando Repartidor...',
-          style: TextStyle(fontSize: 20),
-        ),
-      ],
-    );
-  }
-
-  Widget _pagoCard(double ancho, double alto) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 300.0),
-        child: Column(
-          children: <Widget>[
-            Container(
-              width: ancho * .8,
-              child: CreditCardWidget(
-                cardNumber: _cardNumberController.text,
-                expiryDate: _expiryDateController.text,
-                cardHolderName: _cardHolderNameController.text,
-                cvvCode: _cvvCodeController.text,
-                cardBgColor: Color(0xff0a2342),
-                height: alto * .20,
-                textStyle: TextStyle(
-                  color: Color(0xfff7f0f0),
-                ),
-                width: MediaQuery.of(context).size.width,
-                animationDuration: Duration(milliseconds: 1000),
-                showBackView: false,
-                //showBackView: Provider.of<LoginState>(context, listen: true)
-                //.isCVVFocus(), //true when you want to show cvv(back) view
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
-              child: TextField(
-                  onSubmitted: (Provider.of<LoginState>(context, listen: false)
-                      .setCVVState(false)),
-                  controller: _cardNumberController,
-                  keyboardType: TextInputType.number,
-                  maxLength: 16,
-                  decoration: InputDecoration(
-                      labelText: 'Número de Tarjeta',
-                      prefixIcon: Icon(Icons.credit_card))),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
-              child: TextField(
-                  onSubmitted: (Provider.of<LoginState>(context, listen: false)
-                      .setCVVState(false)),
-                  controller: _cardHolderNameController,
-                  keyboardType: TextInputType.text,
-                  maxLength: 40,
-                  decoration: InputDecoration(
-                      labelText: 'Nombre del Titular',
-                      prefixIcon: Icon(Icons.people))),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
-              child: TextField(
-                  expands: false,
-                  onSubmitted: (Provider.of<LoginState>(context, listen: false)
-                      .setCVVState(false)),
-                  controller: _expiryDateController,
-                  keyboardType: TextInputType.number,
-                  maxLength: 5,
-                  decoration: InputDecoration(
-                      labelText: 'Fecha de Expiración',
-                      prefixIcon: Icon(Icons.date_range))),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
-              child: TextField(
-                  expands: false,
-                  onSubmitted: (Provider.of<LoginState>(context, listen: false)
-                      .setCVVState(true)),
-                  controller: _cvvCodeController,
-                  keyboardType: TextInputType.text,
-                  maxLength: 3,
-                  decoration: InputDecoration(
-                      labelText: 'CVV', prefixIcon: Icon(Icons.edit))),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _pagoChoose(double ancho, double alto) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 300.0),
-        child: Column(
-          children: <Widget>[
-            RaisedButton(
-              child: Text("Create Source"),
-              onPressed: () {
-                StripePayment.createSourceWithParams(SourceParams(
-                  type: 'ideal',
-                  amount: 1099,
-                  currency: 'eur',
-                  returnURL: 'example://stripe-redirect',
-                )).then((source) {
-                  print('Received ${source.sourceId}');
-                  //_scaffoldKey.currentState.showSnackBar(
-                  //  SnackBar(content: Text('Received ${source.sourceId}')));
-                  //setState(() {
-                  //_source = source;
-                  //});
-                }).catchError(setError);
-              },
-            ),
-            Divider(),
-            RaisedButton(
-              child: Text("Create Token with Card Form"),
-              onPressed: () {
-                StripePayment.paymentRequestWithCardForm(
-                        CardFormPaymentRequest())
-                    .then((paymentMethod) {
-                  print('Received ${paymentMethod.id}');
-                  //_scaffoldKey.currentState.showSnackBar(
-                  ////  SnackBar(content: Text('Received ${paymentMethod.id}')));
-                  //setState(() {
-                  //                    _paymentMethod = paymentMethod;
-                  //                });
-                }).catchError(setError);
-              },
-            ),
-            RaisedButton(
-              child: Text("Create Token with Card"),
-              onPressed: () {
-                StripePayment.createTokenWithCard(
-                  testCard,
-                ).then((token) {
-                  print('Received ${token.tokenId}');
-                  //_scaffoldKey.currentState.showSnackBar(
-                  //  SnackBar(content: Text('Received ${token.tokenId}')));
-                  //setState(() {
-                  //                    _paymentToken = token;
-                  //                });
-                }).catchError(setError);
-              },
-            ),
-            Divider(),
-            RaisedButton(
-              child: Text("Create Payment Method with Card"),
-              onPressed: () {
-                StripePayment.createPaymentMethod(
-                  PaymentMethodRequest(
-                    card: testCard,
-                  ),
-                ).then((paymentMethod) {
-                  print('Received ${paymentMethod.id}');
-                  //_scaffoldKey.currentState.showSnackBar(
-                  //SnackBar(content: Text('Received ${paymentMethod.id}')));
-                  //setState(() {
-                  //                    _paymentMethod = paymentMethod;
-                  //                });
-                }).catchError(setError);
-              },
-            ),
-            RaisedButton(
-              child: Text("Create Payment Method with existing token"),
-              onPressed: _paymentToken == null
-                  ? null
-                  : () {
-                      StripePayment.createPaymentMethod(
-                        PaymentMethodRequest(
-                          card: CreditCard(
-                            token: _paymentToken.tokenId,
-                          ),
-                        ),
-                      ).then((paymentMethod) {
-                        print('Received ');
-                        //_scaffoldKey.currentState.showSnackBar(SnackBar(
-                        //  content: Text('Received ${paymentMethod.id}')));
-                        //setState(() {
-                        //                          _paymentMethod = paymentMethod;
-                        //});
-                      }).catchError(setError);
-                    },
-            ),
-            Divider(),
-            RaisedButton(
-              child: Text("Confirm Payment Intent"),
-              onPressed: _paymentMethod == null || _currentSecret == null
-                  ? null
-                  : () {
-                      StripePayment.confirmPaymentIntent(
-                        PaymentIntent(
-                          clientSecret: _currentSecret,
-                          paymentMethodId: _paymentMethod.id,
-                        ),
-                      ).then((paymentIntent) {
-                        print('Received ');
-                        //_scaffoldKey.currentState.showSnackBar(SnackBar(
-                        //content: Text(
-                        //'Received ${paymentIntent.paymentIntentId}')));
-                        //setState(() {
-                        //                          _paymentIntent = paymentIntent;
-                        //                      });
-                      }).catchError(setError);
-                    },
-            ),
-            RaisedButton(
-              child: Text("Authenticate Payment Intent"),
-              onPressed: _currentSecret == null
-                  ? null
-                  : () {
-                      StripePayment.authenticatePaymentIntent(
-                              clientSecret: _currentSecret)
-                          .then((paymentIntent) {
-                        //_scaffoldKey.currentState.showSnackBar(SnackBar(
-                        //content: Text(
-                        //  'Received ${paymentIntent.paymentIntentId}')));
-                        //setState(() {
-                        //                          _paymentIntent = paymentIntent;
-                        //                      });
-                      }).catchError(setError);
-                    },
-            ),
-            RaisedButton(
-              child: Text("Native payment"),
-              onPressed: () {
-                StripePayment.paymentRequestWithNativePay(
-                  androidPayOptions: AndroidPayPaymentRequest(
-                    totalPrice: "1.20",
-                    currencyCode: "EUR",
-                  ),
-                  applePayOptions: ApplePayPaymentOptions(
-                    countryCode: 'DE',
-                    currencyCode: 'EUR',
-                    items: [
-                      ApplePayItem(
-                        label: 'Test',
-                        amount: '13',
-                      )
-                    ],
-                  ),
-                ).then((token) {
-                  setState(() {
-                    //_scaffoldKey.currentState.showSnackBar(
-                    //  SnackBar(content: Text('Received ${token.tokenId}')));
-                    //_paymentToken = token;
-                  });
-                }).catchError(setError);
-              },
-            ),
-            RaisedButton(
-              child: Text("Complete Native Payment"),
-              onPressed: () {
-                StripePayment.completeNativePayRequest().then((_) {
-                  //_scaffoldKey.currentState.showSnackBar(
-                  //  SnackBar(content: Text('Completed successfully')));
-                }).catchError(setError);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  payViaNewCard() async {
-    //ProgressDialog dialog = new ProgressDialog(context);
-    //dialog.style(message: 'Please wait...');
-    //await dialog.show();
-
-    var response =
-        await StripeService.payWithNewCard(amount: '15000', currency: 'USD');
-    //await dialog.hide();
-    //Scaffold.of(context).showSnackBar(SnackBar(
-
-    //content: Text(response.message),
-    //duration:
-    //  new Duration(milliseconds: response.success == true ? 1200 : 3000),
-    //));
-  }
-
-  setError() {
-    print('set error dice');
-  }
-
-  Widget _modalTicket(double alto, double ancho) {
-    return Container(
-      //height: alto * 0.35,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(40.0),
-          topRight: Radius.circular(40.0),
-        ),
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            ListTile(
-              leading: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                      onTap: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Icon(Icons.arrow_back_ios, color: Colors.grey))),
-              title: Text("Mi Ticket", style: TextStyle(color: Colors.grey)),
-            ),
-            Divider(),
-            Row(
-              //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                Expanded(
-                  flex: 5,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              "Cantidad a Pagar:   ",
-                              style:
-                                  TextStyle(fontSize: 16.0, color: Colors.grey),
-                            ),
-                            Icon(
-                              Icons.attach_money,
-                              size: 15,
-                              color: Colors.grey,
-                            )
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              "Costo Servicio:   ",
-                              style:
-                                  TextStyle(fontSize: 16.0, color: Colors.grey),
-                            ),
-                            Icon(
-                              Icons.attach_money,
-                              size: 15,
-                              color: Colors.grey,
-                            )
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              "Total:   ",
-                              style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey),
-                            ),
-                            Icon(
-                              Icons.attach_money,
-                              size: 15,
-                              color: Colors.grey,
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(_cantidadController.value.text),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text("20"),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text("520"),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[],
-                  ),
-                ),
-              ],
-            ),
-            Divider(),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  OutlineButton(
-                    splashColor: Colors.red[300],
-                    textColor: Colors.red[300],
-                    onPressed: () {
-                      print('ticket cancelado');
-                      Navigator.of(context).pop();
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 30.0, right: 30.0),
-                      child: Text('Cancelar'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(right: 10.0, left: 10.0),
+                      child: Icon(Icons.pin_drop, color: Colors.grey),
                     ),
-                  ),
-                  OutlineButton(
-                    onPressed: () async {
-                      final _user =
-                          Provider.of<LoginState>(context, listen: false)
-                              .currentUser();
-                      var _urlim = await _subirImagen(_image);
-
-                      var _pedidoregistrado = UserServices()
-                          .newPedidoPagoServicios(
-                              _tituloController.text,
-                              _cantidadController.text,
-                              _ubicacionController.text,
-                              _datosController.text,
-                              _user,
-                              _urlim);
-
-                      if (_pedidoregistrado) {
-                        Navigator.of(context).pop();
-                        Provider.of<LoginState>(context, listen: false)
-                            .plusStep();
-                      } else {
-                        Navigator.of(context).pop();
-                        _scaffoldKey.currentState.showSnackBar(SnackBar(
-                          content: Text('Algo Pasó, Intentalo de Nuevo'),
-                          backgroundColor: Color(0xffee6179),
-                          duration: Duration(milliseconds: 3000),
-                        ));
-                        //_scaffoldKey.currentState.showSnackBar(SnackBar(
-                        //content: Text('Algo Pasó, Intentalo de Nuevo'),
-                        //duration: Duration(milliseconds: 3000),
-                        //backgroundColor: Color(0xffee6179)//Color(0xff464d77),
-                        //));
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 30.0, right: 30.0),
-                      child: Text('Confirmar'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _cleanDataPedido() {
-    _tituloController.clear();
-    _datosController.clear();
-    _cantidadController.clear();
-    _ubicacionController.clear();
-    Provider.of<LoginState>(context, listen: false).setStepPedido(0);
-  }
+                    Text('Lugar a Pagar:',
+                        style: TextStyle(color: Colors.grey)),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    MaterialButton(
+                      color: Colors.grey[300],
+                      onPressed: () {
+                        print('ubicacion guardada');
+                         showModalBottomSheet(
+                        elevation: alto * 0.8,
+                        backgroundColor: Color.fromRGBO(0, 0, 0, 0),
+                        //shape:
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (context) {
+                          return _elegirUbicacion();
+                                                  });
+                                                },
+                                                child: Text('Ubicacion Guardada',
+                                                    style: TextStyle(color: Colors.grey[600])),
+                                                disabledColor: Colors.grey[300],
+                                              ),
+                                              MaterialButton(
+                                                onPressed: null,
+                                                disabledColor: Colors.grey[300],
+                                                child: Text("Ubicacion Nueva",
+                                                    style: TextStyle(color: Colors.grey[600])),
+                                              )
+                                            ],
+                                          ),
+                                          Divider(
+                                            color: Colors.grey,
+                                          ),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: <Widget>[
+                                              Expanded(
+                                                flex: 1,
+                                                child: Row(
+                                                  children: <Widget>[
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(right: 10.0, left: 10.0),
+                                                      child: Icon(Icons.pin_drop, color: Colors.grey),
+                                                    ),
+                                                    Text(
+                                                      'Foto Recibo:',
+                                                      style: TextStyle(color: Colors.grey),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 1,
+                                                child: MaterialButton(
+                                                  onPressed: () {
+                                                    print('tomar foto');
+                                                    try {
+                                                      _pickImage();
+                                                    } catch (e) {
+                                                      print("Error wee $e");
+                                                    }
+                                                  },
+                                                  disabledColor: Colors.grey[300],
+                                                  color: Colors.grey[300],
+                                                  child: Flexible(
+                                                      child: Text('Abrir Camara',
+                                                          style: TextStyle(color: Colors.grey))),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[300],
+                                              ),
+                                              child: _image == null
+                                                  ? SizedBox()
+                                                  : Stack(
+                                                      children: <Widget>[
+                                                        Center(
+                                                          child: Image.file(
+                                                            _image,
+                                                            width: 70,
+                                                          ),
+                                                        ),
+                                                        Align(
+                                                          alignment: Alignment.topRight,
+                                                          child: IconButton(
+                                                              color: Color(0xffee6179),
+                                                              icon: Icon(
+                                                                Icons.close,
+                                                                color: Colors.white,
+                                                              ),
+                                                              onPressed: () {
+                                                                setState(() {
+                                                                  _image = null;
+                                                                });
+                                                              }),
+                                                        ),
+                                                      ],
+                                                    ),
+                                            ),
+                                          ),
+                                          Text(
+                                            _image == null
+                                                ? 'Si cuentas con uno, seria de gran ayuda.'
+                                                : 'Genial, lo Tenemos',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(color: Colors.grey, fontSize: 10.0),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+                          
+                            Future<String> _subirImagen(File image) async {
+                              print('vamos a intrar al try');
+                              try {
+                                print('dentro del try');
+                                setState(() {
+                                  _uploadTask = _sto.ref().child(filePath).putFile(_image);
+                                });
+                                // String url = 'null';
+                                //var dowurl;
+                                var dowurl = await (await _uploadTask.onComplete).ref.getDownloadURL();
+                                var url = dowurl.toString();
+                                print('acabando de subir la imagen');
+                                return url;
+                              } catch (e) {
+                                return 'null';
+                              }
+                            }
+                          
+                            Widget _buildItem(String item) {
+                              return new ListTile(
+                                title: new Text(item.toString()),
+                                //subtitle: new Text('Capital: ${item.capital}'),
+                                leading: new Icon(Icons.map),
+                              );
+                            }
+                          
+                            Widget _esperaRepartidor(double ancho, double alto) {
+                              return Column(
+                                children: <Widget>[
+                                  Text(
+                                    '¡Tu Pedido esta registrado!',
+                                    style: TextStyle(
+                                        fontSize: 18, color: Colors.grey, fontStyle: FontStyle.italic),
+                                  ),
+                                  Image.asset('lib/assets/giphy.gif'),
+                                  Text(
+                                    'Buscando Repartidor...',
+                                    style: TextStyle(fontSize: 20),
+                                  ),
+                                ],
+                              );
+                            }
+                          
+                            Widget _pagoCard(double ancho, double alto) {
+                              return SingleChildScrollView(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 300.0),
+                                  child: Column(
+                                    children: <Widget>[
+                                      Container(
+                                        width: ancho * .8,
+                                        child: CreditCardWidget(
+                                          cardNumber: _cardNumberController.text,
+                                          expiryDate: _expiryDateController.text,
+                                          cardHolderName: _cardHolderNameController.text,
+                                          cvvCode: _cvvCodeController.text,
+                                          cardBgColor: Color(0xff0a2342),
+                                          height: alto * .20,
+                                          textStyle: TextStyle(
+                                            color: Color(0xfff7f0f0),
+                                          ),
+                                          width: MediaQuery.of(context).size.width,
+                                          animationDuration: Duration(milliseconds: 1000),
+                                          showBackView: false,
+                                          //showBackView: Provider.of<LoginState>(context, listen: true)
+                                          //.isCVVFocus(), //true when you want to show cvv(back) view
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
+                                        child: TextField(
+                                            onSubmitted: (Provider.of<LoginState>(context, listen: false)
+                                                .setCVVState(false)),
+                                            controller: _cardNumberController,
+                                            keyboardType: TextInputType.number,
+                                            maxLength: 16,
+                                            decoration: InputDecoration(
+                                                labelText: 'Número de Tarjeta',
+                                                prefixIcon: Icon(Icons.credit_card))),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
+                                        child: TextField(
+                                            onSubmitted: (Provider.of<LoginState>(context, listen: false)
+                                                .setCVVState(false)),
+                                            controller: _cardHolderNameController,
+                                            keyboardType: TextInputType.text,
+                                            maxLength: 40,
+                                            decoration: InputDecoration(
+                                                labelText: 'Nombre del Titular',
+                                                prefixIcon: Icon(Icons.people))),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
+                                        child: TextField(
+                                            expands: false,
+                                            onSubmitted: (Provider.of<LoginState>(context, listen: false)
+                                                .setCVVState(false)),
+                                            controller: _expiryDateController,
+                                            keyboardType: TextInputType.number,
+                                            maxLength: 5,
+                                            decoration: InputDecoration(
+                                                labelText: 'Fecha de Expiración',
+                                                prefixIcon: Icon(Icons.date_range))),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
+                                        child: TextField(
+                                            expands: false,
+                                            onSubmitted: (Provider.of<LoginState>(context, listen: false)
+                                                .setCVVState(true)),
+                                            controller: _cvvCodeController,
+                                            keyboardType: TextInputType.text,
+                                            maxLength: 3,
+                                            decoration: InputDecoration(
+                                                labelText: 'CVV', prefixIcon: Icon(Icons.edit))),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+                          
+                            Widget _pagoChoose(double ancho, double alto) {
+                              return SingleChildScrollView(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 300.0),
+                                  child: Column(
+                                    children: <Widget>[
+                                      RaisedButton(
+                                        child: Text("Create Source"),
+                                        onPressed: () {
+                                          StripePayment.createSourceWithParams(SourceParams(
+                                            type: 'ideal',
+                                            amount: 1099,
+                                            currency: 'eur',
+                                            returnURL: 'example://stripe-redirect',
+                                          )).then((source) {
+                                            print('Received ${source.sourceId}');
+                                            //_scaffoldKey.currentState.showSnackBar(
+                                            //  SnackBar(content: Text('Received ${source.sourceId}')));
+                                            //setState(() {
+                                            //_source = source;
+                                            //});
+                                          }).catchError(setError);
+                                        },
+                                      ),
+                                      Divider(),
+                                      RaisedButton(
+                                        child: Text("Create Token with Card Form"),
+                                        onPressed: () {
+                                          StripePayment.paymentRequestWithCardForm(
+                                                  CardFormPaymentRequest())
+                                              .then((paymentMethod) {
+                                            print('Received ${paymentMethod.id}');
+                                            //_scaffoldKey.currentState.showSnackBar(
+                                            ////  SnackBar(content: Text('Received ${paymentMethod.id}')));
+                                            //setState(() {
+                                            //                    _paymentMethod = paymentMethod;
+                                            //                });
+                                          }).catchError(setError);
+                                        },
+                                      ),
+                                      RaisedButton(
+                                        child: Text("Create Token with Card"),
+                                        onPressed: () {
+                                          StripePayment.createTokenWithCard(
+                                            testCard,
+                                          ).then((token) {
+                                            print('Received ${token.tokenId}');
+                                            //_scaffoldKey.currentState.showSnackBar(
+                                            //  SnackBar(content: Text('Received ${token.tokenId}')));
+                                            //setState(() {
+                                            //                    _paymentToken = token;
+                                            //                });
+                                          }).catchError(setError);
+                                        },
+                                      ),
+                                      Divider(),
+                                      RaisedButton(
+                                        child: Text("Create Payment Method with Card"),
+                                        onPressed: () {
+                                          StripePayment.createPaymentMethod(
+                                            PaymentMethodRequest(
+                                              card: testCard,
+                                            ),
+                                          ).then((paymentMethod) {
+                                            print('Received ${paymentMethod.id}');
+                                            //_scaffoldKey.currentState.showSnackBar(
+                                            //SnackBar(content: Text('Received ${paymentMethod.id}')));
+                                            //setState(() {
+                                            //                    _paymentMethod = paymentMethod;
+                                            //                });
+                                          }).catchError(setError);
+                                        },
+                                      ),
+                                      RaisedButton(
+                                        child: Text("Create Payment Method with existing token"),
+                                        onPressed: _paymentToken == null
+                                            ? null
+                                            : () {
+                                                StripePayment.createPaymentMethod(
+                                                  PaymentMethodRequest(
+                                                    card: CreditCard(
+                                                      token: _paymentToken.tokenId,
+                                                    ),
+                                                  ),
+                                                ).then((paymentMethod) {
+                                                  print('Received ');
+                                                  //_scaffoldKey.currentState.showSnackBar(SnackBar(
+                                                  //  content: Text('Received ${paymentMethod.id}')));
+                                                  //setState(() {
+                                                  //                          _paymentMethod = paymentMethod;
+                                                  //});
+                                                }).catchError(setError);
+                                              },
+                                      ),
+                                      Divider(),
+                                      RaisedButton(
+                                        child: Text("Confirm Payment Intent"),
+                                        onPressed: _paymentMethod == null || _currentSecret == null
+                                            ? null
+                                            : () {
+                                                StripePayment.confirmPaymentIntent(
+                                                  PaymentIntent(
+                                                    clientSecret: _currentSecret,
+                                                    paymentMethodId: _paymentMethod.id,
+                                                  ),
+                                                ).then((paymentIntent) {
+                                                  print('Received ');
+                                                  //_scaffoldKey.currentState.showSnackBar(SnackBar(
+                                                  //content: Text(
+                                                  //'Received ${paymentIntent.paymentIntentId}')));
+                                                  //setState(() {
+                                                  //                          _paymentIntent = paymentIntent;
+                                                  //                      });
+                                                }).catchError(setError);
+                                              },
+                                      ),
+                                      RaisedButton(
+                                        child: Text("Authenticate Payment Intent"),
+                                        onPressed: _currentSecret == null
+                                            ? null
+                                            : () {
+                                                StripePayment.authenticatePaymentIntent(
+                                                        clientSecret: _currentSecret)
+                                                    .then((paymentIntent) {
+                                                  //_scaffoldKey.currentState.showSnackBar(SnackBar(
+                                                  //content: Text(
+                                                  //  'Received ${paymentIntent.paymentIntentId}')));
+                                                  //setState(() {
+                                                  //                          _paymentIntent = paymentIntent;
+                                                  //                      });
+                                                }).catchError(setError);
+                                              },
+                                      ),
+                                      RaisedButton(
+                                        child: Text("Native payment"),
+                                        onPressed: () {
+                                          StripePayment.paymentRequestWithNativePay(
+                                            androidPayOptions: AndroidPayPaymentRequest(
+                                              totalPrice: "1.20",
+                                              currencyCode: "EUR",
+                                            ),
+                                            applePayOptions: ApplePayPaymentOptions(
+                                              countryCode: 'DE',
+                                              currencyCode: 'EUR',
+                                              items: [
+                                                ApplePayItem(
+                                                  label: 'Test',
+                                                  amount: '13',
+                                                )
+                                              ],
+                                            ),
+                                          ).then((token) {
+                                            setState(() {
+                                              //_scaffoldKey.currentState.showSnackBar(
+                                              //  SnackBar(content: Text('Received ${token.tokenId}')));
+                                              //_paymentToken = token;
+                                            });
+                                          }).catchError(setError);
+                                        },
+                                      ),
+                                      RaisedButton(
+                                        child: Text("Complete Native Payment"),
+                                        onPressed: () {
+                                          StripePayment.completeNativePayRequest().then((_) {
+                                            //_scaffoldKey.currentState.showSnackBar(
+                                            //  SnackBar(content: Text('Completed successfully')));
+                                          }).catchError(setError);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+                          
+                            payViaNewCard() async {
+                              //ProgressDialog dialog = new ProgressDialog(context);
+                              //dialog.style(message: 'Please wait...');
+                              //await dialog.show();
+                          
+                              var response =
+                                  await StripeService.payWithNewCard(amount: '15000', currency: 'USD');
+                              //await dialog.hide();
+                              //Scaffold.of(context).showSnackBar(SnackBar(
+                          
+                              //content: Text(response.message),
+                              //duration:
+                              //  new Duration(milliseconds: response.success == true ? 1200 : 3000),
+                              //));
+                            }
+                          
+                            setError() {
+                              print('set error dice');
+                            }
+                          
+                            Widget _modalTicket(double alto, double ancho) {
+                              return Container(
+                                //height: alto * 0.35,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(40.0),
+                                    topRight: Radius.circular(40.0),
+                                  ),
+                                ),
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      ListTile(
+                                        leading: Material(
+                                            color: Colors.transparent,
+                                            child: InkWell(
+                                                onTap: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: Icon(Icons.arrow_back_ios, color: Colors.grey))),
+                                        title: Text("Mi Ticket", style: TextStyle(color: Colors.grey)),
+                                      ),
+                                      Divider(),
+                                      Row(
+                                        //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: <Widget>[
+                                          Expanded(
+                                            flex: 5,
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.end,
+                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                              children: <Widget>[
+                                                Padding(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  child: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.end,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: <Widget>[
+                                                      Text(
+                                                        "Cantidad a Pagar:   ",
+                                                        style:
+                                                            TextStyle(fontSize: 16.0, color: Colors.grey),
+                                                      ),
+                                                      Icon(
+                                                        Icons.attach_money,
+                                                        size: 15,
+                                                        color: Colors.grey,
+                                                      )
+                                                    ],
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  child: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.end,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: <Widget>[
+                                                      Text(
+                                                        "Costo Servicio:   ",
+                                                        style:
+                                                            TextStyle(fontSize: 16.0, color: Colors.grey),
+                                                      ),
+                                                      Icon(
+                                                        Icons.attach_money,
+                                                        size: 15,
+                                                        color: Colors.grey,
+                                                      )
+                                                    ],
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  child: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.end,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: <Widget>[
+                                                      Text(
+                                                        "Total:   ",
+                                                        style: TextStyle(
+                                                            fontSize: 16.0,
+                                                            fontWeight: FontWeight.bold,
+                                                            color: Colors.grey),
+                                                      ),
+                                                      Icon(
+                                                        Icons.attach_money,
+                                                        size: 15,
+                                                        color: Colors.grey,
+                                                      )
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 1,
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.end,
+                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                              children: <Widget>[
+                                                Padding(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  child: Text(_cantidadController.value.text),
+                                                ),
+                                                Padding(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  child: Text("20"),
+                                                ),
+                                                Padding(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  child: Text("520"),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 1,
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.end,
+                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                              children: <Widget>[],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Divider(),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                          children: <Widget>[
+                                            OutlineButton(
+                                              splashColor: Colors.red[300],
+                                              textColor: Colors.red[300],
+                                              onPressed: () {
+                                                print('ticket cancelado');
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(left: 30.0, right: 30.0),
+                                                child: Text('Cancelar'),
+                                              ),
+                                            ),
+                                            OutlineButton(
+                                              onPressed: () async {
+                                                final _user =
+                                                    Provider.of<LoginState>(context, listen: false)
+                                                        .currentUser();
+                                                var _urlim = await _subirImagen(_image);
+                          
+                                                var _pedidoregistrado = UserServices()
+                                                    .newPedidoPagoServicios(
+                                                        _tituloController.text,
+                                                        _cantidadController.text,
+                                                        _ubicacionController.text,
+                                                        _datosController.text,
+                                                        _user,
+                                                        _urlim);
+                          
+                                                if (_pedidoregistrado) {
+                                                  Navigator.of(context).pop();
+                                                  Provider.of<LoginState>(context, listen: false)
+                                                      .plusStep();
+                                                } else {
+                                                  Navigator.of(context).pop();
+                                                  _scaffoldKey.currentState.showSnackBar(SnackBar(
+                                                    content: Text('Algo Pasó, Intentalo de Nuevo'),
+                                                    backgroundColor: Color(0xffee6179),
+                                                    duration: Duration(milliseconds: 3000),
+                                                  ));
+                                                  //_scaffoldKey.currentState.showSnackBar(SnackBar(
+                                                  //content: Text('Algo Pasó, Intentalo de Nuevo'),
+                                                  //duration: Duration(milliseconds: 3000),
+                                                  //backgroundColor: Color(0xffee6179)//Color(0xff464d77),
+                                                  //));
+                                                }
+                                              },
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(left: 30.0, right: 30.0),
+                                                child: Text('Confirmar'),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+                          
+                            void _cleanDataPedido() {
+                              _tituloController.clear();
+                              _datosController.clear();
+                              _cantidadController.clear();
+                              _ubicacionController.clear();
+                              Provider.of<LoginState>(context, listen: false).setStepPedido(0);
+                            }
+                          
+                            Widget _elegirUbicacion() {
+                              return Container();
+                            }
 }
