@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:mandadero/services/cliente_services.dart';
@@ -15,6 +16,7 @@ class LoginState with ChangeNotifier {
   final _facebookLogin = FacebookLogin();
   FirebaseUser _user;
   SharedPreferences _prefs;
+
   isStepPedido() => _stepPedido;
   isTipoPedido() => _tipoPedido;
   isStorage() => storage;
@@ -251,6 +253,33 @@ class LoginState with ChangeNotifier {
 
   void setStepPedido(int i) {
     _stepPedido = 0;
+    notifyListeners();
+  }
+
+  bool isdireccion() => _haydirecion;
+  String isdireccionCompelto() => direccion1;
+  double isdirecionlati() => lati1;
+  double isdireccionlongi() => longi1;
+
+  void limpiarUbicacion() {
+    direccion1 = " ";
+    lati1 = 0;
+    longi1 = 0;
+    _haydirecion = false;
+    notifyListeners();
+  }
+
+  String direccion1;
+  double lati1;
+  double longi1;
+  bool _haydirecion = false;
+
+  void setUbicacionNueva(String direccion, double lati, double longi) {
+    print('hola');
+    direccion1 = direccion;
+    lati1 = lati;
+    longi1 = longi;
+    _haydirecion = true;
     notifyListeners();
   }
 }

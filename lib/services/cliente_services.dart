@@ -7,7 +7,7 @@ import 'package:mandadero/state/loginstate.dart';
 
 class UserServices {
   bool newPedidoPagoServicios(String titulo, String cantidad, String ubicacion,
-      String datos, FirebaseUser user, String image) {
+      String datos, FirebaseUser user, String image, double lati, double longi) {
     int dia = DateTime.now().day;
     int mes = DateTime.now().month;
     int ano = DateTime.now().year;
@@ -30,6 +30,8 @@ class UserServices {
         "year": ano,
         "horai": horai,
         "horaf": "",
+        "latitud": lati,
+        "longitud": longi,
         "urlrecibocliente": image,
         "urlreciborepartidor": "null",
         "fin_repartidor": false,
