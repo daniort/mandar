@@ -6,6 +6,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:mandadero/state/loginstate.dart';
 
 class UserServices {
+
+  bool newPedidoProductos(List orderLines, int subtotal, int totalPedido, FirebaseUser user) {
+    return false;
+  }
+
   bool newPedidoPagoServicios(String titulo, String cantidad, String ubicacion,
       String datos, FirebaseUser user, String image, double lati, double longi) {
     int dia = DateTime.now().day;
@@ -125,4 +130,6 @@ class UserServices {
       return false;
     }
   }
+
+  
 }

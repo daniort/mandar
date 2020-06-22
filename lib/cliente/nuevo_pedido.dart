@@ -22,6 +22,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
   TextEditingController _datosController;
   TextEditingController _cantidadController;
   TextEditingController _ubicacionController;
+  int subtotal = 0;
   File _image;
   List orderLines = <Map>[];
   final ImagePicker picker = ImagePicker();
@@ -142,16 +143,32 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                       onTap: () {
                         switch (_state.isStepPedido()) {
                           case 1:
-                            if (_formPedidoKey.currentState.validate()) {
-                              print('valido, amonos');
-                              showModalBottomSheet(
-                                  elevation: alto * 0.35,
-                                  backgroundColor: Color.fromRGBO(0, 0, 0, 0.1),
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return _modalTicket(alto, ancho);
-                                  });
+                            if (_state.isTipoPedido() == 1) {
+                              if (_formPedidoKey.currentState.validate()) {
+                                print('valido, amonos');
+                                showModalBottomSheet(
+                                    elevation: alto * 0.35,
+                                    backgroundColor:
+                                        Color.fromRGBO(0, 0, 0, 0.1),
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return _modalTicket(alto, ancho, 12);
+                                    });
+                              }
+                            } else if (_state.isTipoPedido() == 2) {
+                              if (orderLines.isNotEmpty) {
+                                showModalBottomSheet(
+                                    elevation: alto * 0.35,
+                                    backgroundColor:
+                                        Color.fromRGBO(0, 0, 0, 0.1),
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return _modalTicket(
+                                          alto, ancho, subtotal);
+                                    });
+                              }
                             }
+
                             break;
                           case 2:
                             _cleanDataPedido();
@@ -339,59 +356,52 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                               Expanded(
                                   flex: 1,
                                   child: Padding(
-                                    padding: const EdgeInsets.only(right: 15.0),
-                                    child: Text(
-                                      "${item['cantidad'].toString()}",
-                                      textAlign: TextAlign.right,
-                                    ),
-                                  )),
+                                      padding:
+                                          const EdgeInsets.only(right: 15.0),
+                                      child: Text(
+                                          "${item['cantidad'].toString()}",
+                                          textAlign: TextAlign.right))),
                               Expanded(
                                   flex: 1,
                                   child: InkWell(
-                                    onTap: () {
-                                      print(item);
-                                      //setState(() {
-//                                        orderLines.remove(item);
-                                      //                                    });
-                                      return showDialog<void>(
-                                        context: context,
-                                        barrierDismissible: false,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            title: Text(
-                                                'Eliminar: ${item['nombre'].toString().toUpperCase()}'),
-                                            actions: <Widget>[
-                                              FlatButton(
-                                                child: Text(
-                                                  'Cancelar',
-                                                  style: TextStyle(
-                                                      color: Colors.grey),
+                                      onTap: () {
+                                        return showDialog<void>(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Text(
+                                                  'Eliminar: ${item['nombre'].toString().toUpperCase()}'),
+                                              actions: <Widget>[
+                                                FlatButton(
+                                                  child: Text(
+                                                    'Cancelar',
+                                                    style: TextStyle(
+                                                        color: Colors.grey),
+                                                  ),
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
                                                 ),
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                },
-                                              ),
-                                              FlatButton(
-                                                child: Text('Eliminar'),
-                                                color: Color(0xffee6179),
-                                                onPressed: () async {
-                                                  setState(() {
-                                                    orderLines.remove(item);
-                                                  });
-                                                  Navigator.of(context).pop();
-                                                },
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                    },
-                                    child: Icon(
-                                      Icons.cancel,
-                                      color: Color.fromRGBO(238, 97, 121, 0.7),
-                                      size: 20,
-                                    ),
-                                  )),
+                                                FlatButton(
+                                                  child: Text('Eliminar'),
+                                                  color: Color(0xffee6179),
+                                                  onPressed: () async {
+                                                    setState(() {
+                                                      orderLines.remove(item);
+                                                    });
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
+                                      child: Icon(Icons.cancel,
+                                          color:
+                                              Color.fromRGBO(238, 97, 121, 0.7),
+                                          size: 20))),
                             ],
                           ),
                         ),
@@ -408,9 +418,9 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.end,
                                       children: <Widget>[
-                                        _pieTabla("Envío:   \$"),
-                                        _pieTabla("Comisión:   \$"),
-                                        Text("Total:  \$",
+                                        //_pieTabla("Envío:   \$"),
+                                        //_pieTabla("Comisión:   \$"),
+                                        Text("SubTotal:  \$",
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold)),
                                       ],
@@ -425,12 +435,12 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.end,
                                         children: <Widget>[
-                                          _pieTabla("25"),
-                                          _pieTabla("5"),
-                                          Text("240",
+                                          //_pieTabla("25"),
+                                          //_pieTabla("5"),
+                                          Text(_pieSubtotal().toString(),
                                               textAlign: TextAlign.right,
                                               style: TextStyle(
-                                                  fontWeight: FontWeight.bold)),
+                                                  fontWeight: FontWeight.bold))
                                         ],
                                       ),
                                     ),
@@ -487,7 +497,6 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                               showModalBottomSheet(
                                   elevation: alto * 0.8,
                                   backgroundColor: Color.fromRGBO(250, 0, 0, 1),
-                                  //shape:
                                   context: context,
                                   isScrollControlled: true,
                                   builder: (context) {
@@ -953,15 +962,11 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     final FirebaseStorage _sto = LoginState().isStorage();
     String filePath = "recibos_clientes/${DateTime.now()}.png";
     try {
-      print('dentro del try');
       setState(() {
         _uploadTask = _sto.ref().child(filePath).putFile(_image);
       });
-      // String url = 'null';
-      //var dowurl;
       var dowurl = await (await _uploadTask.onComplete).ref.getDownloadURL();
       var url = dowurl.toString();
-      print('acabando de subir la imagen');
       return url;
     } catch (e) {
       return 'null';
@@ -971,7 +976,6 @@ class _NuevoPedidoState extends State<NuevoPedido> {
   Widget _buildItem(String item) {
     return new ListTile(
       title: new Text(item.toString()),
-      //subtitle: new Text('Capital: ${item.capital}'),
       leading: new Icon(Icons.map),
     );
   }
@@ -993,14 +997,13 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     );
   }
 
-  Widget _modalTicket(double alto, double ancho) {
+  Widget _modalTicket(double alto, double ancho, int subtotal) {
     return Container(
-      //height: alto * 0.35,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(40.0),
-          topRight: Radius.circular(40.0),
+          topLeft: Radius.circular(20.0),
+          topRight: Radius.circular(20.0),
         ),
       ),
       child: SingleChildScrollView(
@@ -1018,103 +1021,52 @@ class _NuevoPedidoState extends State<NuevoPedido> {
             ),
             Divider(),
             Row(
-              //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 Expanded(
-                  flex: 5,
+                  flex: 2,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              "Cantidad a Pagar:   ",
-                              style:
-                                  TextStyle(fontSize: 16.0, color: Colors.grey),
-                            ),
-                            Icon(
-                              Icons.attach_money,
-                              size: 15,
-                              color: Colors.grey,
-                            )
-                          ],
-                        ),
+                        padding: const EdgeInsets.all(4.0),
+                        child: _pieTabla("Subtotal:    \$"),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              "Costo Servicio:   ",
-                              style:
-                                  TextStyle(fontSize: 16.0, color: Colors.grey),
-                            ),
-                            Icon(
-                              Icons.attach_money,
-                              size: 15,
-                              color: Colors.grey,
-                            )
-                          ],
-                        ),
+                        padding: const EdgeInsets.all(4.0),
+                        child: _pieTabla("Costo Servicio:    \$"),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              "Total:   ",
-                              style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey),
-                            ),
-                            Icon(
-                              Icons.attach_money,
-                              size: 15,
-                              color: Colors.grey,
-                            )
-                          ],
-                        ),
-                      ),
+                        padding: const EdgeInsets.all(4.0),
+                        child: Text("Total:    \$",
+                            textAlign: TextAlign.right,
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      )
                     ],
                   ),
                 ),
                 Expanded(
                   flex: 1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(_cantidadController.value.text),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text("20"),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text("520"),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[],
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 60),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: _pieTabla(subtotal.toString()),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: _pieTabla("25"),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(_totalPedido(subtotal).toString(),
+                              textAlign: TextAlign.right,
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -1129,7 +1081,6 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                     splashColor: Colors.red[300],
                     textColor: Colors.red[300],
                     onPressed: () {
-                      print('ticket cancelado');
                       Navigator.of(context).pop();
                     },
                     child: Padding(
@@ -1143,18 +1094,12 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                           Provider.of<LoginState>(context, listen: false);
                       final _user = _stados.currentUser();
 
-                      var _urlim = await _subirImagen(_image);
-
-                      var _pedidoregistrado = UserServices()
-                          .newPedidoPagoServicios(
-                              _tituloController.text,
-                              _cantidadController.text,
-                              _ubicacionController.text,
-                              _datosController.text,
-                              _user,
-                              _urlim,
-                              _stados.lati1,
-                              _stados.longi1);
+                      var _pedidoregistrado = UserServices().newPedidoProductos(
+                        orderLines,
+                        subtotal,
+                        _totalPedido(subtotal),
+                        _user,
+                      );
 
                       if (_pedidoregistrado) {
                         Navigator.of(context).pop();
@@ -1165,7 +1110,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                         _scaffoldKey.currentState.showSnackBar(SnackBar(
                           content: Text('Algo Pasó, Intentalo de Nuevo'),
                           backgroundColor: Color(0xffee6179),
-                          duration: Duration(milliseconds: 3000),
+                          duration: Duration(milliseconds: 2000),
                         ));
                       }
                     },
@@ -1295,5 +1240,22 @@ class _NuevoPedidoState extends State<NuevoPedido> {
       s,
       style: TextStyle(fontSize: 14, color: Colors.grey),
     );
+  }
+
+  int _pieSubtotal() {
+    int _sub = 0;
+    for (var item in orderLines) {
+      setState(() {
+        _sub = _sub + item['cantidad'];
+      });
+    }
+    setState(() {
+      subtotal = _sub;
+    });
+    return subtotal;
+  }
+
+  int _totalPedido(int subtotal) {
+    return subtotal + 25;
   }
 }
