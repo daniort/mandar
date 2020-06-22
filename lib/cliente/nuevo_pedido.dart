@@ -1,22 +1,16 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_credit_card/flutter_credit_card.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mandadero/cliente/nueva_ubi.dart';
 import 'package:mandadero/services/cliente_services.dart';
-import 'package:mandadero/services/payment-service.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
-import 'package:stripe_payment/stripe_payment.dart';
 
 class NuevoPedido extends StatefulWidget {
   @override
@@ -24,65 +18,22 @@ class NuevoPedido extends StatefulWidget {
 }
 
 class _NuevoPedidoState extends State<NuevoPedido> {
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
   TextEditingController _tituloController;
   TextEditingController _datosController;
   TextEditingController _cantidadController;
   TextEditingController _ubicacionController;
-
-  TextEditingController _cardNumberController;
-  TextEditingController _cardHolderNameController;
-  TextEditingController _cvvCodeController;
-  TextEditingController _expiryDateController;
-
-  bool dir_elegida = false;
-  String direccion = "";
-  double longitud;
-  double latitud;
-
-  Token _paymentToken;
-  PaymentMethod _paymentMethod;
-
-  final String _currentSecret = null; //set this yourself, e.g using curl
-
-  final CreditCard testCard = CreditCard(
-    number: '4000002760003184',
-    expMonth: 12,
-    expYear: 21,
-  );
-  final _formPedidoKey = GlobalKey<FormState>();
-  String filePath = "recibos_clientes/${DateTime.now()}.png";
-  StorageUploadTask _uploadTask;
-  final ImagePicker picker = ImagePicker();
   File _image;
-  final FirebaseStorage _sto = LoginState().isStorage();
-
+  List orderLines = <Map>[];
+  final ImagePicker picker = ImagePicker();
+  final _formPedidoKey = GlobalKey<FormState>();
+  final _formPedidoProductoKey = GlobalKey<FormState>();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   void initState() {
     _tituloController = TextEditingController();
     _datosController = TextEditingController();
     _cantidadController = TextEditingController();
     _ubicacionController = TextEditingController();
-
-    _expiryDateController = TextEditingController();
-    _cardNumberController = TextEditingController();
-    _cardHolderNameController = TextEditingController();
-    _cvvCodeController = TextEditingController();
     super.initState();
-    StripePayment.setOptions(StripeOptions(
-        publishableKey: "pk_test_aSaULNS8cJU6Tvo20VAXy6rp",
-        merchantId: "Test",
-        androidPayMode: 'test'));
-  }
-
-  Future _pickImage() async {
-    try {
-      final select = await picker.getImage(source: ImageSource.camera);
-      setState(() {
-        _image = File(select.path);
-      });
-    } catch (e) {
-      print('Error: $e');
-    }
   }
 
   @override
@@ -248,9 +199,9 @@ class _NuevoPedidoState extends State<NuevoPedido> {
         if (_stados.isTipoPedido() == 1) {
           return _formServicio(ancho, alto, currentUser, context);
         }
-        //if (_stados.isTipo() == 2) {
-        //return _formProducto();
-        //}
+        if (_stados.isTipoPedido() == 2) {
+          return _formProducto(ancho, alto, currentUser, context);
+        }
         break;
       case 2:
         print('Paso ${_stados.isStepPedido()}');
@@ -258,10 +209,408 @@ class _NuevoPedidoState extends State<NuevoPedido> {
         break;
       case 3:
         print('Paso ${_stados.isStepPedido()}');
-        return _pagoChoose(ancho, alto);
+        //return _pagoChoose(ancho, alto);
         break;
       default:
     }
+  }
+
+  Widget _formProducto(double ancho, double alto, FirebaseUser currentUser,
+      BuildContext context) {
+    final _stados = Provider.of<LoginState>(context, listen: true);
+    return Padding(
+      padding:
+          const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0, bottom: 2.0),
+      child: Form(
+        key: _formPedidoProductoKey,
+        child: Column(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: TextFormField(
+                controller: _tituloController,
+                keyboardType: TextInputType.text,
+                maxLength: 50,
+                decoration: InputDecoration(
+                  labelText: 'Descrpción/Nombre del Producto',
+                  helperText: "Ejemplo: Tortillas",
+                  prefixIcon: Icon(Icons.shopping_cart),
+                  //errorText: _validate ? 'Value Can\'t Be Empty' : null,
+                ),
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return '¿Que Compra haremos?';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Expanded(
+                    child: TextFormField(
+                      controller: _cantidadController,
+                      decoration: InputDecoration(
+                          helperText: "En Pesos",
+                          prefixIcon: Icon(Icons.attach_money),
+                          labelText: '10'),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        BlacklistingTextInputFormatter(RegExp("[a-z,A-Z]")),
+                      ],
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return '¿Cuanto compraremos?';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: MaterialButton(
+                      padding: EdgeInsets.only(left: 10, right: 10),
+                      color: Colors.grey[300],
+                      onPressed: () {
+                        if (_formPedidoProductoKey.currentState.validate()) {
+                          print('correct');
+                          var _producto = {
+                            "nombre": _tituloController.text,
+                            "cantidad": int.parse(_cantidadController.text),
+                          };
+                          setState(() {
+                            orderLines.add(_producto);
+                            print('cor');
+                          });
+                          _tituloController.clear();
+                          _cantidadController.clear();
+                        } else {
+                          print('incorrect');
+                        }
+                        print(orderLines);
+                      },
+                      child: Text('Agregar a la lista',
+                          style: TextStyle(color: Colors.grey[600])),
+                      disabledColor: Colors.grey[300],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Divider(
+              color: Colors.grey,
+            ),
+            Padding(
+              padding:
+                  const EdgeInsets.only(right: 8, left: 8, bottom: 15, top: 1),
+              child: Container(
+                color: Colors.grey[200],
+                height: alto * 0.2,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                        padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
+                        color: Colors.grey[300],
+                        child: Row(
+                          children: <Widget>[
+                            Expanded(flex: 3, child: _tituloTabla("Productos")),
+                            Expanded(flex: 2, child: _tituloTabla("Cantidad")),
+                            Expanded(flex: 1, child: _tituloTabla("-"))
+                          ],
+                        ),
+                      ),
+                      for (var item in orderLines)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0, bottom: 2),
+                          child: Row(
+                            children: <Widget>[
+                              Expanded(
+                                  flex: 4,
+                                  child: Text(
+                                      item['nombre'].toString().toUpperCase())),
+                              Expanded(flex: 1, child: _tituloTabla("\$")),
+                              Expanded(
+                                  flex: 1,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 15.0),
+                                    child: Text(
+                                      "${item['cantidad'].toString()}",
+                                      textAlign: TextAlign.right,
+                                    ),
+                                  )),
+                              Expanded(
+                                  flex: 1,
+                                  child: InkWell(
+                                    onTap: () {
+                                      print(item);
+                                      //setState(() {
+//                                        orderLines.remove(item);
+                                      //                                    });
+                                      return showDialog<void>(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text(
+                                                'Eliminar: ${item['nombre'].toString().toUpperCase()}'),
+                                            actions: <Widget>[
+                                              FlatButton(
+                                                child: Text(
+                                                  'Cancelar',
+                                                  style: TextStyle(
+                                                      color: Colors.grey),
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                              FlatButton(
+                                                child: Text('Eliminar'),
+                                                color: Color(0xffee6179),
+                                                onPressed: () async {
+                                                  setState(() {
+                                                    orderLines.remove(item);
+                                                  });
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                    child: Icon(
+                                      Icons.cancel,
+                                      color: Color.fromRGBO(238, 97, 121, 0.7),
+                                      size: 20,
+                                    ),
+                                  )),
+                            ],
+                          ),
+                        ),
+                      orderLines.isNotEmpty
+                          ? Padding(
+                              padding:
+                                  const EdgeInsets.only(top: 10, bottom: 4),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: <Widget>[
+                                  Expanded(
+                                    flex: 2,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: <Widget>[
+                                        _pieTabla("Envío:   \$"),
+                                        _pieTabla("Comisión:   \$"),
+                                        Text("Total:  \$",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 60.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: <Widget>[
+                                          _pieTabla("25"),
+                                          _pieTabla("5"),
+                                          Text("240",
+                                              textAlign: TextAlign.right,
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold)),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : SizedBox(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(right: 10.0, left: 10.0),
+                          child: Icon(Icons.pin_drop, color: Colors.grey),
+                        ),
+                        Text('Lugar de Compra:',
+                            style: TextStyle(color: Colors.grey)),
+                      ],
+                    ),
+                    _stados.isdireccion()
+                        ? Padding(
+                            padding:
+                                const EdgeInsets.only(right: 10.0, left: 10.0),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.cancel,
+                                color: Colors.grey,
+                              ),
+                              onPressed: () {
+                                _stados.limpiarUbicacion();
+                              },
+                            ))
+                        : SizedBox(),
+                  ],
+                ),
+                !_stados.isdireccion()
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[
+                          MaterialButton(
+                            color: Colors.grey[300],
+                            onPressed: () {
+                              showModalBottomSheet(
+                                  elevation: alto * 0.8,
+                                  backgroundColor: Color.fromRGBO(250, 0, 0, 1),
+                                  //shape:
+                                  context: context,
+                                  isScrollControlled: true,
+                                  builder: (context) {
+                                    return _elegirUbicacion(
+                                        context, currentUser.uid, alto);
+                                  });
+                            },
+                            child: Text('Ubicacion Guardada',
+                                style: TextStyle(color: Colors.grey[600])),
+                            disabledColor: Colors.grey[300],
+                          ),
+                          MaterialButton(
+                            color: Colors.grey[300],
+                            onPressed: () {
+                              print('ubicacion ueva');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => NuevaUbicacion(),
+                                ),
+                              );
+                            },
+                            disabledColor: Colors.grey[300],
+                            child: Text("Ubicacion Nueva",
+                                style: TextStyle(color: Colors.grey[600])),
+                          )
+                        ],
+                      )
+                    : Center(
+                        child: Padding(
+                        padding: const EdgeInsets.only(top: 8.0, bottom: 1.0),
+                        child: Text(_stados.direccion1,
+                            style: TextStyle(color: Colors.grey)),
+                      )),
+              ],
+            ),
+            Divider(
+              color: Colors.grey,
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(right: 10.0, left: 10.0),
+                          child: Icon(Icons.pin_drop, color: Colors.grey),
+                        ),
+                        Text('Lugar de Entrega:',
+                            style: TextStyle(color: Colors.grey)),
+                      ],
+                    ),
+                    _stados.isdireccion()
+                        ? Padding(
+                            padding:
+                                const EdgeInsets.only(right: 10.0, left: 10.0),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.cancel,
+                                color: Colors.grey,
+                              ),
+                              onPressed: () {
+                                _stados.limpiarUbicacion();
+                              },
+                            ))
+                        : SizedBox(),
+                  ],
+                ),
+                !_stados.isdireccion()
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[
+                          MaterialButton(
+                            color: Colors.grey[300],
+                            onPressed: () {
+                              showModalBottomSheet(
+                                  elevation: alto * 0.8,
+                                  backgroundColor: Color.fromRGBO(250, 0, 0, 1),
+                                  //shape:
+                                  context: context,
+                                  isScrollControlled: true,
+                                  builder: (context) {
+                                    return _elegirUbicacion(
+                                        context, currentUser.uid, alto);
+                                  });
+                            },
+                            child: Text('Ubicacion Guardada',
+                                style: TextStyle(color: Colors.grey[600])),
+                            disabledColor: Colors.grey[300],
+                          ),
+                          MaterialButton(
+                            color: Colors.grey[300],
+                            onPressed: () {
+                              print('ubicacion ueva');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => NuevaUbicacion(),
+                                ),
+                              );
+                            },
+                            disabledColor: Colors.grey[300],
+                            child: Text("Ubicacion Nueva",
+                                style: TextStyle(color: Colors.grey[600])),
+                          )
+                        ],
+                      )
+                    : Center(
+                        child: Padding(
+                        padding: const EdgeInsets.only(top: 8.0, bottom: 1.0),
+                        child: Text(_stados.direccion1,
+                            style: TextStyle(color: Colors.grey)),
+                      )),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _tipoChoose(double ancho, double alto) {
@@ -318,10 +667,9 @@ class _NuevoPedidoState extends State<NuevoPedido> {
           child: InkWell(
             onTap: () {
               setState(() {
-                //print(DateTime.now().month);
-                print(DateTime.now().minute);
-                //Provider.of<LoginState>(context, listen: false).setTipo(2);
-                //Provider.of<LoginState>(context, listen: false).setStep(1);
+                Provider.of<LoginState>(context, listen: false)
+                    .setTipoPedido(2);
+                Provider.of<LoginState>(context, listen: false).plusStep();
               });
             },
             child: Container(
@@ -600,7 +948,10 @@ class _NuevoPedidoState extends State<NuevoPedido> {
   }
 
   Future<String> _subirImagen(File image) async {
-    print('vamos a intrar al try');
+    StorageUploadTask _uploadTask;
+
+    final FirebaseStorage _sto = LoginState().isStorage();
+    String filePath = "recibos_clientes/${DateTime.now()}.png";
     try {
       print('dentro del try');
       setState(() {
@@ -640,281 +991,6 @@ class _NuevoPedidoState extends State<NuevoPedido> {
         ),
       ],
     );
-  }
-
-  Widget _pagoCard(double ancho, double alto) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 300.0),
-        child: Column(
-          children: <Widget>[
-            Container(
-              width: ancho * .8,
-              child: CreditCardWidget(
-                cardNumber: _cardNumberController.text,
-                expiryDate: _expiryDateController.text,
-                cardHolderName: _cardHolderNameController.text,
-                cvvCode: _cvvCodeController.text,
-                cardBgColor: Color(0xff0a2342),
-                height: alto * .20,
-                textStyle: TextStyle(
-                  color: Color(0xfff7f0f0),
-                ),
-                width: MediaQuery.of(context).size.width,
-                animationDuration: Duration(milliseconds: 1000),
-                showBackView: false,
-                //showBackView: Provider.of<LoginState>(context, listen: true)
-                //.isCVVFocus(), //true when you want to show cvv(back) view
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
-              child: TextField(
-                  onSubmitted: (Provider.of<LoginState>(context, listen: false)
-                      .setCVVState(false)),
-                  controller: _cardNumberController,
-                  keyboardType: TextInputType.number,
-                  maxLength: 16,
-                  decoration: InputDecoration(
-                      labelText: 'Número de Tarjeta',
-                      prefixIcon: Icon(Icons.credit_card))),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
-              child: TextField(
-                  onSubmitted: (Provider.of<LoginState>(context, listen: false)
-                      .setCVVState(false)),
-                  controller: _cardHolderNameController,
-                  keyboardType: TextInputType.text,
-                  maxLength: 40,
-                  decoration: InputDecoration(
-                      labelText: 'Nombre del Titular',
-                      prefixIcon: Icon(Icons.people))),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
-              child: TextField(
-                  expands: false,
-                  onSubmitted: (Provider.of<LoginState>(context, listen: false)
-                      .setCVVState(false)),
-                  controller: _expiryDateController,
-                  keyboardType: TextInputType.number,
-                  maxLength: 5,
-                  decoration: InputDecoration(
-                      labelText: 'Fecha de Expiración',
-                      prefixIcon: Icon(Icons.date_range))),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0),
-              child: TextField(
-                  expands: false,
-                  onSubmitted: (Provider.of<LoginState>(context, listen: false)
-                      .setCVVState(true)),
-                  controller: _cvvCodeController,
-                  keyboardType: TextInputType.text,
-                  maxLength: 3,
-                  decoration: InputDecoration(
-                      labelText: 'CVV', prefixIcon: Icon(Icons.edit))),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _pagoChoose(double ancho, double alto) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 300.0),
-        child: Column(
-          children: <Widget>[
-            RaisedButton(
-              child: Text("Create Source"),
-              onPressed: () {
-                StripePayment.createSourceWithParams(SourceParams(
-                  type: 'ideal',
-                  amount: 1099,
-                  currency: 'eur',
-                  returnURL: 'example://stripe-redirect',
-                )).then((source) {
-                  print('Received ${source.sourceId}');
-                  //_scaffoldKey.currentState.showSnackBar(
-                  //  SnackBar(content: Text('Received ${source.sourceId}')));
-                  //setState(() {
-                  //_source = source;
-                  //});
-                }).catchError(setError);
-              },
-            ),
-            Divider(),
-            RaisedButton(
-              child: Text("Create Token with Card Form"),
-              onPressed: () {
-                StripePayment.paymentRequestWithCardForm(
-                        CardFormPaymentRequest())
-                    .then((paymentMethod) {
-                  print('Received ${paymentMethod.id}');
-                  //_scaffoldKey.currentState.showSnackBar(
-                  ////  SnackBar(content: Text('Received ${paymentMethod.id}')));
-                  //setState(() {
-                  //                    _paymentMethod = paymentMethod;
-                  //                });
-                }).catchError(setError);
-              },
-            ),
-            RaisedButton(
-              child: Text("Create Token with Card"),
-              onPressed: () {
-                StripePayment.createTokenWithCard(
-                  testCard,
-                ).then((token) {
-                  print('Received ${token.tokenId}');
-                  //_scaffoldKey.currentState.showSnackBar(
-                  //  SnackBar(content: Text('Received ${token.tokenId}')));
-                  //setState(() {
-                  //                    _paymentToken = token;
-                  //                });
-                }).catchError(setError);
-              },
-            ),
-            Divider(),
-            RaisedButton(
-              child: Text("Create Payment Method with Card"),
-              onPressed: () {
-                StripePayment.createPaymentMethod(
-                  PaymentMethodRequest(
-                    card: testCard,
-                  ),
-                ).then((paymentMethod) {
-                  print('Received ${paymentMethod.id}');
-                  //_scaffoldKey.currentState.showSnackBar(
-                  //SnackBar(content: Text('Received ${paymentMethod.id}')));
-                  //setState(() {
-                  //                    _paymentMethod = paymentMethod;
-                  //                });
-                }).catchError(setError);
-              },
-            ),
-            RaisedButton(
-              child: Text("Create Payment Method with existing token"),
-              onPressed: _paymentToken == null
-                  ? null
-                  : () {
-                      StripePayment.createPaymentMethod(
-                        PaymentMethodRequest(
-                          card: CreditCard(
-                            token: _paymentToken.tokenId,
-                          ),
-                        ),
-                      ).then((paymentMethod) {
-                        print('Received ');
-                        //_scaffoldKey.currentState.showSnackBar(SnackBar(
-                        //  content: Text('Received ${paymentMethod.id}')));
-                        //setState(() {
-                        //                          _paymentMethod = paymentMethod;
-                        //});
-                      }).catchError(setError);
-                    },
-            ),
-            Divider(),
-            RaisedButton(
-              child: Text("Confirm Payment Intent"),
-              onPressed: _paymentMethod == null || _currentSecret == null
-                  ? null
-                  : () {
-                      StripePayment.confirmPaymentIntent(
-                        PaymentIntent(
-                          clientSecret: _currentSecret,
-                          paymentMethodId: _paymentMethod.id,
-                        ),
-                      ).then((paymentIntent) {
-                        print('Received ');
-                        //_scaffoldKey.currentState.showSnackBar(SnackBar(
-                        //content: Text(
-                        //'Received ${paymentIntent.paymentIntentId}')));
-                        //setState(() {
-                        //                          _paymentIntent = paymentIntent;
-                        //                      });
-                      }).catchError(setError);
-                    },
-            ),
-            RaisedButton(
-              child: Text("Authenticate Payment Intent"),
-              onPressed: _currentSecret == null
-                  ? null
-                  : () {
-                      StripePayment.authenticatePaymentIntent(
-                              clientSecret: _currentSecret)
-                          .then((paymentIntent) {
-                        //_scaffoldKey.currentState.showSnackBar(SnackBar(
-                        //content: Text(
-                        //  'Received ${paymentIntent.paymentIntentId}')));
-                        //setState(() {
-                        //                          _paymentIntent = paymentIntent;
-                        //                      });
-                      }).catchError(setError);
-                    },
-            ),
-            RaisedButton(
-              child: Text("Native payment"),
-              onPressed: () {
-                StripePayment.paymentRequestWithNativePay(
-                  androidPayOptions: AndroidPayPaymentRequest(
-                    totalPrice: "1.20",
-                    currencyCode: "EUR",
-                  ),
-                  applePayOptions: ApplePayPaymentOptions(
-                    countryCode: 'DE',
-                    currencyCode: 'EUR',
-                    items: [
-                      ApplePayItem(
-                        label: 'Test',
-                        amount: '13',
-                      )
-                    ],
-                  ),
-                ).then((token) {
-                  setState(() {
-                    //_scaffoldKey.currentState.showSnackBar(
-                    //  SnackBar(content: Text('Received ${token.tokenId}')));
-                    //_paymentToken = token;
-                  });
-                }).catchError(setError);
-              },
-            ),
-            RaisedButton(
-              child: Text("Complete Native Payment"),
-              onPressed: () {
-                StripePayment.completeNativePayRequest().then((_) {
-                  //_scaffoldKey.currentState.showSnackBar(
-                  //  SnackBar(content: Text('Completed successfully')));
-                }).catchError(setError);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  payViaNewCard() async {
-    //ProgressDialog dialog = new ProgressDialog(context);
-    //dialog.style(message: 'Please wait...');
-    //await dialog.show();
-
-    var response =
-        await StripeService.payWithNewCard(amount: '15000', currency: 'USD');
-    //await dialog.hide();
-    //Scaffold.of(context).showSnackBar(SnackBar(
-
-    //content: Text(response.message),
-    //duration:
-    //  new Duration(milliseconds: response.success == true ? 1200 : 3000),
-    //));
-  }
-
-  setError() {
-    print('set error dice');
   }
 
   Widget _modalTicket(double alto, double ancho) {
@@ -1180,6 +1256,44 @@ class _NuevoPedidoState extends State<NuevoPedido> {
           }
         },
       ),
+    );
+  }
+
+  Future _pickImage() async {
+    try {
+      final select = await picker.getImage(source: ImageSource.camera);
+      setState(() {
+        _image = File(select.path);
+      });
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  Widget _listaNombres() {
+    if (orderLines.isNotEmpty) {
+      for (var item in orderLines) {
+        print(item['nombre']);
+        return Text(item['nombre']);
+      }
+    } else {
+      return Text("Lista Vacia");
+    }
+  }
+
+  Widget _tituloTabla(String s) {
+    return Center(
+      child: Text(
+        s,
+        style: TextStyle(fontSize: 13, color: Colors.grey),
+      ),
+    );
+  }
+
+  Widget _pieTabla(String s) {
+    return Text(
+      s,
+      style: TextStyle(fontSize: 14, color: Colors.grey),
     );
   }
 }
