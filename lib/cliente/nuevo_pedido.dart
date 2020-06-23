@@ -517,7 +517,8 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => NuevaUbicacion('a'),
+                                  builder: (context) =>
+                                      NuevaUbicacion(data: "a"),
                                 ),
                               );
                             },
@@ -589,7 +590,8 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => NuevaUbicacion("b"),
+                                  builder: (context) =>
+                                      NuevaUbicacion(data: "b"),
                                 ),
                               );
                             },
@@ -828,7 +830,8 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => NuevaUbicacion("a"),
+                                  builder: (context) =>
+                                      NuevaUbicacion(data: "a"),
                                 ),
                               );
                             },

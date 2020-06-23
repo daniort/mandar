@@ -5,17 +5,16 @@ import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
 class NuevaUbicacion extends StatefulWidget {
-  String s;
-  NuevaUbicacion(String s);
+  String data;
+  NuevaUbicacion({Key key, @required this.data}) : super(key: key);
 
   @override
-  _NuevaUbicacionState createState() => _NuevaUbicacionState();
+  _NuevaUbicacionState createState() => _NuevaUbicacionState(data);
 }
 
 class _NuevaUbicacionState extends State<NuevaUbicacion> {
   GoogleMapController mapController;
   TextEditingController _tituloController;
-
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
   bool _buscadoUbicacion = true;
@@ -23,13 +22,13 @@ class _NuevaUbicacionState extends State<NuevaUbicacion> {
   String ubicacion = ' ';
   String numero = '0';
   LatLng miMarker;
-
   final Set<Marker> _markers = {};
   Placemark place;
-
-  
+  String data;
+  _NuevaUbicacionState(String data);
 
   void initState() {
+    print(data);
     _tituloController = TextEditingController();
     _getCurrentLocation();
     super.initState();
@@ -127,11 +126,13 @@ class _NuevaUbicacionState extends State<NuevaUbicacion> {
                   ? InkWell(
                       splashColor: Colors.grey[900],
                       onTap: () {
-                        String _direccion = "${place.thoroughfare}, #${place.subThoroughfare}, ${place.subLocality}, ${place.locality}";
+                        print(data);
+                        String _direccion =
+                            "${place.thoroughfare}, #${place.subThoroughfare}, ${place.subLocality}, ${place.locality}";
                         double lati = _currentPosition.latitude;
                         double longi = _currentPosition.longitude;
-                        Provider.of<LoginState>(context, listen : false)
-                            .setUbicacion(_direccion, lati, longi, widget.s);
+                        Provider.of<LoginState>(context, listen: false)
+                            .setUbicacion(_direccion, lati, longi, data);
                         Navigator.of(context).pop();
                       },
                       child: Container(
@@ -158,7 +159,6 @@ class _NuevaUbicacionState extends State<NuevaUbicacion> {
     geolocator
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
         .then((Position position) {
-      print('obteniendo ubicacion');
       setState(() {
         _currentPosition = position;
         _buscadoUbicacion = false;
@@ -213,7 +213,6 @@ class _NuevaUbicacionState extends State<NuevaUbicacion> {
     double long = -74.0060;
     GoogleMapController controller = await mapController;
     controller.animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, long), 10));
-    setState(() {});
   }
 
   void onMapCreated(GoogleMapController controller) {

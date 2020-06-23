@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-
 import 'package:mandadero/cliente/mis_tiendas.dart';
 import 'package:mandadero/screens/editar_wid.dart';
-
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
