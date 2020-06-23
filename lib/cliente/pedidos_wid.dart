@@ -13,7 +13,7 @@ class _PedidosState extends State<Pedidos> {
   @override
   Widget build(BuildContext context) {
     final _user = Provider.of<LoginState>(context, listen: false).currentUser();
-    final alto = MediaQuery.of(context).size.height;
+
     final ancho = MediaQuery.of(context).size.width;
     return Scaffold(
       key: _scaffoldKey,

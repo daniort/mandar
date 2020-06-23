@@ -232,6 +232,20 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     }
   }
 
+  Widget iconDeleteRed(String x, LoginState stados) {
+    return Padding(
+        padding: const EdgeInsets.only(right: 10.0, left: 10.0),
+        child: IconButton(
+          icon: Icon(
+            Icons.cancel,
+            color: Color.fromRGBO(238, 97, 121, 0.7),
+          ),
+          onPressed: () {
+            stados.limpiarUbicacion(x);
+          },
+        ));
+  }
+
   Widget _formProducto(double ancho, double alto, FirebaseUser currentUser,
       BuildContext context) {
     final _stados = Provider.of<LoginState>(context, listen: true);
@@ -471,23 +485,12 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                             style: TextStyle(color: Colors.grey)),
                       ],
                     ),
-                    _stados.isdireccion()
-                        ? Padding(
-                            padding:
-                                const EdgeInsets.only(right: 10.0, left: 10.0),
-                            child: IconButton(
-                              icon: Icon(
-                                Icons.cancel,
-                                color: Colors.grey,
-                              ),
-                              onPressed: () {
-                                _stados.limpiarUbicacion();
-                              },
-                            ))
+                    _stados.isPunto("a")
+                        ? iconDeleteRed("a", _stados)
                         : SizedBox(),
                   ],
                 ),
-                !_stados.isdireccion()
+                !_stados.isPunto("a")
                     ? Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: <Widget>[
@@ -501,7 +504,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                                   isScrollControlled: true,
                                   builder: (context) {
                                     return _elegirUbicacion(
-                                        context, currentUser.uid, alto);
+                                        context, currentUser.uid, alto, "a");
                                   });
                             },
                             child: Text('Ubicacion Guardada',
@@ -511,16 +514,15 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                           MaterialButton(
                             color: Colors.grey[300],
                             onPressed: () {
-                              print('ubicacion ueva');
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => NuevaUbicacion(),
+                                  builder: (context) => NuevaUbicacion('a'),
                                 ),
                               );
                             },
                             disabledColor: Colors.grey[300],
-                            child: Text("Ubicacion Nueva",
+                            child: Text("Ubicación Nueva",
                                 style: TextStyle(color: Colors.grey[600])),
                           )
                         ],
@@ -528,7 +530,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                     : Center(
                         child: Padding(
                         padding: const EdgeInsets.only(top: 8.0, bottom: 1.0),
-                        child: Text(_stados.direccion1,
+                        child: Text(_stados.getDirecciondelPunto("a"),
                             style: TextStyle(color: Colors.grey)),
                       )),
               ],
@@ -553,23 +555,12 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                             style: TextStyle(color: Colors.grey)),
                       ],
                     ),
-                    _stados.isdireccion()
-                        ? Padding(
-                            padding:
-                                const EdgeInsets.only(right: 10.0, left: 10.0),
-                            child: IconButton(
-                              icon: Icon(
-                                Icons.cancel,
-                                color: Colors.grey,
-                              ),
-                              onPressed: () {
-                                _stados.limpiarUbicacion();
-                              },
-                            ))
+                    _stados.isPunto("b")
+                        ? iconDeleteRed("b", _stados)
                         : SizedBox(),
                   ],
                 ),
-                !_stados.isdireccion()
+                !_stados.isPunto("b")
                     ? Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: <Widget>[
@@ -584,7 +575,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                                   isScrollControlled: true,
                                   builder: (context) {
                                     return _elegirUbicacion(
-                                        context, currentUser.uid, alto);
+                                        context, currentUser.uid, alto, "b");
                                   });
                             },
                             child: Text('Ubicacion Guardada',
@@ -598,7 +589,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => NuevaUbicacion(),
+                                  builder: (context) => NuevaUbicacion("b"),
                                 ),
                               );
                             },
@@ -611,7 +602,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                     : Center(
                         child: Padding(
                         padding: const EdgeInsets.only(top: 8.0, bottom: 1.0),
-                        child: Text(_stados.direccion1,
+                        child: Text(_stados.getDirecciondelPunto("b"),
                             style: TextStyle(color: Colors.grey)),
                       )),
               ],
@@ -722,7 +713,6 @@ class _NuevoPedidoState extends State<NuevoPedido> {
   Widget _formServicio(double ancho, double alto, FirebaseUser currentUser,
       BuildContext context) {
     final _stados = Provider.of<LoginState>(context, listen: true);
-
     return Padding(
       padding:
           const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0, bottom: 2.0),
@@ -804,23 +794,12 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                             style: TextStyle(color: Colors.grey)),
                       ],
                     ),
-                    _stados.isdireccion()
-                        ? Padding(
-                            padding:
-                                const EdgeInsets.only(right: 10.0, left: 10.0),
-                            child: IconButton(
-                              icon: Icon(
-                                Icons.cancel,
-                                color: Colors.grey,
-                              ),
-                              onPressed: () {
-                                _stados.limpiarUbicacion();
-                              },
-                            ))
+                    _stados.isPunto("a")
+                        ? iconDeleteRed("a", _stados)
                         : SizedBox(),
                   ],
                 ),
-                !_stados.isdireccion()
+                !_stados.isPunto("a")
                     ? Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: <Widget>[
@@ -835,7 +814,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                                   isScrollControlled: true,
                                   builder: (context) {
                                     return _elegirUbicacion(
-                                        context, currentUser.uid, alto);
+                                        context, currentUser.uid, alto, "a");
                                   });
                             },
                             child: Text('Ubicacion Guardada',
@@ -849,7 +828,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => NuevaUbicacion(),
+                                  builder: (context) => NuevaUbicacion("a"),
                                 ),
                               );
                             },
@@ -862,7 +841,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                     : Center(
                         child: Padding(
                         padding: const EdgeInsets.only(top: 8.0, bottom: 1.0),
-                        child: Text(_stados.direccion1,
+                        child: Text(_stados.getDirecciondelPunto("a"),
                             style: TextStyle(color: Colors.grey)),
                       )),
                 Divider(
@@ -1136,7 +1115,8 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     Provider.of<LoginState>(context, listen: false).setStepPedido(0);
   }
 
-  Widget _elegirUbicacion(BuildContext context, String uid, double alto) {
+  Widget _elegirUbicacion(
+      BuildContext context, String uid, double alto, String s) {
     return Container(
       height: alto * .5,
       color: Colors.white,
@@ -1167,7 +1147,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                               double longi = document['longitud'];
                               double lati = document['latitud'];
                               Provider.of<LoginState>(context, listen: false)
-                                  .setUbicacionNueva(_dire, lati, longi);
+                                  .setUbicacion(_dire, lati, longi, s);
                               Navigator.of(context).pop();
                             },
                             child: Container(

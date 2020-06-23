@@ -9,7 +9,6 @@ import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-
 class DataCliente extends StatefulWidget {
   @override
   _DataClienteState createState() => _DataClienteState();
@@ -96,63 +95,64 @@ class _DataClienteState extends State<DataCliente> {
           ),
           Expanded(
             child: Container(
-              child: Column(
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      width: alto * .25,
-                      height: alto * .25,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                            color: Color.fromRGBO(20, 20, 20, 0.2), width: 5.0),
-                        boxShadow: [
-                          BoxShadow(color: Colors.white10, blurRadius: 25)
-                        ],
-                        image: new DecorationImage(
-                            image: _user.photoUrl != null
-                                ? NetworkImage("${_user.photoUrl}")
-                                : Image.asset('lib/assets/logo.png'),
-                            fit: BoxFit.fill),
-                        borderRadius: BorderRadius.circular(150),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        width: alto * .25,
+                        height: alto * .25,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                              color: Color.fromRGBO(20, 20, 20, 0.2),
+                              width: 5.0),
+                          boxShadow: [
+                            BoxShadow(color: Colors.white10, blurRadius: 25)
+                          ],
+                          image: new DecorationImage(
+                              image: _user.photoUrl != null
+                                  ? NetworkImage("${_user.photoUrl}")
+                                  : Image.asset('lib/assets/logo.png'),
+                              fit: BoxFit.fill),
+                          borderRadius: BorderRadius.circular(150),
+                        ),
                       ),
                     ),
-                  ),
-                  Text(
-                    "Cliente",
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Color(0xff484349),
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                  Text(
-                    "${_user.displayName}",
-                    style: TextStyle(
-                        fontSize: 25,
+                    Text(
+                      "Cliente",
+                      style: TextStyle(
+                        fontSize: 15,
                         color: Color(0xff484349),
-                        fontWeight: FontWeight.bold),
-                  ),
-                   RatingBar(
-                                initialRating: 3,
-                                minRating: 1,
-                                direction: Axis.horizontal,
-                                allowHalfRating: true,
-                                itemCount: 5,
-                                itemSize: 25,
-                                ignoreGestures: true,
-                                itemPadding:
-                                    EdgeInsets.symmetric(horizontal: 1.0),
-                                itemBuilder: (context, _) => Icon(
-                                  Icons.star,
-                                  
-                                  color: Colors.amber[200],
-                                ),
-                                onRatingUpdate: (rating) {
-                                  print(rating);
-                                },
-                              ),
-                ],
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                    Text(
+                      "${_user.displayName}",
+                      style: TextStyle(
+                          fontSize: 25,
+                          color: Color(0xff484349),
+                          fontWeight: FontWeight.bold),
+                    ),
+                    RatingBar(
+                      initialRating: 3,
+                      minRating: 1,
+                      direction: Axis.horizontal,
+                      allowHalfRating: true,
+                      itemCount: 5,
+                      itemSize: 25,
+                      ignoreGestures: true,
+                      itemPadding: EdgeInsets.symmetric(horizontal: 1.0),
+                      itemBuilder: (context, _) => Icon(
+                        Icons.star,
+                        color: Colors.amber[200],
+                      ),
+                      onRatingUpdate: (rating) {
+                        print(rating);
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -184,7 +184,6 @@ class _DataClienteState extends State<DataCliente> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                     
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: InkWell(

@@ -5,6 +5,9 @@ import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
 class NuevaUbicacion extends StatefulWidget {
+  String s;
+  NuevaUbicacion(String s);
+
   @override
   _NuevaUbicacionState createState() => _NuevaUbicacionState();
 }
@@ -23,6 +26,8 @@ class _NuevaUbicacionState extends State<NuevaUbicacion> {
 
   final Set<Marker> _markers = {};
   Placemark place;
+
+  
 
   void initState() {
     _tituloController = TextEditingController();
@@ -126,7 +131,7 @@ class _NuevaUbicacionState extends State<NuevaUbicacion> {
                         double lati = _currentPosition.latitude;
                         double longi = _currentPosition.longitude;
                         Provider.of<LoginState>(context, listen : false)
-                            .setUbicacionNueva(_direccion, lati, longi);
+                            .setUbicacion(_direccion, lati, longi, widget.s);
                         Navigator.of(context).pop();
                       },
                       child: Container(

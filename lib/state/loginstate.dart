@@ -256,30 +256,56 @@ class LoginState with ChangeNotifier {
     notifyListeners();
   }
 
-  bool isdireccion() => _haydirecion;
-  String isdireccionCompelto() => direccion1;
-  double isdirecionlati() => lati1;
-  double isdireccionlongi() => longi1;
+  ////////////////////////////UBICACIONES////////////////7
 
-  void limpiarUbicacion() {
-    direccion1 = " ";
-    lati1 = 0;
-    longi1 = 0;
-    _haydirecion = false;
+  
+  bool _puntoa = false;
+  bool _puntob = false;
+  var _dira = null;
+  var _dirb = null;
+  
+  
+  void limpiarUbicacion(String s) {
+    if (s == "a") {
+      _dira = null;
+      _puntoa = false;
+    }
+    if (s == "b") {
+      _dirb = null;
+      _puntob = false;
+    }
     notifyListeners();
   }
 
-  String direccion1;
-  double lati1;
-  double longi1;
-  bool _haydirecion = false;
+  bool isPunto(String x) {
+    if (x == "a") return _puntoa;
+    if (x == "b") return _puntob;
+  }
 
-  void setUbicacionNueva(String direccion, double lati, double longi) {
-    print('hola');
-    direccion1 = direccion;
-    lati1 = lati;
-    longi1 = longi;
-    _haydirecion = true;
+  void setUbicacion(String label, double lati, double longi, String punto) {
+    if (punto == "a") {
+      _dira = {
+        "punto": punto,
+        "label": label,
+        "latitud": lati,
+        "longitud": longi,
+      };
+      _puntoa = true;
+    }
+    if (punto == "b") {
+      _dirb = {
+        "punto": punto,
+        "label": label,
+        "latitud": lati,
+        "longitud": longi,
+      };
+      _puntob = true;
+    }
     notifyListeners();
+  }
+
+  String getDirecciondelPunto(String s) {
+    if (s == "a") return _dira['label'].toString();    
+    if (s == "b")  return _dirb['label'].toString();
   }
 }

@@ -1,14 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mandadero/services/cliente_services.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
-import 'Dart:ui' as ui;
+
 
 class MisTiendas extends StatefulWidget {
   @override
@@ -17,12 +14,10 @@ class MisTiendas extends StatefulWidget {
 
 class _MisTiendasState extends State<MisTiendas> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool _edit = false;
+  
   @override
   Widget build(BuildContext context) {
     final _user = Provider.of<LoginState>(context, listen: false).currentUser();
-    final alto = MediaQuery.of(context).size.height;
-    final ancho = MediaQuery.of(context).size.width;
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Color(0xfff6f9ff),
@@ -227,7 +222,6 @@ class _BuscarMapaState extends State<BuscarMapa> {
   @override
   Widget build(BuildContext context) {
     final _user = Provider.of<LoginState>(context, listen: false).currentUser();
-    final alto = MediaQuery.of(context).size.height;
     final ancho = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: Color(0xfff6f9ff),
@@ -526,13 +520,7 @@ class _BuscarMapaState extends State<BuscarMapa> {
     }
   }
 
-  Future<void> _actualizarMarcador() async {
-    double lat = 40.7128;
-    double long = -74.0060;
-    GoogleMapController controller = await mapController;
-    controller.animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, long), 10));
-    setState(() {});
-  }
+
 
   void onMapCreated(GoogleMapController controller) {
     setState(() {

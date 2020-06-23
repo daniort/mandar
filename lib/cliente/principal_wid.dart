@@ -1,14 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:mandadero/Router/strings.dart';
+
 import 'package:mandadero/cliente/nuevo_pedido.dart';
 import 'package:mandadero/cliente/pedidos_wid.dart';
 import 'package:mandadero/cliente/perfil_wid.dart';
-import 'package:mandadero/services/cliente_services.dart';
-import 'package:mandadero/state/loginstate.dart';
-import 'package:mandadero/state/loginstate.dart';
-import 'package:provider/provider.dart';
 
 class ProfileCliente extends StatefulWidget {
   @override
@@ -26,7 +22,7 @@ class ProfileClienteState extends State<ProfileCliente> {
 
   @override
   Widget build(BuildContext context) {
-    final alto = MediaQuery.of(context).size.height;
+    
     return Scaffold(
       backgroundColor: Color(0xfff6f9ff),
       body: PageStorage(
@@ -93,23 +89,12 @@ class ProfileClienteState extends State<ProfileCliente> {
           size: 30,
         ),
         onPressed: () {
-          print('presionaste');
-
-          //Navigator.of(context).pushNamed(nuevoPedidoRoute);
-
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => NuevoPedido(),
             ),
           );
-
-          //showModalBottomSheet(
-          //  context: context,
-          //isScrollControlled: true,
-          //builder: (context) {
-//                return NuevoPedido();
-          //            });
         },
       ),
     );
