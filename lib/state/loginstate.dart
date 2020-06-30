@@ -2,10 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
-import 'package:mandadero/services/cliente_services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginState with ChangeNotifier {
@@ -304,8 +302,8 @@ class LoginState with ChangeNotifier {
     notifyListeners();
   }
 
-  String getDirecciondelPunto(String s) {
-    if (s == "a") return _dira['label'].toString();    
-    if (s == "b")  return _dirb['label'].toString();
+   getDirecciondelPunto(String s) {
+    if (s == "a") return _dira;    
+    if (s == "b")  return _dirb;
   }
 }

@@ -1,42 +1,61 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:mandadero/state/loginstate.dart';
 
 class UserServices {
-
-  bool newPedidoProductos(List orderLines, int subtotal, int totalPedido, FirebaseUser user) {
-    return false;
+  bool newPedidoProductos(List orderLines, int subtotal, int totalPedido,
+      FirebaseUser user, puntoa, puntob) {
+    var hoy = DateTime.now();
+    try {
+      Firestore.instance.collection('pedidos').document().setData({
+        "id_pedido": "",
+        "tipo": 'producto',
+        "lista": orderLines,
+        "subtotal": subtotal,
+        "total": totalPedido,
+        "cliente": user.uid,
+        "repartidor": "",
+        "status": "espera",
+        "dia": hoy.day,
+        "mes": hoy.month,
+        "year": hoy.year,
+        "horai": "${hoy.hour}:${hoy.minute}:${hoy.second}",
+        "horaf": "",
+        "puntoa": puntoa,
+        "puntob": puntob,
+        "urlrecibocliente": "null",
+        "urlreciborepartidor": "null",
+        "fin_repartidor": false,
+        "fin_cliente": false,
+      }).then((value) {
+        print('hola');
+      });
+      return true;
+    } catch (e) {
+      print("error al guardar el pedido");
+      return false;
+    }
   }
 
-  bool newPedidoPagoServicios(String titulo, String cantidad, String ubicacion,
-      String datos, FirebaseUser user, String image, double lati, double longi) {
-    int dia = DateTime.now().day;
-    int mes = DateTime.now().month;
-    int ano = DateTime.now().year;
-    String horai =
-        DateTime.now().hour.toString() + ':' + DateTime.now().minute.toString();
-
+  bool newPedidoPagoServicios(String titulo, String datos, int subtotal,
+      int totalPedido, FirebaseUser user, String image, puntoa) {
+    var hoy = DateTime.now();
     try {
       Firestore.instance.collection('pedidos').document().setData({
         "id_pedido": "",
         "tipo": 'pago',
         "titulo": titulo,
-        "cantidad": cantidad,
-        "ubicacion": ubicacion,
+        "subtotal": subtotal,
+        "total": totalPedido,
         "datos": datos,
         "cliente": user.uid,
         "repartidor": "",
         "status": "espera",
-        "dia": dia,
-        "mes": mes,
-        "year": ano,
-        "horai": horai,
+        "dia": hoy.day,
+        "mes": hoy.month,
+        "year": hoy.year,
+        "horai": "${hoy.hour}:${hoy.minute}:${hoy.second}",
         "horaf": "",
-        "latitud": lati,
-        "longitud": longi,
+        "puntoa": puntoa,
         "urlrecibocliente": image,
         "urlreciborepartidor": "null",
         "fin_repartidor": false,
@@ -130,6 +149,4 @@ class UserServices {
       return false;
     }
   }
-
-  
 }

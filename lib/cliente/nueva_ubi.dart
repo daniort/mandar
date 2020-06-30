@@ -5,11 +5,11 @@ import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
 class NuevaUbicacion extends StatefulWidget {
-  String data;
+  final String data;
   NuevaUbicacion({Key key, @required this.data}) : super(key: key);
 
   @override
-  _NuevaUbicacionState createState() => _NuevaUbicacionState(data);
+  _NuevaUbicacionState createState() => _NuevaUbicacionState();
 }
 
 class _NuevaUbicacionState extends State<NuevaUbicacion> {
@@ -24,11 +24,8 @@ class _NuevaUbicacionState extends State<NuevaUbicacion> {
   LatLng miMarker;
   final Set<Marker> _markers = {};
   Placemark place;
-  String data;
-  _NuevaUbicacionState(String data);
 
   void initState() {
-    print(data);
     _tituloController = TextEditingController();
     _getCurrentLocation();
     super.initState();
@@ -126,13 +123,12 @@ class _NuevaUbicacionState extends State<NuevaUbicacion> {
                   ? InkWell(
                       splashColor: Colors.grey[900],
                       onTap: () {
-                        print(data);
-                        String _direccion =
-                            "${place.thoroughfare}, #${place.subThoroughfare}, ${place.subLocality}, ${place.locality}";
-                        double lati = _currentPosition.latitude;
-                        double longi = _currentPosition.longitude;
                         Provider.of<LoginState>(context, listen: false)
-                            .setUbicacion(_direccion, lati, longi, data);
+                            .setUbicacion(
+                                "${place.thoroughfare}, #${place.subThoroughfare}, ${place.subLocality}, ${place.locality}",
+                                _currentPosition.latitude,
+                                _currentPosition.longitude,
+                                widget.data);
                         Navigator.of(context).pop();
                       },
                       child: Container(

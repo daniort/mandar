@@ -89,7 +89,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 100.0),
+              padding: const EdgeInsets.only(top: 100.0, bottom: 60.0),
               child: SingleChildScrollView(
                 child: _firstForm(context, ancho, alto, _state.currentUser()),
               ),
@@ -110,7 +110,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                                 .backStep();
                             break;
                           case 2:
-                            _cleanDataPedido();
+                            //_cleanDataPedido();
                             Navigator.of(context).pop();
                             break;
                           default:
@@ -144,19 +144,22 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                         switch (_state.isStepPedido()) {
                           case 1:
                             if (_state.isTipoPedido() == 1) {
-                              if (_formPedidoKey.currentState.validate()) {
-                                print('valido, amonos');
+                              if (_formPedidoKey.currentState.validate() &&
+                                  _state.isPunto('a')) {
                                 showModalBottomSheet(
                                     elevation: alto * 0.35,
                                     backgroundColor:
                                         Color.fromRGBO(0, 0, 0, 0.1),
                                     context: context,
                                     builder: (BuildContext context) {
-                                      return _modalTicket(alto, ancho, 12);
+                                      return _modalTicket(alto, ancho,
+                                          int.parse(_cantidadController.text));
                                     });
                               }
                             } else if (_state.isTipoPedido() == 2) {
-                              if (orderLines.isNotEmpty) {
+                              if (orderLines.isNotEmpty &&
+                                  _state.isPunto('a') &&
+                                  _state.isPunto('b')) {
                                 showModalBottomSheet(
                                     elevation: alto * 0.35,
                                     backgroundColor:
@@ -171,7 +174,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
 
                             break;
                           case 2:
-                            _cleanDataPedido();
+                            //_cleanDataPedido();
                             Navigator.of(context).pop();
                             break;
                           default:
@@ -309,7 +312,6 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                       color: Colors.grey[300],
                       onPressed: () {
                         if (_formPedidoProductoKey.currentState.validate()) {
-                          print('correct');
                           var _producto = {
                             "nombre": _tituloController.text,
                             "cantidad": int.parse(_cantidadController.text),
@@ -323,7 +325,6 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                         } else {
                           print('incorrect');
                         }
-                        print(orderLines);
                       },
                       child: Text('Agregar a la lista',
                           style: TextStyle(color: Colors.grey[600])),
@@ -517,9 +518,8 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      NuevaUbicacion(data: "a"),
-                                ),
+                                    builder: (context) =>
+                                        NuevaUbicacion(data: 'a')),
                               );
                             },
                             disabledColor: Colors.grey[300],
@@ -531,7 +531,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                     : Center(
                         child: Padding(
                         padding: const EdgeInsets.only(top: 8.0, bottom: 1.0),
-                        child: Text(_stados.getDirecciondelPunto("a"),
+                        child: Text(_stados.getDirecciondelPunto("a")['label'],
                             style: TextStyle(color: Colors.grey)),
                       )),
               ],
@@ -586,12 +586,12 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                           MaterialButton(
                             color: Colors.grey[300],
                             onPressed: () {
-                              print('ubicacion ueva');
+                              String _tip = 'b';
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
-                                      NuevaUbicacion(data: "b"),
+                                      NuevaUbicacion(data: _tip),
                                 ),
                               );
                             },
@@ -604,7 +604,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                     : Center(
                         child: Padding(
                         padding: const EdgeInsets.only(top: 8.0, bottom: 1.0),
-                        child: Text(_stados.getDirecciondelPunto("b"),
+                        child: Text(_stados.getDirecciondelPunto("b")['label'],
                             style: TextStyle(color: Colors.grey)),
                       )),
               ],
@@ -826,12 +826,11 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                           MaterialButton(
                             color: Colors.grey[300],
                             onPressed: () {
-                              print('ubicacion ueva');
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
-                                      NuevaUbicacion(data: "a"),
+                                      NuevaUbicacion(data: 'a'),
                                 ),
                               );
                             },
@@ -844,7 +843,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                     : Center(
                         child: Padding(
                         padding: const EdgeInsets.only(top: 8.0, bottom: 1.0),
-                        child: Text(_stados.getDirecciondelPunto("a"),
+                        child: Text(_stados.getDirecciondelPunto("a")['label'],
                             style: TextStyle(color: Colors.grey)),
                       )),
                 Divider(
@@ -940,7 +939,6 @@ class _NuevoPedidoState extends State<NuevoPedido> {
 
   Future<String> _subirImagen(File image) async {
     StorageUploadTask _uploadTask;
-
     final FirebaseStorage _sto = LoginState().isStorage();
     String filePath = "recibos_clientes/${DateTime.now()}.png";
     try {
@@ -979,7 +977,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     );
   }
 
-  Widget _modalTicket(double alto, double ancho, int subtotal) {
+  Widget _modalTicket(double alto, double ancho, int subtot) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -1043,7 +1041,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                         ),
                         Padding(
                           padding: const EdgeInsets.all(4.0),
-                          child: Text(_totalPedido(subtotal).toString(),
+                          child: Text(_totalPedido(subtot).toString(),
                               textAlign: TextAlign.right,
                               style: TextStyle(fontWeight: FontWeight.bold)),
                         )
@@ -1074,19 +1072,37 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                     onPressed: () async {
                       final _stados =
                           Provider.of<LoginState>(context, listen: false);
-                      final _user = _stados.currentUser();
+                      bool _pedidoregistrado = false;
 
-                      var _pedidoregistrado = UserServices().newPedidoProductos(
-                        orderLines,
-                        subtotal,
-                        _totalPedido(subtotal),
-                        _user,
-                      );
+                      if (_stados.isTipoPedido() == 1) {
+                        String _url = await _subirImagen(_image);
+                        _pedidoregistrado = UserServices()
+                            .newPedidoPagoServicios(
+                                _tituloController.text,
+                                _datosController.text,
+                                int.parse(_cantidadController.text),
+                                _totalPedido(subtot),
+                                _stados.currentUser(),
+                                _url,
+                                _stados.getDirecciondelPunto('a'));
+                      }
+                      if (_stados.isTipoPedido() == 2) {
+                        _pedidoregistrado = UserServices().newPedidoProductos(
+                          orderLines,
+                          subtot,
+                          _totalPedido(subtotal),
+                          _stados.currentUser(),
+                          _stados.getDirecciondelPunto('a'),
+                          _stados.getDirecciondelPunto('b'),
+                        );
+                      }
 
                       if (_pedidoregistrado) {
-                        Navigator.of(context).pop();
-                        Provider.of<LoginState>(context, listen: false)
-                            .plusStep();
+                        _formPedidoKey.currentState.reset();
+                        _formPedidoProductoKey.currentState.reset();
+                        _stados.plusStep();
+                        _stados.setStepPedido(0);                        
+                        Navigator.of(context).pop();                        
                       } else {
                         Navigator.of(context).pop();
                         _scaffoldKey.currentState.showSnackBar(SnackBar(
@@ -1108,14 +1124,6 @@ class _NuevoPedidoState extends State<NuevoPedido> {
         ),
       ),
     );
-  }
-
-  void _cleanDataPedido() {
-    _tituloController.clear();
-    _datosController.clear();
-    _cantidadController.clear();
-    _ubicacionController.clear();
-    Provider.of<LoginState>(context, listen: false).setStepPedido(0);
   }
 
   Widget _elegirUbicacion(
