@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mandadero/services/cliente_services.dart';
+import 'package:mandadero/services/colors.dart';
+import 'package:mandadero/services/widgets.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
@@ -99,9 +102,12 @@ class _TomarPedidoState extends State<TomarPedido> {
                             .map((DocumentSnapshot document) {
                           if (document.data['cliente'] == _user.uid) {
                             return Text(
-                              ' ',
-                              style: TextStyle(fontSize: 1),
-                            );
+                                'No hay pedidos disponibles por el momento,\nVuelve en un momento',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: Colors.grey[400],
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold));
                           } else {
                             return Padding(
                               padding: const EdgeInsets.only(
@@ -109,205 +115,9 @@ class _TomarPedidoState extends State<TomarPedido> {
                               child: Container(
                                 color: Colors.grey[200],
                                 width: ancho * .9,
-                                child: new ExpansionTile(
-                                  leading: Icon(
-                                    document['tipo'] == 'pago'
-                                        ? Icons.monetization_on
-                                        : Icons.shop,
-                                    color: Colors.deepOrange,
-                                    size: 30,
-                                  ),
-                                  title:
-                                      new Text(document['titulo'].toString()),
-                                  subtitle: new Text("De: "),
-                                  children: <Widget>[
-                                    ListTile(
-                                      leading: Icon(Icons.pin_drop),
-                                      title: Text(document['ubicacion'] != null
-                                          ? 'A elección'
-                                          : "${document['ubicacion']}"),
-                                    ),
-                                    ListTile(
-                                      leading: Icon(Icons.attach_money),
-                                      title: Text(document['cantidad']),
-                                    ),
-                                    ListTile(
-                                      leading: Icon(Icons.info),
-                                      title: Text(
-                                          "Info Extra: " + document['datos']),
-                                    ),
-                                    document['urlrecibocliente'] != 'null'
-                                        ? ListTile(
-                                            title: Container(
-                                              child: Stack(
-                                                children: <Widget>[
-                                                  Center(
-                                                    child: Image.network(
-                                                      document[
-                                                          'urlrecibocliente'],
-                                                      width:
-                                                          MediaQuery.of(context)
-                                                              .size
-                                                              .width,
-                                                    ),
-                                                  ),
-                                                  Align(
-                                                    alignment:
-                                                        Alignment.topRight,
-                                                    child: IconButton(
-                                                        color:
-                                                            Color(0xffee6179),
-                                                        icon: Icon(
-                                                          Icons.remove_red_eye,
-                                                          color: Colors.white,
-                                                        ),
-                                                        onPressed: () {
-                                                         print('Ver Ticket');
-                                                        }),
-                                                  ),
-                                                  
-                                                ],
-                                              ),
-                                            ),
-                                          )
-                                        : SizedBox(),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: <Widget>[
-                                          InkWell(
-                                            onTap: () {
-                                              showDialog(
-                                                  context: context,
-                                                  builder: (_) {
-                                                    return AlertDialog(
-                                                      title: Center(
-                                                          child: Text(
-                                                              'Tomar Pedido')),
-                                                      actions: <Widget>[
-                                                        MaterialButton(
-                                                          onPressed: () {
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
-                                                          },
-                                                          child: Text(
-                                                            'Cancelar',
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .grey),
-                                                          ),
-                                                        ),
-                                                        MaterialButton(
-                                                          onPressed: () async {
-                                                            bool _agregado =
-                                                                await _tomarEstePedido(
-                                                                    document
-                                                                        .documentID,
-                                                                    _user);
-
-                                                            if (_agregado ==
-                                                                true) {
-                                                              print(_agregado);
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop();
-
-                                                              _scaffoldKey
-                                                                  .currentState
-                                                                  .showSnackBar(
-                                                                      SnackBar(
-                                                                content: Text(
-                                                                    'Pedido Tomado, Espera el PAgo'),
-                                                                duration: Duration(
-                                                                    milliseconds:
-                                                                        3000),
-                                                                backgroundColor:
-                                                                    Color(
-                                                                        0xff464d77),
-                                                              ));
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop();
-                                                            } else {
-                                                              print(_agregado);
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop();
-                                                              _scaffoldKey.currentState.showSnackBar(SnackBar(
-                                                                  content: Text(
-                                                                      'Ya tienes un Pedido'),
-                                                                  duration: Duration(
-                                                                      milliseconds:
-                                                                          3000),
-                                                                  backgroundColor:
-                                                                      Colors
-                                                                          .deepOrange //Color(0xffd1495b),
-                                                                  ));
-                                                            }
-                                                          },
-                                                          color:
-                                                              Color(0xff464d77),
-                                                          child: Text(
-                                                            'Aceptar',
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                      content: RichText(
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                        text: TextSpan(
-                                                          text: "Realiza: " +
-                                                              document['titulo']
-                                                                  .toString(),
-                                                          style: DefaultTextStyle
-                                                                  .of(context)
-                                                              .style,
-                                                          children: <TextSpan>[
-                                                            TextSpan(
-                                                                text: '\n',
-                                                                style: TextStyle(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold)),
-                                                            TextSpan(
-                                                              text:
-                                                                  'Tómalo y espera el pago',
-                                                              style: TextStyle(
-                                                                  color: Colors
-                                                                      .grey,
-                                                                  fontSize: 16),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    );
-                                                  });
-                                            },
-                                            child: Container(
-                                              color: Color(0xff464d77),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Text(
-                                                  'Tomar Pedido',
-                                                  style: TextStyle(
-                                                    color: Color(0xfff6f9ff),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                child: document['tipo'] == 'pago'
+                                    ? _pedidoPago(document)
+                                    : _pedidoProducto(document),
                               ),
                             );
                           }
@@ -347,5 +157,290 @@ class _TomarPedidoState extends State<TomarPedido> {
     } else {
       return false;
     }
+  }
+
+  _pedidoPago(DocumentSnapshot document) {
+    return ExpansionTile(
+      leading: Icon(
+        FontAwesomeIcons.moneyCheck,
+        color: AppColorsR.primaryBackground,
+        size: 30,
+      ),
+      title: new Text(
+        'Paga un Servicio',
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+      subtitle: new Text("Ganas: "),
+      children: <Widget>[
+        ListTile(
+          leading: Icon(Icons.pin_drop),
+          title: Text(document['puntoa']['label']),
+        ),
+        ListTile(
+          leading: Icon(Icons.attach_money),
+          title: Text("Cantidad: \$ ${document['subtotal']}.00"),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              InkWell(
+                onTap: () {
+                  showDialog(
+                      context: context,
+                      builder: (_) {
+                        return AlertDialog(
+                          title: Center(child: Text('Tomar Pedido')),
+                          actions: <Widget>[
+                            MaterialButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text(
+                                'Cancelar',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ),
+                            MaterialButton(
+                              onPressed: () async {
+                                bool _agregado =
+                                    false; // await _tomarEstePedido(
+                                //  document.documentID, _user);
+
+                                if (_agregado == true) {
+                                  print(_agregado);
+                                  Navigator.of(context).pop();
+
+                                  _scaffoldKey.currentState
+                                      .showSnackBar(SnackBar(
+                                    content:
+                                        Text('Pedido Tomado, Espera el PAgo'),
+                                    duration: Duration(milliseconds: 3000),
+                                    backgroundColor: Color(0xff464d77),
+                                  ));
+                                  Navigator.of(context).pop();
+                                } else {
+                                  print(_agregado);
+                                  Navigator.of(context).pop();
+                                  _scaffoldKey.currentState.showSnackBar(
+                                      SnackBar(
+                                          content: Text('Ya tienes un Pedido'),
+                                          duration:
+                                              Duration(milliseconds: 3000),
+                                          backgroundColor: Colors
+                                              .deepOrange //Color(0xffd1495b),
+                                          ));
+                                }
+                              },
+                              color: Color(0xff464d77),
+                              child: Text(
+                                'Aceptar',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                          content: RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              text: "Realiza: " + document['titulo'].toString(),
+                              style: DefaultTextStyle.of(context).style,
+                              children: <TextSpan>[
+                                TextSpan(
+                                    text: '\n',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(
+                                  text: 'Tómalo y espera el pago',
+                                  style: TextStyle(
+                                      color: Colors.grey, fontSize: 16),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      });
+                },
+                child: Container(
+                  color: Color(0xff464d77),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Tomar Pedido',
+                      style: TextStyle(
+                        color: Color(0xfff6f9ff),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  _pedidoProducto(DocumentSnapshot document) {
+    return ExpansionTile(
+      leading: Icon(
+        FontAwesomeIcons.shoppingCart,
+        color: AppColorsR.primaryBackground,
+        size: 30,
+      ),
+      title: new Text(
+        'Compra el Mandado',
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+      subtitle:
+          new Text("Gánate: \$${_calcularCantidadPago(document['costo'])}"),
+      children: <Widget>[
+        ListTile(
+          leading: Icon(Icons.person_pin),
+          title: Text("${document['puntob']['label']}"),
+        ),
+        ListTile(
+          leading: Icon(Icons.attach_money),
+          title: Text("Necesitas: \$${document['subtotal']}.00"),
+        ),
+        ListTile(
+          leading: Icon(Icons.directions_transit),
+          title: Text("${document['lista'].length} Paradas"),
+        ),
+        ListTile(
+          title: ExpansionTile(
+            title: Text("Lista:"),
+            children: <Widget>[
+              for (var item in document['lista'])
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(
+                        flex: 1,
+                        child: textoLista(
+                            item['nombre'].toString().toUpperCase())),
+                    SizedBox(width: 2),
+                    Expanded(
+                        flex: 2,
+                        child: textoListaDirec(item['punto']['label'])),
+                  ],
+                ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              InkWell(
+                onTap: () {
+                  showDialog(
+                      context: context,
+                      builder: (_) {
+                        return AlertDialog(
+                          title: Center(child: Text('Tomar Pedido')),
+                          actions: <Widget>[
+                            MaterialButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text(
+                                'Cancelar',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ),
+                            MaterialButton(
+                              onPressed: () async {
+                                bool _agregado =
+                                    false; // await _tomarEstePedido(
+                                //  document.documentID, _user);
+
+                                if (_agregado == true) {
+                                  print(_agregado);
+                                  Navigator.of(context).pop();
+
+                                  _scaffoldKey.currentState
+                                      .showSnackBar(SnackBar(
+                                    content:
+                                        Text('Pedido Tomado, Espera el PAgo'),
+                                    duration: Duration(milliseconds: 3000),
+                                    backgroundColor: Color(0xff464d77),
+                                  ));
+                                  Navigator.of(context).pop();
+                                } else {
+                                  print(_agregado);
+                                  Navigator.of(context).pop();
+                                  _scaffoldKey.currentState.showSnackBar(
+                                      SnackBar(
+                                          content: Text('Ya tienes un Pedido'),
+                                          duration:
+                                              Duration(milliseconds: 3000),
+                                          backgroundColor: Colors
+                                              .deepOrange //Color(0xffd1495b),
+                                          ));
+                                }
+                              },
+                              color: Color(0xff464d77),
+                              child: Text(
+                                'Aceptar',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                          content: RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              text: "Realiza: " + document['titulo'].toString(),
+                              style: DefaultTextStyle.of(context).style,
+                              children: <TextSpan>[
+                                TextSpan(
+                                    text: '\n',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(
+                                  text: 'Tómalo y espera el pago',
+                                  style: TextStyle(
+                                      color: Colors.grey, fontSize: 16),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      });
+                },
+                child: Container(
+                  color: Color(0xff464d77),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Tomar Pedido',
+                      style: TextStyle(
+                        color: Color(0xfff6f9ff),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  _calcularCantidadPago(double cos) {
+    final double c = cos * 0.7;
+    return redondear(c);
+  }
+
+  Widget textoLista(String s) {
+    return Text("$s:",
+        textAlign: TextAlign.right,
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold));
+  }
+
+  Widget textoListaDirec(String s) {
+    return Text(s, textAlign: TextAlign.left, style: TextStyle(fontSize: 12));
   }
 }

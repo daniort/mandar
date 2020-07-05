@@ -168,8 +168,11 @@ class _NuevaUbicacionState extends State<NuevaUbicacion> {
 
   _getAddressFromLatLng(double latitude, double longitude) async {
     try {
-      List<Placemark> p =
-          await geolocator.placemarkFromCoordinates(latitude, longitude);
+      List<Placemark> p = await geolocator
+          .placemarkFromCoordinates(latitude, longitude)
+          .catchError((e) {
+        print("error aqui we");
+      });
 
       setState(() {
         place = p[0];
@@ -192,7 +195,9 @@ class _NuevaUbicacionState extends State<NuevaUbicacion> {
                       value[0].position.latitude, value[0].position.longitude),
                   zoom: 10.0),
             ),
-          );
+          ).catchError((e){
+            print("error aqui we");
+          });
         }).catchError((onError) {
           print("error we >>>>>>>>>>>>>>>>");
           print(onError);

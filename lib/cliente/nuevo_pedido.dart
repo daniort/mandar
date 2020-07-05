@@ -5,10 +5,12 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mandadero/cliente/nueva_ubi.dart';
 import 'package:mandadero/services/cliente_services.dart';
+import 'package:mandadero/services/widgets.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
@@ -21,10 +23,14 @@ class _NuevoPedidoState extends State<NuevoPedido> {
   TextEditingController _tituloController;
   TextEditingController _datosController;
   TextEditingController _cantidadController;
-  TextEditingController _ubicacionController;
+
   int subtotal = 0;
+  double costoServicio = 0.0;
   File _image;
   List orderLines = <Map>[];
+  List puntos = [];
+  List distancias = [];
+  bool destino = false;
   final ImagePicker picker = ImagePicker();
   final _formPedidoKey = GlobalKey<FormState>();
   final _formPedidoProductoKey = GlobalKey<FormState>();
@@ -33,7 +39,6 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     _tituloController = TextEditingController();
     _datosController = TextEditingController();
     _cantidadController = TextEditingController();
-    _ubicacionController = TextEditingController();
     super.initState();
   }
 
@@ -47,103 +52,126 @@ class _NuevoPedidoState extends State<NuevoPedido> {
       key: _scaffoldKey,
       resizeToAvoidBottomPadding: false,
       backgroundColor: Color(0xfff6f9ff),
-      body: SafeArea(
-        child: Stack(
-          children: <Widget>[
-            Column(
+      appBar: AppBar(
+        actions: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(right: 10.0),
+            child: _state.isAdvertencia()
+                ? Icon(FontAwesomeIcons.exclamationCircle,
+                    color: Color(0xffec506b))
+                : SizedBox(),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 10.0),
+            child: _state.isLoading()
+                ? Center(
+                    child: CircularProgressIndicator(
+                      backgroundColor: Color(0xfff6f9ff),
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+                    ),
+                  )
+                : SizedBox(),
+          ),
+        ],
+        iconTheme: IconThemeData(color: Colors.grey),
+        backgroundColor: Color(0xfff6f9ff),
+        elevation: 0.0,
+      ),
+      body: Stack(
+        children: <Widget>[
+          SingleChildScrollView(
+            child: Column(
               children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    IconButton(
-                      icon: Icon(
-                        Icons.arrow_back,
-                        color: Colors.grey,
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    )
-                  ],
-                ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 0.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        '¿Que Necesitas?',
-                        style: GoogleFonts.courgette(
-                          fontSize: 35,
-                          color: Color(0xff292f36),
-                        ),
-                      ),
-                    ],
+                  padding: const EdgeInsets.all(10.0),
+                  child: Text(
+                    '¿Que Necesitas?',
+                    style: GoogleFonts.courgette(
+                      fontSize: 30,
+                      color: Color(0xff292f36),
+                    ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Divider(
-                    height: 5,
-                  ),
+                Divider(
+                  height: 2,
                 ),
+                _firstForm(context),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 100.0, bottom: 60.0),
-              child: SingleChildScrollView(
-                child: _firstForm(context, ancho, alto, _state.currentUser()),
-              ),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        switch (_state.isStepPedido()) {
-                          case 0:
-                            Navigator.of(context).pop();
-                            break;
-                          case 1:
-                            Provider.of<LoginState>(context, listen: false)
-                                .backStep();
-                            break;
-                          case 2:
-                            //_cleanDataPedido();
-                            Navigator.of(context).pop();
-                            break;
-                          default:
-                        }
-                      },
-                      child: Container(
-                        height: 45.0,
-                        //width: ancho * .5,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                              colors: [Color(0xffec506b), Color(0xffee6179)],
-                              begin: Alignment.topLeft),
-                          //color: Color(0xffee6179),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 20.0),
-                          child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Icon(
-                                Icons.arrow_back_ios,
-                                color: Colors.white,
-                              )),
-                        ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: InkWell(
+                    onTap: () {
+                      switch (_state.isTipoPedido()) {
+                        case 1:
+                          switch (_state.isStepPedido()) {
+                            case 0:
+                              Navigator.of(context).pop();
+                              break;
+                            case 1:
+                              Provider.of<LoginState>(context, listen: false)
+                                  .backStep();
+                              break;
+                            case 2:
+                              Navigator.of(context).pop();
+                              break;
+                            default:
+                          }
+                          break;
+                        case 2:
+                          switch (_state.isStepPedido()) {
+                            case 0:
+                              Navigator.of(context).pop();
+                              break;
+                            case 1:
+                              Provider.of<LoginState>(context, listen: false)
+                                  .backStep();
+                              _state.loading(false);
+                              break;
+                            case 2:
+                              Provider.of<LoginState>(context, listen: false)
+                                  .backStep();
+                              _state.loading(false);
+                              break;
+                            default:
+                          }
+                          break;
+                        default:
+                      }
+                    },
+                    child: Container(
+                      height: 45.0,
+                      //width: ancho * .5,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            colors: [Color(0xffec506b), Color(0xffee6179)],
+                            begin: Alignment.topLeft),
+                        //color: Color(0xffee6179),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20.0),
+                        child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Icon(
+                              Icons.arrow_back_ios,
+                              color: Colors.white,
+                            )),
                       ),
                     ),
                   ),
-                  Container(width: 1.0, height: 45.0, color: Color(0xffeb425f)),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        switch (_state.isStepPedido()) {
-                          case 1:
-                            if (_state.isTipoPedido() == 1) {
+                ),
+                Container(width: 1.0, height: 45.0, color: Color(0xffeb425f)),
+                Expanded(
+                  child: InkWell(
+                    onTap: () {
+                      switch (_state.isTipoPedido()) {
+                        case 1:
+                          switch (_state.isStepPedido()) {
+                            case 1:
                               if (_formPedidoKey.currentState.validate() &&
                                   _state.isPunto('a')) {
                                 showModalBottomSheet(
@@ -156,60 +184,93 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                                           int.parse(_cantidadController.text));
                                     });
                               }
-                            } else if (_state.isTipoPedido() == 2) {
-                              if (orderLines.isNotEmpty &&
-                                  _state.isPunto('a') &&
-                                  _state.isPunto('b')) {
-                                showModalBottomSheet(
-                                    elevation: alto * 0.35,
-                                    backgroundColor:
-                                        Color.fromRGBO(0, 0, 0, 0.1),
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return _modalTicket(
-                                          alto, ancho, subtotal);
-                                    });
-                              }
-                            }
+                              break;
+                            case 2:
+                              Navigator.of(context).pop();
+                              break;
+                            default:
+                          }
+                          break;
 
-                            break;
-                          case 2:
-                            //_cleanDataPedido();
-                            Navigator.of(context).pop();
-                            break;
-                          default:
-                        }
-                      },
-                      child: Container(
-                        height: 45.0,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                              colors: [Color(0xffee6179), Color(0xffec506b)],
-                              begin: Alignment.topLeft),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 20.0),
-                          child: Align(
-                              alignment: Alignment.centerRight,
-                              child: Icon(
-                                Icons.arrow_forward_ios,
-                                color: Colors.white,
-                              )),
-                        ),
+                        case 2:
+                          switch (_state.isStepPedido()) {
+                            case 1:
+                              if (orderLines.isNotEmpty) {
+                                _state.plusStep();
+                              } else {
+                                _state.salioAdvertencia();
+                              }
+                              break;
+                            case 2:
+                              if (orderLines.isNotEmpty &&
+                                  _state.isPunto("b")) {
+                                _calcularCostedelServicio();
+                                if (costoServicio >= 1.0) {
+                                  showModalBottomSheet(
+                                      elevation: alto * 0.7,
+                                      backgroundColor:
+                                          Color.fromRGBO(0, 0, 0, 0.1),
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return _modalListaPedidosConfirmar(
+                                            alto, ancho, context);
+                                      });
+                                } else {
+                                  _calcularCostedelServicio();
+                                  _state.loading(true);
+                                }
+                              } else {
+                                print("aqui");
+                                _state.salioAdvertencia();
+                              }
+                              break;
+                            default:
+                          }
+
+                          break;
+                        default:
+                      }
+                    },
+                    child: Container(
+                      height: 45.0,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            colors: [Color(0xffee6179), Color(0xffec506b)],
+                            begin: Alignment.topLeft),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 20.0),
+                        child: Align(
+                            alignment: Alignment.centerRight,
+                            child: _state.isAdvertencia()
+                                ? Icon(Icons.cancel, color: Colors.white)
+                                : _state.isLoading()
+                                    ? CircularProgressIndicator(
+                                        backgroundColor: Color(0xffec506b),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                          Colors.white,
+                                        ),
+                                      )
+                                    : Icon(
+                                        Icons.arrow_forward_ios,
+                                        color: Colors.white,
+                                      )),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  _firstForm(BuildContext context, double ancho, double alto,
-      FirebaseUser currentUser) {
+  _firstForm(BuildContext context) {
+    final alto = MediaQuery.of(context).size.height;
+    final ancho = MediaQuery.of(context).size.width;
     final _stados = Provider.of<LoginState>(context, listen: true);
     switch (_stados.isStepPedido()) {
       case 0:
@@ -217,15 +278,21 @@ class _NuevoPedidoState extends State<NuevoPedido> {
         break;
       case 1:
         if (_stados.isTipoPedido() == 1) {
-          return _formServicio(ancho, alto, currentUser, context);
+          return _formServicio(ancho, alto, _stados.currentUser(), context);
         }
         if (_stados.isTipoPedido() == 2) {
-          return _formProducto(ancho, alto, currentUser, context);
+          return _formProducto(ancho, alto, _stados.currentUser(), context);
         }
         break;
       case 2:
         print('Paso ${_stados.isStepPedido()}');
-        return _esperaRepartidor(ancho, alto);
+        if (_stados.isTipoPedido() == 1) {
+          return esperaRepartidor(ancho, alto);
+        }
+        if (_stados.isTipoPedido() == 2) {
+          return _ubicacionEntrega(alto, ancho);
+        }
+
         break;
       case 3:
         print('Paso ${_stados.isStepPedido()}');
@@ -235,26 +302,12 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     }
   }
 
-  Widget iconDeleteRed(String x, LoginState stados) {
-    return Padding(
-        padding: const EdgeInsets.only(right: 10.0, left: 10.0),
-        child: IconButton(
-          icon: Icon(
-            Icons.cancel,
-            color: Color.fromRGBO(238, 97, 121, 0.7),
-          ),
-          onPressed: () {
-            stados.limpiarUbicacion(x);
-          },
-        ));
-  }
-
   Widget _formProducto(double ancho, double alto, FirebaseUser currentUser,
       BuildContext context) {
     final _stados = Provider.of<LoginState>(context, listen: true);
     return Padding(
-      padding:
-          const EdgeInsets.only(top: 2.0, left: 15.0, right: 15.0, bottom: 2.0),
+      padding: const EdgeInsets.only(
+          top: 2.0, left: 15.0, right: 15.0, bottom: 100.0),
       child: Form(
         key: _formPedidoProductoKey,
         child: Column(
@@ -269,7 +322,6 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                   labelText: 'Descrpción/Nombre del Producto',
                   helperText: "Ejemplo: Tortillas",
                   prefixIcon: Icon(Icons.shopping_cart),
-                  //errorText: _validate ? 'Value Can\'t Be Empty' : null,
                 ),
                 validator: (value) {
                   if (value.isEmpty) {
@@ -278,6 +330,79 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                   return null;
                 },
               ),
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(top: 20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(right: 10.0, left: 10.0),
+                            child: Icon(Icons.pin_drop, color: Colors.grey),
+                          ),
+                          Text('¿Donde lo Compramos?',
+                              style: TextStyle(color: Colors.grey)),
+                        ],
+                      ),
+                      _stados.isPunto("x")
+                          ? iconDeleteRedDos("x", _stados)
+                          : SizedBox(),
+                    ],
+                  ),
+                ),
+                !_stados.isPunto("x")
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[
+                          MaterialButton(
+                            color: Colors.grey[300],
+                            onPressed: () {
+                              showModalBottomSheet(
+                                  elevation: alto * 0.8,
+                                  backgroundColor: Color.fromRGBO(250, 0, 0, 1),
+                                  context: context,
+                                  isScrollControlled: true,
+                                  builder: (context) {
+                                    return _elegirUbicacion(
+                                        context, currentUser.uid, alto, "x");
+                                  });
+                            },
+                            child: Text('Ubicacion Guardada',
+                                style: TextStyle(color: Colors.grey[600])),
+                            disabledColor: Colors.grey[300],
+                          ),
+                          MaterialButton(
+                            color: Colors.grey[300],
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        NuevaUbicacion(data: 'x')),
+                              );
+                            },
+                            disabledColor: Colors.grey[300],
+                            child: Text("Ubicación Nueva",
+                                style: TextStyle(color: Colors.grey[600])),
+                          )
+                        ],
+                      )
+                    : Center(
+                        child: Padding(
+                        padding: const EdgeInsets.only(top: 8.0, bottom: 1.0),
+                        child: Text(_stados.getDirecciondelPunto("x")['label'],
+                            style: TextStyle(color: Colors.grey)),
+                      )),
+              ],
+            ),
+            Divider(
+              color: Colors.grey,
             ),
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
@@ -315,10 +440,11 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                           var _producto = {
                             "nombre": _tituloController.text,
                             "cantidad": int.parse(_cantidadController.text),
+                            "punto": _stados.getDirecciondelPunto("x"),
+                            "distancia": 0.0,
                           };
                           setState(() {
                             orderLines.add(_producto);
-                            print('cor');
                           });
                           _tituloController.clear();
                           _cantidadController.clear();
@@ -339,10 +465,10 @@ class _NuevoPedidoState extends State<NuevoPedido> {
             ),
             Padding(
               padding:
-                  const EdgeInsets.only(right: 8, left: 8, bottom: 15, top: 1),
+                  const EdgeInsets.only(right: 8, left: 8, bottom: 15, top: 10),
               child: Container(
                 color: Colors.grey[200],
-                height: alto * 0.2,
+                height: alto * 0.25,
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -352,9 +478,9 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                         color: Colors.grey[300],
                         child: Row(
                           children: <Widget>[
-                            Expanded(flex: 3, child: _tituloTabla("Productos")),
-                            Expanded(flex: 2, child: _tituloTabla("Cantidad")),
-                            Expanded(flex: 1, child: _tituloTabla("-"))
+                            Expanded(flex: 3, child: tituloTabla("Productos")),
+                            Expanded(flex: 2, child: tituloTabla("Cantidad")),
+                            Expanded(flex: 1, child: tituloTabla("-"))
                           ],
                         ),
                       ),
@@ -367,7 +493,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                                   flex: 4,
                                   child: Text(
                                       item['nombre'].toString().toUpperCase())),
-                              Expanded(flex: 1, child: _tituloTabla("\$")),
+                              Expanded(flex: 1, child: tituloTabla("\$")),
                               Expanded(
                                   flex: 1,
                                   child: Padding(
@@ -468,146 +594,6 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                   ),
                 ),
               ),
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        Padding(
-                          padding:
-                              const EdgeInsets.only(right: 10.0, left: 10.0),
-                          child: Icon(Icons.pin_drop, color: Colors.grey),
-                        ),
-                        Text('Lugar de Compra:',
-                            style: TextStyle(color: Colors.grey)),
-                      ],
-                    ),
-                    _stados.isPunto("a")
-                        ? iconDeleteRed("a", _stados)
-                        : SizedBox(),
-                  ],
-                ),
-                !_stados.isPunto("a")
-                    ? Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: <Widget>[
-                          MaterialButton(
-                            color: Colors.grey[300],
-                            onPressed: () {
-                              showModalBottomSheet(
-                                  elevation: alto * 0.8,
-                                  backgroundColor: Color.fromRGBO(250, 0, 0, 1),
-                                  context: context,
-                                  isScrollControlled: true,
-                                  builder: (context) {
-                                    return _elegirUbicacion(
-                                        context, currentUser.uid, alto, "a");
-                                  });
-                            },
-                            child: Text('Ubicacion Guardada',
-                                style: TextStyle(color: Colors.grey[600])),
-                            disabledColor: Colors.grey[300],
-                          ),
-                          MaterialButton(
-                            color: Colors.grey[300],
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        NuevaUbicacion(data: 'a')),
-                              );
-                            },
-                            disabledColor: Colors.grey[300],
-                            child: Text("Ubicación Nueva",
-                                style: TextStyle(color: Colors.grey[600])),
-                          )
-                        ],
-                      )
-                    : Center(
-                        child: Padding(
-                        padding: const EdgeInsets.only(top: 8.0, bottom: 1.0),
-                        child: Text(_stados.getDirecciondelPunto("a")['label'],
-                            style: TextStyle(color: Colors.grey)),
-                      )),
-              ],
-            ),
-            Divider(
-              color: Colors.grey,
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        Padding(
-                          padding:
-                              const EdgeInsets.only(right: 10.0, left: 10.0),
-                          child: Icon(Icons.pin_drop, color: Colors.grey),
-                        ),
-                        Text('Lugar de Entrega:',
-                            style: TextStyle(color: Colors.grey)),
-                      ],
-                    ),
-                    _stados.isPunto("b")
-                        ? iconDeleteRed("b", _stados)
-                        : SizedBox(),
-                  ],
-                ),
-                !_stados.isPunto("b")
-                    ? Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: <Widget>[
-                          MaterialButton(
-                            color: Colors.grey[300],
-                            onPressed: () {
-                              showModalBottomSheet(
-                                  elevation: alto * 0.8,
-                                  backgroundColor: Color.fromRGBO(250, 0, 0, 1),
-                                  //shape:
-                                  context: context,
-                                  isScrollControlled: true,
-                                  builder: (context) {
-                                    return _elegirUbicacion(
-                                        context, currentUser.uid, alto, "b");
-                                  });
-                            },
-                            child: Text('Ubicacion Guardada',
-                                style: TextStyle(color: Colors.grey[600])),
-                            disabledColor: Colors.grey[300],
-                          ),
-                          MaterialButton(
-                            color: Colors.grey[300],
-                            onPressed: () {
-                              String _tip = 'b';
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      NuevaUbicacion(data: _tip),
-                                ),
-                              );
-                            },
-                            disabledColor: Colors.grey[300],
-                            child: Text("Ubicacion Nueva",
-                                style: TextStyle(color: Colors.grey[600])),
-                          )
-                        ],
-                      )
-                    : Center(
-                        child: Padding(
-                        padding: const EdgeInsets.only(top: 8.0, bottom: 1.0),
-                        child: Text(_stados.getDirecciondelPunto("b")['label'],
-                            style: TextStyle(color: Colors.grey)),
-                      )),
-              ],
             ),
           ],
         ),
@@ -797,7 +783,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                       ],
                     ),
                     _stados.isPunto("a")
-                        ? iconDeleteRed("a", _stados)
+                        ? iconDeleteRedDos("a", _stados)
                         : SizedBox(),
                   ],
                 ),
@@ -953,26 +939,77 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     }
   }
 
-  Widget _buildItem(String item) {
-    return new ListTile(
-      title: new Text(item.toString()),
-      leading: new Icon(Icons.map),
-    );
-  }
-
-  Widget _esperaRepartidor(double ancho, double alto) {
+  Widget _ubicacionEntrega(double alto, double ancho) {
+    final _stados = Provider.of<LoginState>(context, listen: true);
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Text(
-          '¡Tu Pedido esta registrado!',
-          style: TextStyle(
-              fontSize: 18, color: Colors.grey, fontStyle: FontStyle.italic),
+        Padding(
+          padding: const EdgeInsets.only(top: 20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10.0, left: 10.0),
+                    child: Icon(Icons.pin_drop, color: Colors.grey),
+                  ),
+                  Text('Lugar de Entrega:',
+                      style: TextStyle(color: Colors.grey)),
+                ],
+              ),
+              _stados.isPunto("b")
+                  ? iconDeleteRedDos("b", _stados)
+                  : SizedBox(),
+            ],
+          ),
         ),
-        Image.asset('lib/assets/giphy.gif'),
-        Text(
-          'Buscando Repartidor...',
-          style: TextStyle(fontSize: 20),
-        ),
+        !_stados.isPunto("b")
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  MaterialButton(
+                    color: Colors.grey[300],
+                    onPressed: () {
+                      showModalBottomSheet(
+                          elevation: alto * 0.8,
+                          backgroundColor: Color.fromRGBO(250, 0, 0, 1),
+                          //shape:
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (context) {
+                            return _elegirUbicacion(
+                                context, _stados.currentUser().uid, alto, "b");
+                          });
+                    },
+                    child: Text('Ubicacion Guardada',
+                        style: TextStyle(color: Colors.grey[600])),
+                    disabledColor: Colors.grey[300],
+                  ),
+                  MaterialButton(
+                    color: Colors.grey[300],
+                    onPressed: () {
+                      String _tip = 'b';
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NuevaUbicacion(data: _tip),
+                        ),
+                      );
+                    },
+                    disabledColor: Colors.grey[300],
+                    child: Text("Ubicacion Nueva",
+                        style: TextStyle(color: Colors.grey[600])),
+                  )
+                ],
+              )
+            : Center(
+                child: Padding(
+                padding: const EdgeInsets.only(top: 8.0, bottom: 1.0),
+                child: Text(_stados.getDirecciondelPunto("b")['label'],
+                    style: TextStyle(color: Colors.grey)),
+              )),
       ],
     );
   }
@@ -1009,11 +1046,11 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(4.0),
-                        child: _pieTabla("Subtotal:    \$"),
+                        child: pieTabla("Subtotal:    \$"),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(4.0),
-                        child: _pieTabla("Costo Servicio:    \$"),
+                        child: pieTabla("Costo Servicio:    \$"),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(4.0),
@@ -1033,11 +1070,11 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                       children: <Widget>[
                         Padding(
                           padding: const EdgeInsets.all(4.0),
-                          child: _pieTabla(subtotal.toString()),
+                          child: pieTabla(subtotal.toString()),
                         ),
                         Padding(
                           padding: const EdgeInsets.all(4.0),
-                          child: _pieTabla("25"),
+                          child: pieTabla("25"),
                         ),
                         Padding(
                           padding: const EdgeInsets.all(4.0),
@@ -1086,23 +1123,13 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                                 _url,
                                 _stados.getDirecciondelPunto('a'));
                       }
-                      if (_stados.isTipoPedido() == 2) {
-                        _pedidoregistrado = UserServices().newPedidoProductos(
-                          orderLines,
-                          subtot,
-                          _totalPedido(subtotal),
-                          _stados.currentUser(),
-                          _stados.getDirecciondelPunto('a'),
-                          _stados.getDirecciondelPunto('b'),
-                        );
-                      }
 
                       if (_pedidoregistrado) {
-                        _formPedidoKey.currentState.reset();
-                        _formPedidoProductoKey.currentState.reset();
+                        //_formPedidoKey.currentState.reset();
+                        //_formPedidoProductoKey.currentState.reset();
                         _stados.plusStep();
-                        _stados.setStepPedido(0);                        
-                        Navigator.of(context).pop();                        
+                        _stados.setStepPedido(0);
+                        Navigator.of(context).pop();
                       } else {
                         Navigator.of(context).pop();
                         _scaffoldKey.currentState.showSnackBar(SnackBar(
@@ -1115,6 +1142,204 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                     child: Padding(
                       padding: const EdgeInsets.only(left: 30.0, right: 30.0),
                       child: Text('Confirmar'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _modalListaPedidosConfirmar(
+      double alto, double ancho, BuildContext context) {
+    return Container(
+      height: alto * 0.7,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(10.0),
+          topRight: Radius.circular(10.0),
+        ),
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            for (var item in puntos)
+              Column(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10.0),
+                    child: Text("Punto de Compra:",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.grey)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        top: 2.0, bottom: 4.0, left: 10, right: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Expanded(
+                          flex: 1,
+                          child: Icon(Icons.pin_drop),
+                        ),
+                        Expanded(
+                          flex: 9,
+                          child: Text(item['label'],
+                              textAlign: TextAlign.left,
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  for (var item2 in orderLines)
+                    if (item['label'] == item2['punto']["label"])
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            top: 4.0, bottom: 4.0, left: 20, right: 30),
+                        child: Row(
+                          children: <Widget>[
+                            Expanded(
+                              flex: 2,
+                              child: pieTabla(
+                                  item2['nombre'].toString().toUpperCase()),
+                            ),
+                            Expanded(
+                                flex: 1,
+                                child: pieTablaRigth(
+                                    "\$ ${item2['cantidad'].toString()}")),
+                          ],
+                        ),
+                      ),
+                ],
+              ),
+            Text(
+              "Punto de Entrega:",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, color: Colors.grey[800]),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 2.0, bottom: 4.0, left: 10, right: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    flex: 1,
+                    child: Icon(Icons.person_pin_circle),
+                  ),
+                  Expanded(
+                    flex: 9,
+                    child: Text(
+                        "${Provider.of<LoginState>(context, listen: true).getDirecciondelPunto('b')['label']}",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            ),
+            Divider(
+              color: Colors.grey,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 4.0, bottom: 4.0, left: 20, right: 30),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Expanded(
+                    flex: 2,
+                    child: pieTablaRigth("Total Pedido:  \$"),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: pieTablaRigth(subtotal.toString()),
+                  )
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 4.0, bottom: 4.0, left: 20, right: 30),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Expanded(
+                    flex: 2,
+                    child: pieTablaRigth("Costo del Servicio:  \$"),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: pieTablaRigth(redondear(costoServicio).toString()),
+                  )
+                ],
+              ),
+            ),
+            Divider(
+              color: Colors.grey,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  OutlineButton(
+                    splashColor: Colors.red[200],
+                    textColor: Colors.red[300],
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 30.0, right: 30.0),
+                      child: Text('Cancelar'),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: RaisedButton(
+                        onPressed: () async {
+                          final _stados =
+                              Provider.of<LoginState>(context, listen: false);
+                          bool _pedidoregistrado = false;
+                          final _destino = _stados.getDirecciondelPunto('b');
+                          _pedidoregistrado = await UserServices()
+                              .newPedidoProductos(
+                                  await _llenarDistancias(
+                                      orderLines,
+                                      _destino["latitud"],
+                                      _destino['longitud']),
+                                  subtotal,
+                                  costoServicio,
+                                  _stados.currentUser(),
+                                  _destino,
+                                  350.3);
+
+                          if (_pedidoregistrado) {
+                            //_formPedidoKey.currentState.reset();
+                            //_formPedidoProductoKey.currentState.reset();
+                            _stados.plusStep();
+                            _stados.setStepPedido(0);
+                            Navigator.of(context).pop();
+                            Navigator.of(context).pop();
+                          } else {
+                            Navigator.of(context).pop();
+                            _scaffoldKey.currentState.showSnackBar(SnackBar(
+                              content: Text('Algo Pasó, Intentalo de Nuevo'),
+                              backgroundColor: Color(0xffee6179),
+                              duration: Duration(milliseconds: 2000),
+                            ));
+                          }
+                        },
+                        child: Text('Confirmar',
+                            style: TextStyle(color: Colors.white)),
+                        color: Colors.grey[900],
+                      ),
                     ),
                   ),
                 ],
@@ -1206,33 +1431,6 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     }
   }
 
-  Widget _listaNombres() {
-    if (orderLines.isNotEmpty) {
-      for (var item in orderLines) {
-        print(item['nombre']);
-        return Text(item['nombre']);
-      }
-    } else {
-      return Text("Lista Vacia");
-    }
-  }
-
-  Widget _tituloTabla(String s) {
-    return Center(
-      child: Text(
-        s,
-        style: TextStyle(fontSize: 13, color: Colors.grey),
-      ),
-    );
-  }
-
-  Widget _pieTabla(String s) {
-    return Text(
-      s,
-      style: TextStyle(fontSize: 14, color: Colors.grey),
-    );
-  }
-
   int _pieSubtotal() {
     int _sub = 0;
     for (var item in orderLines) {
@@ -1248,5 +1446,115 @@ class _NuevoPedidoState extends State<NuevoPedido> {
 
   int _totalPedido(int subtotal) {
     return subtotal + 25;
+  }
+
+  _calcularCostedelServicio() {
+    setState(() {
+      double preCostoServicio = _porDestinos() + _porCompra(subtotal);
+      costoServicio =
+          preCostoServicio + _comisionApp(preCostoServicio) + 2.50;
+    });
+  }
+
+  Future<List> _llenarDistancias(
+      List listaTemporal, double startLatitude, double startLongitude) async {
+    List a = listaTemporal;
+    for (var item in a) {
+      final double endLatitude = item['punto']['latitud'];
+      final double endLongitude = item['punto']['longitud'];
+      item['distancia'] = await Geolocator().distanceBetween(
+          startLatitude, startLongitude, endLatitude, endLongitude);
+    }
+    return listaTemporal;
+  }
+
+  int _posicionMenor(List li) {
+    int _pos = 0;
+    for (var i = 0; i < li.length; i++) {
+      if (i == 0) {
+        _pos = i;
+      } else {
+        if (li[i]['distancia'] < li[_pos]['distancia']) {
+          _pos = i;
+        }
+      }
+    }
+    return _pos;
+  }
+
+  _porCompra(int sub) {
+    if (sub >= 1000) {
+      return sub * 0.02;
+    }
+    if (sub >= 800 && sub <= 999) {
+      return sub * 0.03;
+    }
+    if (sub >= 500 && sub <= 799) {
+      return sub * 0.05;
+    }
+    if (sub >= 300 && sub <= 499) {
+      return sub * 0.06;
+    }
+    if (sub >= 100 && sub <= 299) {
+      return sub * 0.08;
+    }
+    if (sub >= 99) {
+      return sub * 0.10;
+    }
+  }
+
+  _porDestinos() {
+    int _destinos = _rellenarDestinos().length;
+    if (_destinos <= 2) return subtotal * 0.10;
+    if (_destinos <= 4) return subtotal * 0.08;
+    if (_destinos <= 6) return subtotal * 0.06;
+    if (_destinos <= 8) return subtotal * 0.05;
+    if (_destinos <= 10) return subtotal * 0.03;
+    if (_destinos >= 11) return subtotal * 0.02;
+  }
+
+  _porDistancia() async {
+    final destino = Provider.of<LoginState>(context, listen: false)
+        .getDirecciondelPunto('b');
+    double startLatitude = destino['latitud'];
+    double startLongitude = destino['longitud'];
+    List listaTemporal = orderLines;
+    int posmin = 0;
+    double disTotal = 0.0;
+
+    for (var i = 0; i < orderLines.length + 1; i++) {
+      listaTemporal =
+          await _llenarDistancias(listaTemporal, startLatitude, startLongitude);
+      posmin = _posicionMenor(listaTemporal);
+      disTotal = disTotal + listaTemporal[posmin]['distancia'];
+      startLatitude = listaTemporal[posmin]['punto']['latitud'];
+      startLongitude = listaTemporal[posmin]['punto']['longitud'];
+      listaTemporal.remove(posmin);
+    }
+    return disTotal;
+  }
+
+  _rellenarDestinos() {
+    puntos.clear();
+    for (var item in orderLines) {
+      var existe = false;
+      if (puntos == null) {
+        puntos.add(item['punto']);
+      } else {
+        for (var p in puntos) {
+          if (p == item['punto']) {
+            existe = true;
+          }
+        }
+        if (!existe) {
+          puntos.add(item['punto']);
+        }
+      }
+    }
+    return puntos;
+  }
+
+  num _comisionApp(double pre) {
+    return pre * 0.029;
   }
 }
