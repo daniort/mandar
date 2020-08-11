@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:mandadero/Router/strings.dart';
 import 'package:mandadero/repartidor/lista_pedidos.dart';
 import 'package:mandadero/repartidor/perfil_repartidor.dart';
+import 'package:mandadero/repartidor/tomarPedido.dart';
+import 'package:mandadero/services/colors.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
@@ -87,14 +89,18 @@ class ProfileMandaderoState extends State<ProfileMandadero> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Color(0xff464d77), //Color(0xffee6179),
+        backgroundColor: AppColorsR.primaryBackground,
         child: Icon(
           Icons.add,
           size: 30,
         ),
         onPressed: () {
-          print('presionaste');
-         Navigator.of(context).pushNamed(tomarPedidoRoute);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TomarPedido(),
+            ),
+          );
         },
       ),
     );

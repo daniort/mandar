@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mandadero/Router/strings.dart';
+import 'package:mandadero/screens/regsitro.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
@@ -126,7 +127,7 @@ class _LoginState extends State<Login> {
                       child: InkWell(
                         onTap: () async {
                           Provider.of<LoginState>(context, listen: false)
-                              .loginWithEmail(_emailController.text,
+                              .loginWithEmailAndPass(_emailController.text,
                                   _passwordController.text);
                         },
                         child: Container(
@@ -218,7 +219,9 @@ class _LoginState extends State<Login> {
                     ),
                     InkWell(
                       onTap: () {
-                        Navigator.pushNamed(context, signRoute);
+                        //Navigator.pushNamed(context, signRoute);
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => Sign()));
                       },
                       child: Container(
                         width: ancho * 0.7,
@@ -253,11 +256,12 @@ class _LoginState extends State<Login> {
                                   FontAwesomeIcons.exclamationCircle,
                                   color: Colors.grey,
                                 ),
-                                SizedBox(width: 6,),
-                                Text(
-                                  'Algo pasó,\nintenta nuevamente',
-                                  style: TextStyle(color: Colors.grey, fontSize: 15)
-                                )
+                                SizedBox(
+                                  width: 6,
+                                ),
+                                Text('Algo pasó,\nintenta nuevamente',
+                                    style: TextStyle(
+                                        color: Colors.grey, fontSize: 15))
                               ],
                             )
                           : SizedBox(),

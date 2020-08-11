@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:mandadero/cliente/perfil_wid.dart';
-import 'package:mandadero/cliente/principal_wid.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
@@ -15,7 +13,7 @@ class _PedidosState extends State<Pedidos> {
   @override
   Widget build(BuildContext context) {
     final _user = Provider.of<LoginState>(context, listen: false).currentUser();
-    final alto = MediaQuery.of(context).size.height;
+
     final ancho = MediaQuery.of(context).size.width;
     return Scaffold(
       key: _scaffoldKey,
@@ -86,61 +84,9 @@ class _PedidosState extends State<Pedidos> {
                               child: Container(
                                 color: Colors.grey[200],
                                 width: ancho * .9,
-                                child: new ExpansionTile(
-                                  initiallyExpanded:
-                                      document['status'] == 'pagando'
-                                          ? true
-                                          : false,
-                                  leading: Icon(
-                                    _returnIcon(document['tipo'].toString()),
-                                    color: _returnColorIcon(
-                                        document['status'].toString()),
-                                  ),
-                                  title: Text(document['titulo']
-                                      .toString()
-                                      .toUpperCase()),
-                                  subtitle: Text(document['status'] +
-                                      "...".toString().toLowerCase()),
-                                  children: <Widget>[
-                                    ListTile(
-                                      leading: Icon(Icons.pin_drop),
-                                      title: Text(document['ubicacion'] != null
-                                          ? 'A elección'
-                                          : "${document['ubicacion']}"),
-                                    ),
-                                    ListTile(
-                                      leading: Icon(Icons.attach_money),
-                                      title: Text(document['cantidad']),
-                                    ),
-                                    ListTile(
-                                      leading: Icon(Icons.info),
-                                      title: Text(
-                                          "Info Extra: " + document['datos']),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: <Widget>[
-                                          document['status'] != 'activo'
-                                              ? _botonEliminar(
-                                                  document.documentID)
-                                              : Text(
-                                                  ' ',
-                                                  style: TextStyle(fontSize: 1),
-                                                ),
-                                          document['status'] == 'pagando'
-                                              ? _botonPagar(document.documentID)
-                                              : Text(
-                                                  ' ',
-                                                  style: TextStyle(fontSize: 1),
-                                                ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                child: document['tipo'] == "producto"
+                                    ? _listarproductos(document)
+                                    : _listarservicios(document),
                               ),
                             );
                           }
@@ -269,15 +215,15 @@ class _PedidosState extends State<Pedidos> {
                       ),
                     ),
                     MaterialButton(
-                      onPressed: () async{
+                      onPressed: () async {
                         bool _realizado = await _pagarPedido(documentID);
-                         if (_realizado) {
+                        if (_realizado) {
                           Navigator.of(context).pop();
                           _scaffoldKey.currentState.showSnackBar(SnackBar(
-                            content: Text('Repartidor en Curso'),
-                            duration: Duration(milliseconds: 3000),
-                            backgroundColor: Colors.blue//Color(0xffee6179),
-                          ));
+                              content: Text('Repartidor en Curso'),
+                              duration: Duration(milliseconds: 3000),
+                              backgroundColor: Colors.blue //Color(0xffee6179),
+                              ));
                         } else {
                           Navigator.of(context).pop();
                           _scaffoldKey.currentState.showSnackBar(SnackBar(
@@ -402,4 +348,137 @@ class _PedidosState extends State<Pedidos> {
       return false;
     }
   }
+
+  Widget _listarproductos(DocumentSnapshot document) {
+    return ExpansionTile(
+      initiallyExpanded: document['status'] == 'pagando' ? true : false,
+      leading: Icon(
+        _returnIcon(document['tipo'].toString()),
+        color: _returnColorIcon(document['status'].toString()),
+      ),
+      title: Text('Compra Productos'),
+      subtitle: _subtitulo(document['status']),
+      children: <Widget>[
+        ListTile(
+          leading: Icon(Icons.pin_drop),
+          title: Text(document['puntob']['label']),
+        ),
+        ListTile(
+          leading: Icon(Icons.attach_money),
+          title: Text(document['subtotal'].toString()),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              document['status'] == 'activo'
+                  ? _botonVerProceso(document.documentID)
+                  : SizedBox(),
+              document['status'] != 'activo'
+                  ? _botonEliminar(document.documentID)
+                  : Text(
+                      ' ',
+                      style: TextStyle(fontSize: 1),
+                    ),
+              document['status'] == 'pagando'
+                  ? _botonPagar(document.documentID)
+                  : Text(
+                      ' ',
+                      style: TextStyle(fontSize: 1),
+                    ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _listarservicios(DocumentSnapshot document) {
+    return ExpansionTile(
+      initiallyExpanded: document['status'] == 'pagando' ? true : false,
+      leading: Icon(
+        _returnIcon(document['tipo'].toString()),
+        color: _returnColorIcon(document['status'].toString()),
+      ),
+      title: Text(document['titulo'].toString().toUpperCase()),
+      subtitle: _subtitulo(document['status']),
+      children: <Widget>[
+        ListTile(
+          leading: Icon(Icons.pin_drop),
+          title: Text(document['puntoa']["label"]),
+        ),
+        ListTile(
+          leading: Icon(Icons.attach_money),
+          title: Text(document['subtotal'].toString()),
+        ),
+        ListTile(
+          leading: Icon(Icons.info),
+          title: Text("Info Extra: " + document['datos']),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              document['status'] != 'activo'
+                  ? _botonEliminar(document.documentID)
+                  : Text(
+                      ' ',
+                      style: TextStyle(fontSize: 1),
+                    ),
+              document['status'] == 'pagando'
+                  ? _botonPagar(document.documentID)
+                  : Text(
+                      ' ',
+                      style: TextStyle(fontSize: 1),
+                    ),
+              document['status'] == 'activo'
+                  ? _botonEliminar(document.documentID)
+                  : SizedBox()
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _subtitulo(String estado) {
+    switch (estado) {
+      case "pagando":
+        return Text("Esperando tu Pago...");
+        break;
+      case "espera":
+        return Text("Esperando Repartidor...", style: TextStyle(fontSize: 12));
+        break;
+      case "activo":
+        return Text("Pedido Activo");
+        break;
+      default:
+    }
+  }
+
+  _botonVerProceso(String documentID) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: InkWell(
+        onTap: () {
+         
+        },
+        child: Container(
+          color: Colors.grey[800],
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'Ver Estado',
+              style: TextStyle(
+                color: Color(0xfff6f9ff),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
 }
