@@ -18,6 +18,7 @@ class TomarPedido extends StatefulWidget {
 class _TomarPedidoState extends State<TomarPedido> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   int _activos = 0;
+  List puntos = [];
   @override
   Widget build(BuildContext context) {
     final _user = Provider.of<LoginState>(context, listen: false).currentUser();
@@ -74,7 +75,7 @@ class _TomarPedidoState extends State<TomarPedido> {
                       ],
                     );
                   default:
-                    if (snapshot.data.documents.length == 0) {
+                    if (snapshot.data.documents.length <= 0) {
                       return Container(
                         height: alto * 0.5,
                         child: Column(
@@ -100,15 +101,7 @@ class _TomarPedidoState extends State<TomarPedido> {
                       return new ListView(
                         children: snapshot.data.documents
                             .map((DocumentSnapshot document) {
-                          if (document.data['cliente'] == _user.uid) {
-                            return Text(
-                                'No hay pedidos disponibles por el momento,\nVuelve en un momento',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.grey[400],
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold));
-                          } else {
+                          if (document.data['cliente'] != _user.uid) {
                             return Padding(
                               padding: const EdgeInsets.only(
                                   left: 20.0, right: 20.0, top: 5, bottom: 5),
@@ -120,6 +113,7 @@ class _TomarPedidoState extends State<TomarPedido> {
                                     : _pedidoProducto(document),
                               ),
                             );
+                          
                           }
                         }).toList(),
                       );
@@ -298,6 +292,7 @@ class _TomarPedidoState extends State<TomarPedido> {
         ListTile(
           leading: Icon(Icons.person_pin),
           title: Text("${document['puntob']['label']}"),
+          //subtitle:  _obtenerNombre(document['cliente']),
         ),
         ListTile(
           leading: Icon(Icons.attach_money),
@@ -338,75 +333,183 @@ class _TomarPedidoState extends State<TomarPedido> {
                   showDialog(
                       context: context,
                       builder: (_) {
+                        puntos.clear();
+                        for (var item in document['lista']) {
+                          var existe = false;
+                          if (puntos == null) {
+                            puntos.add(item['punto']);
+                          } else {
+                            for (var p in puntos) {
+                              if (p == item['punto']) {
+                                existe = true;
+                              }
+                            }
+                            if (!existe) {
+                              puntos.add(item['punto']);
+                            }
+                          }
+                        }
+
                         return AlertDialog(
-                          title: Center(child: Text('Tomar Pedido')),
-                          actions: <Widget>[
-                            MaterialButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: Text(
-                                'Cancelar',
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ),
-                            MaterialButton(
-                              onPressed: () async {
-                                bool _agregado =
-                                    false; // await _tomarEstePedido(
-                                //  document.documentID, _user);
-
-                                if (_agregado == true) {
-                                  print(_agregado);
+                          
+                            title: Center(child: Text('Tomar Pedido')),
+                            actions: <Widget>[
+                              MaterialButton(
+                                onPressed: () {
                                   Navigator.of(context).pop();
-
-                                  _scaffoldKey.currentState
-                                      .showSnackBar(SnackBar(
-                                    content:
-                                        Text('Pedido Tomado, Espera el PAgo'),
-                                    duration: Duration(milliseconds: 3000),
-                                    backgroundColor: Color(0xff464d77),
-                                  ));
-                                  Navigator.of(context).pop();
-                                } else {
-                                  print(_agregado);
-                                  Navigator.of(context).pop();
-                                  _scaffoldKey.currentState.showSnackBar(
-                                      SnackBar(
-                                          content: Text('Ya tienes un Pedido'),
-                                          duration:
-                                              Duration(milliseconds: 3000),
-                                          backgroundColor: Colors
-                                              .deepOrange //Color(0xffd1495b),
-                                          ));
-                                }
-                              },
-                              color: Color(0xff464d77),
-                              child: Text(
-                                'Aceptar',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ],
-                          content: RichText(
-                            textAlign: TextAlign.center,
-                            text: TextSpan(
-                              text: "Realiza: " + document['titulo'].toString(),
-                              style: DefaultTextStyle.of(context).style,
-                              children: <TextSpan>[
-                                TextSpan(
-                                    text: '\n',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold)),
-                                TextSpan(
-                                  text: 'Tómalo y espera el pago',
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 16),
+                                },
+                                child: Text(
+                                  'Cancelar',
+                                  style: TextStyle(color: Colors.grey),
                                 ),
-                              ],
-                            ),
-                          ),
-                        );
+                              ),
+                              MaterialButton(
+                                onPressed: () async {
+                                  bool _agregado = await _tomarEstePedido(
+                                      document.documentID,
+                                      Provider.of<LoginState>(context,
+                                              listen: false)
+                                          .currentUser());
+
+                                  if (_agregado == true) {
+                                    print(_agregado);
+                                    Navigator.of(context).pop();
+
+                                    _scaffoldKey.currentState
+                                        .showSnackBar(SnackBar(
+                                      content:
+                                          Text('Pedido Tomado, Espera el PAgo'),
+                                      duration: Duration(milliseconds: 3000),
+                                      backgroundColor: Color(0xff464d77),
+                                    ));
+                                    Navigator.of(context).pop();
+                                  } else {
+                                    print(_agregado);
+                                    Navigator.of(context).pop();
+                                    _scaffoldKey.currentState.showSnackBar(
+                                        SnackBar(
+                                            content:
+                                                Text('Ya tienes un Pedido'),
+                                            duration:
+                                                Duration(milliseconds: 3000),
+                                            backgroundColor: Colors
+                                                .deepOrange //Color(0xffd1495b),
+                                            ));
+                                  }
+                                },
+                                color: Color(0xff464d77),
+                                child: Text(
+                                  'Aceptar',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ],
+                            content: Container(
+                              
+                              height: 300,
+                              child: SingleChildScrollView(
+                                                              child: Column(
+                                  children: <Widget>[
+                                    Text("Necesitas comprar"),
+                                    for (var item in puntos)
+                                      Column(
+                                        children: <Widget>[
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 10.0),
+                                            child: Text("Punto de Compra:",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.grey)),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                top: 2.0,
+                                                bottom: 4.0,
+                                                left: 10,
+                                                right: 8),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: <Widget>[
+                                                Expanded(
+                                                  flex: 1,
+                                                  child: Icon(Icons.pin_drop),
+                                                ),
+                                                Expanded(
+                                                  flex: 9,
+                                                  child: Text(item['label'],
+                                                      textAlign: TextAlign.left,
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold)),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          for (var item2 in document['lista'])
+                                            if (item['label'] ==
+                                                item2['punto']["label"])
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 4.0,
+                                                    bottom: 4.0,
+                                                    left: 20,
+                                                    right: 30),
+                                                child: Row(
+                                                  children: <Widget>[
+                                                    Expanded(
+                                                      flex: 2,
+                                                      child: pieTabla(
+                                                          item2['nombre']
+                                                              .toString()
+                                                              .toUpperCase()),
+                                                    ),
+                                                    Expanded(
+                                                        flex: 1,
+                                                        child: pieTablaRigth(
+                                                            "\$ ${item2['cantidad'].toString()}")),
+                                                  ],
+                                                ),
+                                              ),
+                                        ],
+                                      ),
+                                    Text(
+                                      "Punto de Entrega:",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.grey[800]),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 2.0,
+                                          bottom: 4.0,
+                                          left: 10,
+                                          right: 8),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: <Widget>[
+                                          Expanded(
+                                            flex: 1,
+                                            child: Icon(Icons.person_pin_circle),
+                                          ),
+                                          Expanded(
+                                            flex: 9,
+                                            child: Text("${document['puntob']['label']}",
+                                                textAlign: TextAlign.left,
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold)),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ));
                       });
                 },
                 child: Container(

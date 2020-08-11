@@ -89,19 +89,18 @@ class ProfileMandaderoState extends State<ProfileMandadero> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColorsR.primaryBackground, 
+        backgroundColor: AppColorsR.primaryBackground,
         child: Icon(
           Icons.add,
           size: 30,
         ),
         onPressed: () {
-           Navigator.push(
+          Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => TomarPedido(),
             ),
           );
-         
         },
       ),
     );

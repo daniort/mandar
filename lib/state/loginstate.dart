@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,9 @@ class LoginState with ChangeNotifier {
   int _tipoPedido = 1;
   bool _cvvfocus = false;
   bool _advertencia = false;
+  bool _pedidoactivo = false;
 
+  isPedidoActivo() => _pedidoactivo;
   isStepPedido() => _stepPedido;
   isTipoPedido() => _tipoPedido;
   isStorage() => storage;
@@ -180,6 +183,36 @@ class LoginState with ChangeNotifier {
     }
   }
 
+  Future<void> loginWithEmailAndPass(String correo, String pass) async {
+    _loading = true;
+    _error = false;
+    notifyListeners();
+    try {
+      AuthResult result =
+          await _auth.signInWithEmailAndPassword(email: correo, password: pass);
+
+      _user = result.user;
+      if (_user != null) {
+        print(_user.uid);
+        //verificarExistencia();
+        _loading = false;
+        _prefs.setBool('isLoggedIn', true);
+        _login = true;
+
+        notifyListeners();
+      } else {
+        _error = true;
+        _login = false;
+        notifyListeners();
+      }
+    } catch (e) {
+      _login = false;
+      _loading = false;
+      //salioError(tipeerror(e.code));
+      notifyListeners();
+    }
+  }
+
   Future<String> loginWithEmail(String email, String pass) async {
     _error = false;
     _loading = true;
@@ -320,7 +353,7 @@ class LoginState with ChangeNotifier {
           "latitud": lati,
           "longitud": longi,
         };
-        _puntob = true; 
+        _puntob = true;
         notifyListeners();
         break;
       case "x":
@@ -340,5 +373,13 @@ class LoginState with ChangeNotifier {
     if (s == "a") return _dira;
     if (s == "b") return _dirb;
     if (s == "x") return _dirX;
+  }
+
+  DocumentSnapshot documentoActivo;
+
+  void setPedidoActivo(DocumentSnapshot document) {
+    _pedidoactivo = true;
+    documentoActivo = document;
+    notifyListeners();
   }
 }

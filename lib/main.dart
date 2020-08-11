@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:mandadero/Router/strings.dart';
 import 'package:mandadero/cliente/principal_wid.dart';
 import 'package:mandadero/repartidor/principal_repartidor.dart';
+import 'package:mandadero/repartidor/seguimiento.dart';
 import 'package:mandadero/screens/first_page.dart';
 import 'package:mandadero/screens/login.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
-
 
 void main() => runApp(MyApp());
 
@@ -25,12 +25,17 @@ class MyApp extends StatelessWidget {
           mainRoute: (BuildContext context) {
             var _state = Provider.of<LoginState>(context);
             if (_state.islogin()) {
-              switch (_state.isType_User()) {                
+              switch (_state.isType_User()) {
                 case 1:
                   return ProfileCliente();
                   break;
                 case 2:
-                  return ProfileMandadero();
+                  if (_state.isPedidoActivo() == true) {
+                    return Seguir();
+                  } else {
+                    return ProfileMandadero();
+                  }
+
                   break;
                 default:
               }
@@ -51,4 +56,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

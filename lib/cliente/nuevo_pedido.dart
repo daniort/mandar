@@ -442,6 +442,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                             "cantidad": int.parse(_cantidadController.text),
                             "punto": _stados.getDirecciondelPunto("x"),
                             "distancia": 0.0,
+                            "comprado": false,
                           };
                           setState(() {
                             orderLines.add(_producto);
@@ -1450,7 +1451,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
 
   _calcularCostedelServicio() {
     setState(() {
-      double preCostoServicio = _porDestinos() + _porCompra(subtotal);
+      double preCostoServicio = _porDestinos() + double.parse(_porCompra(subtotal));
       costoServicio =
           preCostoServicio + _comisionApp(preCostoServicio) + 2.50;
     });
@@ -1482,7 +1483,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     return _pos;
   }
 
-  _porCompra(int sub) {
+   _porCompra(int sub) {
     if (sub >= 1000) {
       return sub * 0.02;
     }
@@ -1503,8 +1504,8 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     }
   }
 
-  _porDestinos() {
-    int _destinos = _rellenarDestinos().length;
+   double _porDestinos() {
+    int _destinos = rellenarDestinos().length;
     if (_destinos <= 2) return subtotal * 0.10;
     if (_destinos <= 4) return subtotal * 0.08;
     if (_destinos <= 6) return subtotal * 0.06;
@@ -1534,7 +1535,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     return disTotal;
   }
 
-  _rellenarDestinos() {
+  rellenarDestinos() {
     puntos.clear();
     for (var item in orderLines) {
       var existe = false;
