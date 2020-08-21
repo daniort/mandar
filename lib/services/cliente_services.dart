@@ -149,4 +149,60 @@ class UserServices {
       return false;
     }
   }
+
+  void primero(
+      int type_user,
+      FirebaseUser user,
+      String nombre,
+      String correo,
+      String telefono,
+      String direccion,
+      String nota,
+      String titular,
+      String tarjeta,
+      String mes,
+      String year,
+      String cvc,
+      String url,
+      // token = '$token',String token,
+      bool aceptados,
+      bool ocupado) {
+    Firestore.instance
+        .collection(type_user == 1 ? 'users' : 'repartidores')
+        .document(user.uid)
+        .collection('datos')
+        .document(user.uid)
+        .setData({
+      'nombre': nombre,
+      'email': correo,
+      'telefono': telefono,
+      'direccion': direccion,
+      'nota': nota,
+      'titular': titular,
+      'tarjeta': tarjeta,
+      'mes': mes,
+      'año': year,
+      'cvc': cvc,
+      'ine': url,
+      // token = '$token','token': token,
+      'aceptado': false,
+      'ocupado': false,
+    });
+  }
+
+  void saveData(
+    int type_user,
+    FirebaseUser user,
+    String campo,
+    String valor,
+  ) {
+    Firestore.instance
+        .collection(type_user == 1 ? 'users' : 'repartidores')
+        .document(user.uid)
+        .collection('datos')
+        .document(user.uid)
+        .updateData({
+      '$campo': valor,
+    });
+  }
 }

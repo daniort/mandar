@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:mandadero/Router/strings.dart';
 import 'package:mandadero/repartidor/lista_pedidos.dart';
 import 'package:mandadero/repartidor/perfil_repartidor.dart';
+import 'package:mandadero/repartidor/tomarPedido.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
 
@@ -93,8 +94,12 @@ class ProfileMandaderoState extends State<ProfileMandadero> {
           size: 30,
         ),
         onPressed: () {
-          print('presionaste');
-         Navigator.of(context).pushNamed(tomarPedidoRoute);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TomarPedido(),
+            ),
+          );
         },
       ),
     );
