@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class UserServices {
-  bool newPedidoProductos(List orderLines, int subtotal, int totalPedido,
-      FirebaseUser user, puntoa, puntob) {
+  bool newPedidoProductos(List orderLines, int subtotal, double servicio,
+      FirebaseUser user, puntob, double distancia) {
     var hoy = DateTime.now();
     try {
       Firestore.instance.collection('pedidos').document().setData({
@@ -11,7 +11,7 @@ class UserServices {
         "tipo": 'producto',
         "lista": orderLines,
         "subtotal": subtotal,
-        "total": totalPedido,
+        "costo": servicio,
         "cliente": user.uid,
         "repartidor": "",
         "status": "espera",
@@ -20,7 +20,7 @@ class UserServices {
         "year": hoy.year,
         "horai": "${hoy.hour}:${hoy.minute}:${hoy.second}",
         "horaf": "",
-        "puntoa": puntoa,
+        "distancia": distancia,
         "puntob": puntob,
         "urlrecibocliente": "null",
         "urlreciborepartidor": "null",

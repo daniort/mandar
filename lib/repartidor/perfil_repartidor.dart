@@ -96,22 +96,25 @@ class _DataRepartidorState extends State<DataRepartidor> {
                 children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      width: alto * .25,
-                      height: alto * .25,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                            color: Color.fromRGBO(70, 77, 119, 0.6),
-                            width: 5.0),
-                        boxShadow: [
-                          BoxShadow(color: Colors.white10, blurRadius: 25)
-                        ],
-                        image: new DecorationImage(
-                            image: _user.photoUrl != null
-                                ? NetworkImage("${_user.photoUrl}")
-                                : Image.asset('lib/assets/logo.png'),
-                            fit: BoxFit.fill),
-                        borderRadius: BorderRadius.circular(150),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(150),
+                      child: Container(
+                        width: alto * .25,
+                        height: alto * .25,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(
+                              color: Color.fromRGBO(20, 20, 20, 0.2),
+                              width: 5.0),
+                          boxShadow: [
+                            BoxShadow(color: Colors.white10, blurRadius: 25)
+                          ],
+                          borderRadius: BorderRadius.circular(150),
+                        ),
+                        child: Image.asset(
+                          'lib/assets/2.jpg',
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
