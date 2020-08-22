@@ -46,7 +46,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
   Widget build(BuildContext context) {
     final alto = MediaQuery.of(context).size.height;
     final ancho = MediaQuery.of(context).size.width;
-    final _state = Provider.of<LoginState>(context, listen: true);
+    final state = Provider.of<LoginState>(context, listen: true);
 
     return Scaffold(
       key: _scaffoldKey,
@@ -56,14 +56,14 @@ class _NuevoPedidoState extends State<NuevoPedido> {
         actions: <Widget>[
           Padding(
             padding: const EdgeInsets.only(right: 10.0),
-            child: _state.isAdvertencia()
+            child: state.isAdvertencia()
                 ? Icon(FontAwesomeIcons.exclamationCircle,
                     color: Color(0xffec506b))
                 : SizedBox(),
           ),
           Padding(
             padding: const EdgeInsets.only(right: 10.0),
-            child: _state.isLoading()
+            child: state.isLoading()
                 ? Center(
                     child: CircularProgressIndicator(
                       backgroundColor: Color(0xfff6f9ff),
@@ -106,9 +106,9 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                 Expanded(
                   child: InkWell(
                     onTap: () {
-                      switch (_state.isTipoPedido()) {
+                      switch (state.isTipoPedido()) {
                         case 1:
-                          switch (_state.isStepPedido()) {
+                          switch (state.isStepPedido()) {
                             case 0:
                               Navigator.of(context).pop();
                               break;
@@ -123,19 +123,19 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                           }
                           break;
                         case 2:
-                          switch (_state.isStepPedido()) {
+                          switch (state.isStepPedido()) {
                             case 0:
                               Navigator.of(context).pop();
                               break;
                             case 1:
                               Provider.of<LoginState>(context, listen: false)
                                   .backStep();
-                              _state.loading(false);
+                              state.loading(false);
                               break;
                             case 2:
                               Provider.of<LoginState>(context, listen: false)
                                   .backStep();
-                              _state.loading(false);
+                              state.loading(false);
                               break;
                             default:
                           }
@@ -167,13 +167,13 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                 Container(width: 1.0, height: 45.0, color: Color(0xffeb425f)),
                 Expanded(
                   child: InkWell(
-                    onTap: () {
-                      switch (_state.isTipoPedido()) {
-                        case 1:
-                          switch (_state.isStepPedido()) {
+                    onTap: () async {
+                      switch (state.isTipoPedido()) {
+                        case 1: //cleinte
+                          switch (state.isStepPedido()) {
                             case 1:
                               if (_formPedidoKey.currentState.validate() &&
-                                  _state.isPunto('a')) {
+                                  state.isPunto('a')) {
                                 showModalBottomSheet(
                                     elevation: alto * 0.35,
                                     backgroundColor:
@@ -185,7 +185,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                                     });
                               }
                               break;
-                            case 2:
+                            case 2: //repartidor
                               Navigator.of(context).pop();
                               break;
                             default:
@@ -193,35 +193,34 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                           break;
 
                         case 2:
-                          switch (_state.isStepPedido()) {
+                          switch (state.isStepPedido()) {
                             case 1:
                               if (orderLines.isNotEmpty) {
-                                _state.plusStep();
+                                state.plusStep();
                               } else {
-                                _state.salioAdvertencia();
+                                state.salioAdvertencia();
                               }
                               break;
                             case 2:
-                              if (orderLines.isNotEmpty &&
-                                  _state.isPunto("b")) {
-                                _calcularCostedelServicio();
-                                if (costoServicio >= 1.0) {
-                                  showModalBottomSheet(
-                                      elevation: alto * 0.7,
-                                      backgroundColor:
-                                          Color.fromRGBO(0, 0, 0, 0.1),
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return _modalListaPedidosConfirmar(
-                                            alto, ancho, context);
-                                      });
-                                } else {
-                                  _calcularCostedelServicio();
-                                  _state.loading(true);
-                                }
+                              if (orderLines.isNotEmpty && state.isPunto("b")) {
+                                print("Aceptar, caluclar preci....");
+                                state.loading(true);
+                                await _calcularCostedelServicio();
+                                print(costoServicio);
+                                print(
+                                    "YA se calculo el coste de servicio///////////////////////");
+
+                                showModalBottomSheet(
+                                    elevation: alto * 0.7,
+                                    backgroundColor:
+                                        Color.fromRGBO(0, 0, 0, 0.1),
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return _modalListaPedidosConfirmar(
+                                          alto, ancho, context);
+                                    });
                               } else {
-                                print("aqui");
-                                _state.salioAdvertencia();
+                                state.salioAdvertencia();
                               }
                               break;
                             default:
@@ -242,9 +241,9 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                         padding: const EdgeInsets.only(right: 20.0),
                         child: Align(
                             alignment: Alignment.centerRight,
-                            child: _state.isAdvertencia()
+                            child: state.isAdvertencia()
                                 ? Icon(Icons.cancel, color: Colors.white)
-                                : _state.isLoading()
+                                : state.isLoading()
                                     ? CircularProgressIndicator(
                                         backgroundColor: Color(0xffec506b),
                                         valueColor:
@@ -286,6 +285,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
         break;
       case 2:
         print('Paso ${_stados.isStepPedido()}');
+        print(orderLines);
         if (_stados.isTipoPedido() == 1) {
           return esperaRepartidor(ancho, alto);
         }
@@ -1449,24 +1449,33 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     return subtotal + 25;
   }
 
-  _calcularCostedelServicio() {
+  void _calcularCostedelServicio() {
+    print(
+        "..........Calculando Coste del Servicio .................."); //double _dis = await _porDistancia();
+    double preCostoServicio = _porDestinos() + _porCompra(subtotal); // + _dis;
     setState(() {
-      double preCostoServicio = _porDestinos() + double.parse(_porCompra(subtotal));
-      costoServicio =
-          preCostoServicio + _comisionApp(preCostoServicio) + 2.50;
+      costoServicio = preCostoServicio + _comisionApp(preCostoServicio);
     });
   }
 
+/////////////////////////////////////////////////////////
+
   Future<List> _llenarDistancias(
       List listaTemporal, double startLatitude, double startLongitude) async {
+    print("Llenar Distamcias!!!");
     List a = listaTemporal;
+
+    print("item");
     for (var item in a) {
+      print(item);
       final double endLatitude = item['punto']['latitud'];
       final double endLongitude = item['punto']['longitud'];
-      item['distancia'] = await Geolocator().distanceBetween(
-          startLatitude, startLongitude, endLatitude, endLongitude);
+      setState(() async {
+        a[item]['distancia'] = await Geolocator().distanceBetween(
+            startLatitude, startLongitude, endLatitude, endLongitude);
+      });
     }
-    return listaTemporal;
+    return a;
   }
 
   int _posicionMenor(List li) {
@@ -1483,28 +1492,18 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     return _pos;
   }
 
-   _porCompra(int sub) {
-    if (sub >= 1000) {
-      return sub * 0.02;
-    }
-    if (sub >= 800 && sub <= 999) {
-      return sub * 0.03;
-    }
-    if (sub >= 500 && sub <= 799) {
-      return sub * 0.05;
-    }
-    if (sub >= 300 && sub <= 499) {
-      return sub * 0.06;
-    }
-    if (sub >= 100 && sub <= 299) {
-      return sub * 0.08;
-    }
-    if (sub >= 99) {
-      return sub * 0.10;
-    }
+  double _porCompra(int sub) {
+    double _por;
+    if (sub >= 1000) _por = 0.02;
+    if (sub >= 800 && sub <= 999) _por = 0.03;
+    if (sub >= 500 && sub <= 799) _por = 0.05;
+    if (sub >= 300 && sub <= 499) _por = 0.06;
+    if (sub >= 100 && sub <= 299) _por = 0.08;
+    if (sub <= 99) _por = 0.10;
+    return sub * _por;
   }
 
-   double _porDestinos() {
+  double _porDestinos() {
     int _destinos = rellenarDestinos().length;
     if (_destinos <= 2) return subtotal * 0.10;
     if (_destinos <= 4) return subtotal * 0.08;
@@ -1514,11 +1513,12 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     if (_destinos >= 11) return subtotal * 0.02;
   }
 
-  _porDistancia() async {
+  Future<double> _porDistancia() async {
     final destino = Provider.of<LoginState>(context, listen: false)
         .getDirecciondelPunto('b');
     double startLatitude = destino['latitud'];
     double startLongitude = destino['longitud'];
+
     List listaTemporal = orderLines;
     int posmin = 0;
     double disTotal = 0.0;
@@ -1530,9 +1530,11 @@ class _NuevoPedidoState extends State<NuevoPedido> {
       disTotal = disTotal + listaTemporal[posmin]['distancia'];
       startLatitude = listaTemporal[posmin]['punto']['latitud'];
       startLongitude = listaTemporal[posmin]['punto']['longitud'];
-      listaTemporal.remove(posmin);
+      listaTemporal[posmin] = null;
     }
-    return disTotal;
+    print("ahora aqui3");
+    print("$disTotal");
+    return _precioDistancia(disTotal);
   }
 
   rellenarDestinos() {
@@ -1555,7 +1557,24 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     return puntos;
   }
 
-  num _comisionApp(double pre) {
-    return pre * 0.029;
+  double _comisionApp(double pre) {
+    return pre * 0.029 + 2.50;
+  }
+
+  double _precioDistancia(double disTotal) {
+    print("precio Distancia");
+    if (disTotal < 1999.0) return 15;
+    if (disTotal < 4999.0) return 25;
+    if (disTotal < 7999.0) return 35;
+    if (disTotal < 10999.0) return 45;
+    if (disTotal < 13999.0) return 55;
+    if (disTotal < 16999.0) return 65;
+    if (disTotal < 19999.0) return 75;
+    if (disTotal < 22999.0) return 85;
+    if (disTotal < 25999.0) return 95;
+    if (disTotal < 28999.0) return 105;
+    if (disTotal < 31999.0) return 115;
+    if (disTotal < 34999.0) return 125;
+    if (disTotal >= 35000.0) return 150;
   }
 }

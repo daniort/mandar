@@ -131,7 +131,7 @@ class _DataClienteState extends State<DataCliente> {
                       ),
                     ),
                     Text(
-                      "${_user.displayName}",
+                      "${_user.displayName.toUpperCase()}",
                       style: TextStyle(
                           fontSize: 25,
                           color: Color(0xff484349),
