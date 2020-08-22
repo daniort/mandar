@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mandadero/Router/strings.dart';
+import 'package:mandadero/screens/editar_wid.dart';
 
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
@@ -48,10 +49,11 @@ class _DataRepartidorState extends State<DataRepartidor> {
                                 MaterialButton(
                                   onPressed: () {
                                     Navigator.of(context).pop();
-                                      Provider.of<LoginState>(context, listen: false).logout();
-                                      
+                                    Provider.of<LoginState>(context,
+                                            listen: false)
+                                        .logout();
                                   },
-                                  color:   Color(0xff464d77),
+                                  color: Color(0xff464d77),
                                   child: Text(
                                     'Salir',
                                     style: TextStyle(color: Colors.white),
@@ -68,7 +70,10 @@ class _DataRepartidorState extends State<DataRepartidor> {
                                         text: '\n',
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold)),
-                                    TextSpan(text: 'Ya no podrás seguir tus pedidos.',style: TextStyle(color: Colors.grey),),
+                                    TextSpan(
+                                      text: 'Ya no podrás seguir tus pedidos.',
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
                                   ],
                                 ),
                               ));
@@ -89,33 +94,31 @@ class _DataRepartidorState extends State<DataRepartidor> {
             child: Container(
               child: Column(
                 children: <Widget>[
-                   Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(150),
-                        child: Container(
-                          width: alto * .25,
-                          height: alto * .25,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(
-                                color: Color.fromRGBO(20, 20, 20, 0.2),
-                                width: 5.0),
-                            boxShadow: [
-                              BoxShadow(color: Colors.white10, blurRadius: 25)
-                            ],
-                            borderRadius: BorderRadius.circular(150),
-                          ),
-                          child: Image.asset(
-                            'lib/assets/2.jpg',
-                            fit: BoxFit.cover,
-                            
-                            
-                          ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(150),
+                      child: Container(
+                        width: alto * .25,
+                        height: alto * .25,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(
+                              color: Color.fromRGBO(20, 20, 20, 0.2),
+                              width: 5.0),
+                          boxShadow: [
+                            BoxShadow(color: Colors.white10, blurRadius: 25)
+                          ],
+                          borderRadius: BorderRadius.circular(150),
+                        ),
+                        child: Image.asset(
+                          'lib/assets/2.jpg',
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
-                 Text(
+                  ),
+                  Text(
                     "Repartidor",
                     style: TextStyle(
                       fontSize: 19,
@@ -123,28 +126,31 @@ class _DataRepartidorState extends State<DataRepartidor> {
                       fontWeight: FontWeight.normal,
                     ),
                   ),
-                 Text(
+                  Text(
                     "${_user.displayName}",
                     style: TextStyle(
                         fontSize: 25,
                         color: Color(0xff484349),
                         fontWeight: FontWeight.bold),
                   ),
-                  _user.email != null ?  Text(
-                    "${_user.email}",
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Color(0xff484349),
-                    ),
-                  ):Text(''),
-                   _user.phoneNumber != null ?  Text(
-                    "${_user.phoneNumber}",
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Color(0xff484349),
-                    ),
-                  ):Text(''),
-                
+                  _user.email != null
+                      ? Text(
+                          "${_user.email}",
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Color(0xff484349),
+                          ),
+                        )
+                      : Text(''),
+                  _user.phoneNumber != null
+                      ? Text(
+                          "${_user.phoneNumber}",
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Color(0xff484349),
+                          ),
+                        )
+                      : Text(''),
                 ],
               ),
             ),
@@ -230,7 +236,12 @@ class _DataRepartidorState extends State<DataRepartidor> {
                                       fontWeight: FontWeight.bold),
                                 ),
                                 onTap: () {
-                                  Navigator.of(context).pushNamed(editarRoute);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EditarUser(),
+                                    ),
+                                  );
                                 },
                               ),
                               SizedBox(
