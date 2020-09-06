@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-
 import 'package:mandadero/cliente/nuevo_pedido.dart';
 import 'package:mandadero/cliente/pedidos_wid.dart';
 import 'package:mandadero/cliente/perfil_wid.dart';
@@ -20,9 +19,16 @@ class ProfileClienteState extends State<ProfileCliente> {
   Widget inicio = DataCliente();
   final PageStorageBucket bucket = PageStorageBucket();
 
+  cabio() {
+    
+        inicio = Pedidos();
+        page = 1;
+    
+    
+  }
+
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       backgroundColor: Color(0xfff6f9ff),
       body: PageStorage(

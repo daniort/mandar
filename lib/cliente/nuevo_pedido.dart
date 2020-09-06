@@ -9,7 +9,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mandadero/cliente/nueva_ubi.dart';
+import 'package:mandadero/cliente/principal_wid.dart';
 import 'package:mandadero/services/cliente_services.dart';
+import 'package:mandadero/services/datas.dart';
 import 'package:mandadero/services/widgets.dart';
 import 'package:mandadero/state/loginstate.dart';
 import 'package:provider/provider.dart';
@@ -23,23 +25,50 @@ class _NuevoPedidoState extends State<NuevoPedido> {
   TextEditingController _tituloController;
   TextEditingController _datosController;
   TextEditingController _cantidadController;
-
-  int subtotal = 0;
-  double costoServicio = 0.0;
-  File _image;
-  List orderLines = <Map>[];
-  List puntos = [];
-  List distancias = [];
-  bool destino = false;
-  final ImagePicker picker = ImagePicker();
   final _formPedidoKey = GlobalKey<FormState>();
   final _formPedidoProductoKey = GlobalKey<FormState>();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  //int subtotal = 0;
+  double costoServicio = 0.0;
+  File _image;
+  List _orderLines = <Map>[];
+  //List distancias = [];
+  //bool destino = false;
+  final ImagePicker picker = ImagePicker();
+
   void initState() {
     _tituloController = TextEditingController();
     _datosController = TextEditingController();
     _cantidadController = TextEditingController();
     super.initState();
+  }
+
+  Future _pickImage() async {
+    try {
+      final select = await picker.getImage(source: ImageSource.camera);
+      setState(() {
+        _image = File(select.path);
+      });
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  Future<String> _subirImagen(File image) async {
+    StorageUploadTask _uploadTask;
+    final FirebaseStorage _sto = LoginState().isStorage();
+    String filePath = "recibos_clientes/${DateTime.now()}.png";
+    try {
+      setState(() {
+        _uploadTask = _sto.ref().child(filePath).putFile(_image);
+      });
+      var dowurl = await (await _uploadTask.onComplete).ref.getDownloadURL();
+      var url = dowurl.toString();
+      return url;
+    } catch (e) {
+      return 'null';
+    }
   }
 
   @override
@@ -107,7 +136,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                   child: InkWell(
                     onTap: () {
                       switch (state.isTipoPedido()) {
-                        case 1:
+                        case 1: //servicio
                           switch (state.isStepPedido()) {
                             case 0:
                               Navigator.of(context).pop();
@@ -122,7 +151,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                             default:
                           }
                           break;
-                        case 2:
+                        case 2: //productos
                           switch (state.isStepPedido()) {
                             case 0:
                               Navigator.of(context).pop();
@@ -169,56 +198,67 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                   child: InkWell(
                     onTap: () async {
                       switch (state.isTipoPedido()) {
-                        case 1: //cleinte
+                        case 1: //servicio
                           switch (state.isStepPedido()) {
                             case 1:
                               if (_formPedidoKey.currentState.validate() &&
                                   state.isPunto('a')) {
+                                //await _calcularCostedelServicioProductos();
                                 showModalBottomSheet(
                                     elevation: alto * 0.35,
                                     backgroundColor:
                                         Color.fromRGBO(0, 0, 0, 0.1),
                                     context: context,
                                     builder: (BuildContext context) {
-                                      return _modalTicket(alto, ancho,
+                                      return _modalTicketServicio(alto, ancho,
                                           int.parse(_cantidadController.text));
                                     });
                               }
                               break;
-                            case 2: //repartidor
+                            case 2:
                               Navigator.of(context).pop();
                               break;
                             default:
                           }
                           break;
 
-                        case 2:
+                        case 2: // productos
                           switch (state.isStepPedido()) {
                             case 1:
-                              if (orderLines.isNotEmpty) {
+                              if (_orderLines.isNotEmpty) {
                                 state.plusStep();
                               } else {
                                 state.salioAdvertencia();
                               }
                               break;
                             case 2:
-                              if (orderLines.isNotEmpty && state.isPunto("b")) {
-                                print("Aceptar, caluclar preci....");
+                              if (_orderLines.isNotEmpty &&
+                                  state.isPunto("b")) {
                                 state.loading(true);
-                                await _calcularCostedelServicio();
-                                print(costoServicio);
-                                print(
-                                    "YA se calculo el coste de servicio///////////////////////");
 
-                                showModalBottomSheet(
-                                    elevation: alto * 0.7,
-                                    backgroundColor:
-                                        Color.fromRGBO(0, 0, 0, 0.1),
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return _modalListaPedidosConfirmar(
-                                          alto, ancho, context);
-                                    });
+                                _calcularCostedelServicioProductos(
+                                        state.getDirecciondelPunto('b'),
+                                        _orderLines,
+                                        pieSubtotal(_orderLines))
+                                    .then((value) {
+                                  print(":::COSTO DEL SERVICIO: " +
+                                      costoServicio.toString());
+
+                                  if (costoServicio >= 1) {
+                                    state.loading(false);
+                                    showModalBottomSheet(
+                                        elevation: alto * 0.7,
+                                        backgroundColor:
+                                            Color.fromRGBO(0, 0, 0, 0.1),
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return _modalListaPedidosConfirmar(
+                                              alto, ancho, context);
+                                        });
+                                  }
+                                }).catchError((onError){
+                                  print(onError);
+                                });
                               } else {
                                 state.salioAdvertencia();
                               }
@@ -284,8 +324,8 @@ class _NuevoPedidoState extends State<NuevoPedido> {
         }
         break;
       case 2:
-        print('Paso ${_stados.isStepPedido()}');
-        print(orderLines);
+        //print('Paso ${_stados.isStepPedido()}');
+        //uprint(orderLines);
         if (_stados.isTipoPedido() == 1) {
           return esperaRepartidor(ancho, alto);
         }
@@ -344,10 +384,16 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                           Padding(
                             padding:
                                 const EdgeInsets.only(right: 10.0, left: 10.0),
-                            child: Icon(Icons.pin_drop, color: Colors.grey),
+                            child: Icon(Icons.pin_drop,
+                                color: _stados.isAdvertencia()
+                                    ? AppColors.primaryBackground
+                                    : Colors.grey),
                           ),
                           Text('¿Donde lo Compramos?',
-                              style: TextStyle(color: Colors.grey)),
+                              style: TextStyle(
+                                  color: _stados.isAdvertencia()
+                                      ? AppColors.primaryBackground
+                                      : Colors.grey)),
                         ],
                       ),
                       _stados.isPunto("x")
@@ -369,7 +415,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                                   context: context,
                                   isScrollControlled: true,
                                   builder: (context) {
-                                    return _elegirUbicacion(
+                                    return elegirUbicacion(
                                         context, currentUser.uid, alto, "x");
                                   });
                             },
@@ -434,27 +480,35 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                   Expanded(
                     child: MaterialButton(
                       padding: EdgeInsets.only(left: 10, right: 10),
-                      color: Colors.grey[300],
+                      color: Colors.grey[
+                          300], //AppColors.secundaryBackground,  //Colors.grey[300],
                       onPressed: () {
+                        print("==================");
                         if (_formPedidoProductoKey.currentState.validate()) {
-                          var _producto = {
-                            "nombre": _tituloController.text,
-                            "cantidad": int.parse(_cantidadController.text),
-                            "punto": _stados.getDirecciondelPunto("x"),
-                            "distancia": 0.0,
-                            "comprado": false,
-                          };
-                          setState(() {
-                            orderLines.add(_producto);
-                          });
-                          _tituloController.clear();
-                          _cantidadController.clear();
+                          if (_stados.isPunto("x")) {
+                            var _producto = {
+                              "nombre": _tituloController.text,
+                              "cantidad": int.parse(_cantidadController.text),
+                              "punto": _stados.getDirecciondelPunto("x"),
+                              "distancia": 0.0,
+                              "comprado": false,
+                            };
+                            setState(() {
+                              _orderLines.add(_producto);
+                            });
+                            _tituloController.clear();
+                            _cantidadController.clear();
+                          } else {
+                            _stados.salioAdvertencia();
+                          }
                         } else {
                           print('incorrect');
                         }
                       },
                       child: Text('Agregar a la lista',
-                          style: TextStyle(color: Colors.grey[600])),
+                          style: TextStyle(
+                              color: Colors.grey[800],
+                              fontWeight: FontWeight.bold)),
                       disabledColor: Colors.grey[300],
                     ),
                   ),
@@ -485,7 +539,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                           ],
                         ),
                       ),
-                      for (var item in orderLines)
+                      for (var item in _orderLines)
                         Padding(
                           padding: const EdgeInsets.only(left: 10.0, bottom: 2),
                           child: Row(
@@ -530,7 +584,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                                                   color: Color(0xffee6179),
                                                   onPressed: () async {
                                                     setState(() {
-                                                      orderLines.remove(item);
+                                                      _orderLines.remove(item);
                                                     });
                                                     Navigator.of(context).pop();
                                                   },
@@ -547,7 +601,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                             ],
                           ),
                         ),
-                      orderLines.isNotEmpty
+                      _orderLines.isNotEmpty
                           ? Padding(
                               padding:
                                   const EdgeInsets.only(top: 10, bottom: 4),
@@ -579,7 +633,9 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                                         children: <Widget>[
                                           //_pieTabla("25"),
                                           //_pieTabla("5"),
-                                          Text(_pieSubtotal().toString(),
+                                          Text(
+                                              pieSubtotal(_orderLines)
+                                                  .toString(),
                                               textAlign: TextAlign.right,
                                               style: TextStyle(
                                                   fontWeight: FontWeight.bold))
@@ -699,6 +755,315 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     );
   }
 
+  Widget _ubicacionEntrega(double alto, double ancho) {
+    final _stados = Provider.of<LoginState>(context, listen: true);
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(top: 20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10.0, left: 10.0),
+                    child: Icon(Icons.pin_drop,
+                        color: _stados.isAdvertencia()
+                            ? AppColors.primaryBackground
+                            : Colors.grey),
+                  ),
+                  Text('Lugar de Entrega:',
+                      style: TextStyle(color: Colors.grey)),
+                ],
+              ),
+              _stados.isPunto("b")
+                  ? iconDeleteRedDos("b", _stados)
+                  : SizedBox(),
+            ],
+          ),
+        ),
+        !_stados.isPunto("b")
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  MaterialButton(
+                    color: Colors.grey[300],
+                    onPressed: () {
+                      showModalBottomSheet(
+                          elevation: alto * 0.8,
+                          backgroundColor: Color.fromRGBO(250, 0, 0, 1),
+                          //shape:
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (context) {
+                            return elegirUbicacion(
+                                context, _stados.currentUser().uid, alto, "b");
+                          });
+                    },
+                    child: Text('Ubicacion Guardada',
+                        style: TextStyle(color: Colors.grey[600])),
+                    //disabledColor: Colors.grey[300],
+                  ),
+                  MaterialButton(
+                    color: Colors.grey[300],
+                    onPressed: () {
+                      String _tip = 'b';
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NuevaUbicacion(data: _tip),
+                        ),
+                      );
+                    },
+                    disabledColor: Colors.grey[300],
+                    child: Text("Ubicacion Nueva",
+                        style: TextStyle(color: Colors.grey[600])),
+                  )
+                ],
+              )
+            : Center(
+                child: Padding(
+                padding: const EdgeInsets.only(top: 8.0, bottom: 1.0),
+                child: Text(_stados.getDirecciondelPunto("b")['label'],
+                    style: TextStyle(color: Colors.grey)),
+              )),
+      ],
+    );
+  }
+
+  Widget _modalListaPedidosConfirmar(
+      double alto, double ancho, BuildContext context) {
+    return Container(
+      height: alto * 0.7,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(10.0),
+          topRight: Radius.circular(10.0),
+        ),
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            for (var item in (rellenarDestinos(_orderLines)))
+              Column(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10.0),
+                    child: Text("Punto de Compra:",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.grey)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        top: 2.0, bottom: 4.0, left: 10, right: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Expanded(
+                          flex: 1,
+                          child: Icon(Icons.pin_drop),
+                        ),
+                        Expanded(
+                          flex: 9,
+                          child: Text(item['label'],
+                              textAlign: TextAlign.left,
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  for (var item2 in _orderLines)
+                    if (item['label'] == item2['punto']["label"])
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            top: 4.0, bottom: 4.0, left: 20, right: 30),
+                        child: Row(
+                          children: <Widget>[
+                            Expanded(
+                              flex: 2,
+                              child: pieTabla(
+                                  item2['nombre'].toString().toUpperCase()),
+                            ),
+                            Expanded(
+                                flex: 1,
+                                child: pieTablaRigth(
+                                    "\$ ${item2['cantidad'].toString()}")),
+                          ],
+                        ),
+                      ),
+                ],
+              ),
+            Text(
+              "Punto de Entrega:",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, color: Colors.grey[800]),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 2.0, bottom: 4.0, left: 10, right: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    flex: 1,
+                    child: Icon(Icons.person_pin_circle),
+                  ),
+                  Expanded(
+                    flex: 9,
+                    child: Text(
+                        "${Provider.of<LoginState>(context, listen: true).getDirecciondelPunto('b')['label']}",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            ),
+            Divider(
+              color: Colors.grey,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 4.0, bottom: 4.0, left: 20, right: 30),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Expanded(
+                    flex: 2,
+                    child: pieTablaRigth("Total Pedido:  \$"),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: pieTablaRigth(pieSubtotal(_orderLines).toString()),
+                  )
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 4.0, bottom: 4.0, left: 20, right: 30),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Expanded(
+                    flex: 2,
+                    child: pieTablaRigth("Costo del Servicio:  \$"),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: pieTablaRigth(redondear(costoServicio).toString()),
+                  )
+                ],
+              ),
+            ),
+            Divider(
+              color: Colors.grey,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  OutlineButton(
+                    splashColor: Colors.red[200],
+                    textColor: Colors.red[300],
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 30.0, right: 30.0),
+                      child: Text('Cancelar'),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: RaisedButton(
+                        onPressed: () async {
+                          final _stados =
+                              Provider.of<LoginState>(context, listen: false);
+                          bool _pedidoregistrado = false;
+                          final _destino = _stados.getDirecciondelPunto('b');
+                          double _distancia =
+                              await totalDistancia(_orderLines, _destino);
+                          _pedidoregistrado = UserServices().newPedidoProductos(
+                              _orderLines,
+                              pieSubtotal(_orderLines),
+                              costoServicio,
+                              _stados.currentUser(),
+                              _destino,
+                              _distancia);
+
+                          if (_pedidoregistrado) {
+                            print("=== PEDIDO AGREGADO ====");
+                            //_formPedidoKey.currentState.reset();
+                            //_formPedidoProductoKey.currentState.reset();
+                            ProfileClienteState().cabio();
+                            _stados.setStepPedido(0);
+                            Navigator.of(context).pop();
+                            Navigator.of(context).pop();
+                          } else {
+                            Navigator.of(context).pop();
+                            _scaffoldKey.currentState.showSnackBar(SnackBar(
+                              content: Text('Algo Pasó, Intentalo de Nuevo'),
+                              backgroundColor: Color(0xffee6179),
+                              duration: Duration(milliseconds: 2000),
+                            ));
+                          }
+                        },
+                        child: Text('Confirmar',
+                            style: TextStyle(color: Colors.white)),
+                        color: Colors.grey[900],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+  Future<void> _calcularCostedelServicioProductos(
+      var destino, List orden, int sub) async {
+    //print(".......Calculando Coste del Servicio Compra de Productos.....");
+    double _dist = await totalDistancia(orden, destino);
+    double preCostoServicio =
+        porDestinos(orden, sub) + porCompra(sub) + precioDistancia(_dist);
+    setState(() {
+      costoServicio = preCostoServicio + comisionApp(preCostoServicio);
+    });
+  }
+
+  //Future<void> _calcularCostedelServicioServicio() async {
+  //print(".....Calculando Coste de un Pago de Servicio .......");
+  //double _dis = await _porDistanciaUnica();
+  //double preCostoServicio = (subtotal * 0.10) + porCompra(subtotal);
+  //setState(() {
+//      costoServicio = preCostoServicio + comisionApp(preCostoServicio);
+  //  });
+  //}
+
+  /////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////FORM///////////////////////////////////////////////////////////////////////
+///////////////////////////DE///////////////////////////////////////////////////////////////////
+////////////////////////////////PAGO DE SERVICIOS///////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////
+
   Widget _formServicio(double ancho, double alto, FirebaseUser currentUser,
       BuildContext context) {
     final _stados = Provider.of<LoginState>(context, listen: true);
@@ -802,7 +1167,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                                   context: context,
                                   isScrollControlled: true,
                                   builder: (context) {
-                                    return _elegirUbicacion(
+                                    return elegirUbicacion(
                                         context, currentUser.uid, alto, "a");
                                   });
                             },
@@ -924,98 +1289,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     );
   }
 
-  Future<String> _subirImagen(File image) async {
-    StorageUploadTask _uploadTask;
-    final FirebaseStorage _sto = LoginState().isStorage();
-    String filePath = "recibos_clientes/${DateTime.now()}.png";
-    try {
-      setState(() {
-        _uploadTask = _sto.ref().child(filePath).putFile(_image);
-      });
-      var dowurl = await (await _uploadTask.onComplete).ref.getDownloadURL();
-      var url = dowurl.toString();
-      return url;
-    } catch (e) {
-      return 'null';
-    }
-  }
-
-  Widget _ubicacionEntrega(double alto, double ancho) {
-    final _stados = Provider.of<LoginState>(context, listen: true);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(top: 20.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10.0, left: 10.0),
-                    child: Icon(Icons.pin_drop, color: Colors.grey),
-                  ),
-                  Text('Lugar de Entrega:',
-                      style: TextStyle(color: Colors.grey)),
-                ],
-              ),
-              _stados.isPunto("b")
-                  ? iconDeleteRedDos("b", _stados)
-                  : SizedBox(),
-            ],
-          ),
-        ),
-        !_stados.isPunto("b")
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-                  MaterialButton(
-                    color: Colors.grey[300],
-                    onPressed: () {
-                      showModalBottomSheet(
-                          elevation: alto * 0.8,
-                          backgroundColor: Color.fromRGBO(250, 0, 0, 1),
-                          //shape:
-                          context: context,
-                          isScrollControlled: true,
-                          builder: (context) {
-                            return _elegirUbicacion(
-                                context, _stados.currentUser().uid, alto, "b");
-                          });
-                    },
-                    child: Text('Ubicacion Guardada',
-                        style: TextStyle(color: Colors.grey[600])),
-                    disabledColor: Colors.grey[300],
-                  ),
-                  MaterialButton(
-                    color: Colors.grey[300],
-                    onPressed: () {
-                      String _tip = 'b';
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => NuevaUbicacion(data: _tip),
-                        ),
-                      );
-                    },
-                    disabledColor: Colors.grey[300],
-                    child: Text("Ubicacion Nueva",
-                        style: TextStyle(color: Colors.grey[600])),
-                  )
-                ],
-              )
-            : Center(
-                child: Padding(
-                padding: const EdgeInsets.only(top: 8.0, bottom: 1.0),
-                child: Text(_stados.getDirecciondelPunto("b")['label'],
-                    style: TextStyle(color: Colors.grey)),
-              )),
-      ],
-    );
-  }
-
-  Widget _modalTicket(double alto, double ancho, int subtot) {
+  Widget _modalTicketServicio(double alto, double ancho, int subtot) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -1053,12 +1327,6 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                         padding: const EdgeInsets.all(4.0),
                         child: pieTabla("Costo Servicio:    \$"),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: Text("Total:    \$",
-                            textAlign: TextAlign.right,
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                      )
                     ],
                   ),
                 ),
@@ -1071,18 +1339,12 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                       children: <Widget>[
                         Padding(
                           padding: const EdgeInsets.all(4.0),
-                          child: pieTabla(subtotal.toString()),
+                          child: pieTabla(pieSubtotal(_orderLines).toString()),
                         ),
                         Padding(
                           padding: const EdgeInsets.all(4.0),
-                          child: pieTabla("25"),
+                          child: pieTabla(redondear(costoServicio).toString()),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Text(_totalPedido(subtot).toString(),
-                              textAlign: TextAlign.right,
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                        )
                       ],
                     ),
                   ),
@@ -1113,13 +1375,14 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                       bool _pedidoregistrado = false;
 
                       if (_stados.isTipoPedido() == 1) {
+                        print("estas aqui");
                         String _url = await _subirImagen(_image);
-                        _pedidoregistrado = UserServices()
-                            .newPedidoPagoServicios(
+                        _pedidoregistrado =
+                            UserServices().newPedidoPagoServicios(
                                 _tituloController.text,
                                 _datosController.text,
                                 int.parse(_cantidadController.text),
-                                _totalPedido(subtot),
+                                300, //_totalPedido(subtot),
                                 _stados.currentUser(),
                                 _url,
                                 _stados.getDirecciondelPunto('a'));
@@ -1152,429 +1415,5 @@ class _NuevoPedidoState extends State<NuevoPedido> {
         ),
       ),
     );
-  }
-
-  Widget _modalListaPedidosConfirmar(
-      double alto, double ancho, BuildContext context) {
-    return Container(
-      height: alto * 0.7,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(10.0),
-          topRight: Radius.circular(10.0),
-        ),
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            for (var item in puntos)
-              Column(
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10.0),
-                    child: Text("Punto de Compra:",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, color: Colors.grey)),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        top: 2.0, bottom: 4.0, left: 10, right: 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Expanded(
-                          flex: 1,
-                          child: Icon(Icons.pin_drop),
-                        ),
-                        Expanded(
-                          flex: 9,
-                          child: Text(item['label'],
-                              textAlign: TextAlign.left,
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                        ),
-                      ],
-                    ),
-                  ),
-                  for (var item2 in orderLines)
-                    if (item['label'] == item2['punto']["label"])
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            top: 4.0, bottom: 4.0, left: 20, right: 30),
-                        child: Row(
-                          children: <Widget>[
-                            Expanded(
-                              flex: 2,
-                              child: pieTabla(
-                                  item2['nombre'].toString().toUpperCase()),
-                            ),
-                            Expanded(
-                                flex: 1,
-                                child: pieTablaRigth(
-                                    "\$ ${item2['cantidad'].toString()}")),
-                          ],
-                        ),
-                      ),
-                ],
-              ),
-            Text(
-              "Punto de Entrega:",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontWeight: FontWeight.bold, color: Colors.grey[800]),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(
-                  top: 2.0, bottom: 4.0, left: 10, right: 8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
-                    flex: 1,
-                    child: Icon(Icons.person_pin_circle),
-                  ),
-                  Expanded(
-                    flex: 9,
-                    child: Text(
-                        "${Provider.of<LoginState>(context, listen: true).getDirecciondelPunto('b')['label']}",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                ],
-              ),
-            ),
-            Divider(
-              color: Colors.grey,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(
-                  top: 4.0, bottom: 4.0, left: 20, right: 30),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  Expanded(
-                    flex: 2,
-                    child: pieTablaRigth("Total Pedido:  \$"),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: pieTablaRigth(subtotal.toString()),
-                  )
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(
-                  top: 4.0, bottom: 4.0, left: 20, right: 30),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  Expanded(
-                    flex: 2,
-                    child: pieTablaRigth("Costo del Servicio:  \$"),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: pieTablaRigth(redondear(costoServicio).toString()),
-                  )
-                ],
-              ),
-            ),
-            Divider(
-              color: Colors.grey,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  OutlineButton(
-                    splashColor: Colors.red[200],
-                    textColor: Colors.red[300],
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 30.0, right: 30.0),
-                      child: Text('Cancelar'),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: RaisedButton(
-                        onPressed: () async {
-                          final _stados =
-                              Provider.of<LoginState>(context, listen: false);
-                          bool _pedidoregistrado = false;
-                          final _destino = _stados.getDirecciondelPunto('b');
-                          _pedidoregistrado = await UserServices()
-                              .newPedidoProductos(
-                                  await _llenarDistancias(
-                                      orderLines,
-                                      _destino["latitud"],
-                                      _destino['longitud']),
-                                  subtotal,
-                                  costoServicio,
-                                  _stados.currentUser(),
-                                  _destino,
-                                  350.3);
-
-                          if (_pedidoregistrado) {
-                            //_formPedidoKey.currentState.reset();
-                            //_formPedidoProductoKey.currentState.reset();
-                            _stados.plusStep();
-                            _stados.setStepPedido(0);
-                            Navigator.of(context).pop();
-                            Navigator.of(context).pop();
-                          } else {
-                            Navigator.of(context).pop();
-                            _scaffoldKey.currentState.showSnackBar(SnackBar(
-                              content: Text('Algo Pasó, Intentalo de Nuevo'),
-                              backgroundColor: Color(0xffee6179),
-                              duration: Duration(milliseconds: 2000),
-                            ));
-                          }
-                        },
-                        child: Text('Confirmar',
-                            style: TextStyle(color: Colors.white)),
-                        color: Colors.grey[900],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _elegirUbicacion(
-      BuildContext context, String uid, double alto, String s) {
-    return Container(
-      height: alto * .5,
-      color: Colors.white,
-      child: StreamBuilder<QuerySnapshot>(
-        stream: Firestore.instance
-            .collection('users')
-            .document(uid)
-            .collection("tiendas")
-            .snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting:
-              return new Text('Loading...');
-            default:
-              return Stack(
-                children: <Widget>[
-                  Expanded(
-                    child: ListView(
-                      children: snapshot.data.documents
-                          .map((DocumentSnapshot document) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: InkWell(
-                            onTap: () {
-                              String _dire =
-                                  "${document['calle']}, #${document['numero']}, ${document['localidad']}, ${document['ciudad']}";
-                              double longi = document['longitud'];
-                              double lati = document['latitud'];
-                              Provider.of<LoginState>(context, listen: false)
-                                  .setUbicacion(_dire, lati, longi, s);
-                              Navigator.of(context).pop();
-                            },
-                            child: Container(
-                              color: Colors.grey[100],
-                              child: new ListTile(
-                                leading: Icon(Icons.store),
-                                title: new Text(
-                                  document['nombre'],
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Colors.black54),
-                                ),
-                                subtitle: new Text(
-                                    "${document['calle']}, #${document['numero']}, ${document['localidad']}, ${document['ciudad']}"),
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  Center(
-                    child: Text(
-                      'Elige una ubicación',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ),
-                ],
-              );
-          }
-        },
-      ),
-    );
-  }
-
-  Future _pickImage() async {
-    try {
-      final select = await picker.getImage(source: ImageSource.camera);
-      setState(() {
-        _image = File(select.path);
-      });
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-  int _pieSubtotal() {
-    int _sub = 0;
-    for (var item in orderLines) {
-      setState(() {
-        _sub = _sub + item['cantidad'];
-      });
-    }
-    setState(() {
-      subtotal = _sub;
-    });
-    return subtotal;
-  }
-
-  int _totalPedido(int subtotal) {
-    return subtotal + 25;
-  }
-
-  void _calcularCostedelServicio() {
-    print(
-        "..........Calculando Coste del Servicio .................."); //double _dis = await _porDistancia();
-    double preCostoServicio = _porDestinos() + _porCompra(subtotal); // + _dis;
-    setState(() {
-      costoServicio = preCostoServicio + _comisionApp(preCostoServicio);
-    });
-  }
-
-/////////////////////////////////////////////////////////
-
-  Future<List> _llenarDistancias(
-      List listaTemporal, double startLatitude, double startLongitude) async {
-    print("Llenar Distamcias!!!");
-    List a = listaTemporal;
-
-    print("item");
-    for (var item in a) {
-      print(item);
-      final double endLatitude = item['punto']['latitud'];
-      final double endLongitude = item['punto']['longitud'];
-      setState(() async {
-        a[item]['distancia'] = await Geolocator().distanceBetween(
-            startLatitude, startLongitude, endLatitude, endLongitude);
-      });
-    }
-    return a;
-  }
-
-  int _posicionMenor(List li) {
-    int _pos = 0;
-    for (var i = 0; i < li.length; i++) {
-      if (i == 0) {
-        _pos = i;
-      } else {
-        if (li[i]['distancia'] < li[_pos]['distancia']) {
-          _pos = i;
-        }
-      }
-    }
-    return _pos;
-  }
-
-  double _porCompra(int sub) {
-    double _por;
-    if (sub >= 1000) _por = 0.02;
-    if (sub >= 800 && sub <= 999) _por = 0.03;
-    if (sub >= 500 && sub <= 799) _por = 0.05;
-    if (sub >= 300 && sub <= 499) _por = 0.06;
-    if (sub >= 100 && sub <= 299) _por = 0.08;
-    if (sub <= 99) _por = 0.10;
-    return sub * _por;
-  }
-
-  double _porDestinos() {
-    int _destinos = rellenarDestinos().length;
-    if (_destinos <= 2) return subtotal * 0.10;
-    if (_destinos <= 4) return subtotal * 0.08;
-    if (_destinos <= 6) return subtotal * 0.06;
-    if (_destinos <= 8) return subtotal * 0.05;
-    if (_destinos <= 10) return subtotal * 0.03;
-    if (_destinos >= 11) return subtotal * 0.02;
-  }
-
-  Future<double> _porDistancia() async {
-    final destino = Provider.of<LoginState>(context, listen: false)
-        .getDirecciondelPunto('b');
-    double startLatitude = destino['latitud'];
-    double startLongitude = destino['longitud'];
-
-    List listaTemporal = orderLines;
-    int posmin = 0;
-    double disTotal = 0.0;
-
-    for (var i = 0; i < orderLines.length + 1; i++) {
-      listaTemporal =
-          await _llenarDistancias(listaTemporal, startLatitude, startLongitude);
-      posmin = _posicionMenor(listaTemporal);
-      disTotal = disTotal + listaTemporal[posmin]['distancia'];
-      startLatitude = listaTemporal[posmin]['punto']['latitud'];
-      startLongitude = listaTemporal[posmin]['punto']['longitud'];
-      listaTemporal[posmin] = null;
-    }
-    print("ahora aqui3");
-    print("$disTotal");
-    return _precioDistancia(disTotal);
-  }
-
-  rellenarDestinos() {
-    puntos.clear();
-    for (var item in orderLines) {
-      var existe = false;
-      if (puntos == null) {
-        puntos.add(item['punto']);
-      } else {
-        for (var p in puntos) {
-          if (p == item['punto']) {
-            existe = true;
-          }
-        }
-        if (!existe) {
-          puntos.add(item['punto']);
-        }
-      }
-    }
-    return puntos;
-  }
-
-  double _comisionApp(double pre) {
-    return pre * 0.029 + 2.50;
-  }
-
-  double _precioDistancia(double disTotal) {
-    print("precio Distancia");
-    if (disTotal < 1999.0) return 15;
-    if (disTotal < 4999.0) return 25;
-    if (disTotal < 7999.0) return 35;
-    if (disTotal < 10999.0) return 45;
-    if (disTotal < 13999.0) return 55;
-    if (disTotal < 16999.0) return 65;
-    if (disTotal < 19999.0) return 75;
-    if (disTotal < 22999.0) return 85;
-    if (disTotal < 25999.0) return 95;
-    if (disTotal < 28999.0) return 105;
-    if (disTotal < 31999.0) return 115;
-    if (disTotal < 34999.0) return 125;
-    if (disTotal >= 35000.0) return 150;
   }
 }
