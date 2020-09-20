@@ -38,8 +38,17 @@ class UserServices {
     }
   }
 
-  bool newPedidoPagoServicios(String titulo, String datos, int subtotal,
-      int totalPedido, FirebaseUser user, String image, puntoa) {
+  bool newPedidoPagoServicios(
+      String titulo, 
+      String datos,
+      int subtotal,
+      double totalPedido, 
+      FirebaseUser user, 
+      String image,
+      puntoa,
+      puntob,
+      distancia,
+       ) {
     var hoy = DateTime.now();
     try {
       Firestore.instance.collection('pedidos').document().setData({
@@ -58,6 +67,7 @@ class UserServices {
         "horai": "${hoy.hour}:${hoy.minute}:${hoy.second}",
         "horaf": "",
         "puntoa": puntoa,
+        "puntob": puntob,
         "urlrecibocliente": image,
         "urlreciborepartidor": "null",
         "fin_repartidor": false,

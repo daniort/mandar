@@ -24,10 +24,10 @@ class NuevoPedido extends StatefulWidget {
 class _NuevoPedidoState extends State<NuevoPedido> {
   TextEditingController _tituloController;
   TextEditingController _datosController;
-  TextEditingController _cantidadController;
+  TextEditingController cantidadController;
   final _formPedidoKey = GlobalKey<FormState>();
   final _formPedidoProductoKey = GlobalKey<FormState>();
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final scaffoldKey = GlobalKey<ScaffoldState>();
 
   //int subtotal = 0;
   double costoServicio = 0.0;
@@ -40,7 +40,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
   void initState() {
     _tituloController = TextEditingController();
     _datosController = TextEditingController();
-    _cantidadController = TextEditingController();
+    cantidadController = TextEditingController();
     super.initState();
   }
 
@@ -78,7 +78,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     final state = Provider.of<LoginState>(context, listen: true);
 
     return Scaffold(
-      key: _scaffoldKey,
+      key: scaffoldKey,
       resizeToAvoidBottomPadding: false,
       backgroundColor: Color(0xfff6f9ff),
       appBar: AppBar(
@@ -201,19 +201,66 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                         case 1: //servicio
                           switch (state.isStepPedido()) {
                             case 1:
-                              if (_formPedidoKey.currentState.validate() &&
-                                  state.isPunto('a')) {
-                                //await _calcularCostedelServicioProductos();
-                                showModalBottomSheet(
-                                    elevation: alto * 0.35,
-                                    backgroundColor:
-                                        Color.fromRGBO(0, 0, 0, 0.1),
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return _modalTicketServicio(alto, ancho,
-                                          int.parse(_cantidadController.text));
+
+                              //await _calcularCostedelServicioProductos();
+                              //showModalBottomSheet(
+                              //  elevation: alto * 0.35,
+                              //backgroundColor:
+                              //  Color.fromRGBO(0, 0, 0, 0.1),
+                              //context: context,
+                              //builder: (BuildContext context) {
+                              //return _modalTicketServicio(alto, ancho,
+                              //  int.parse(_cantidadController.text));
+                              //});
+
+                              if (_formPedidoKey.currentState.validate()) {
+                                if (state.isPunto("b")) {
+                                  if (state.isPunto("a")) {
+                                    state.loading(true);
+
+                                    _calcularCostedelServicioServicio(
+                                            state.getDirecciondelPunto('b'),
+                                            state.getDirecciondelPunto('a'),
+                                            int.parse(cantidadController.text))
+                                        .then((value) {
+                                      print(":::COSTO DEL SERVICIO: " +
+                                          costoServicio.toString());
+
+                                      if (costoServicio >= 1) {
+                                        state.loading(false);
+                                        showModalBottomSheet(
+                                            elevation: alto * 0.7,
+                                            backgroundColor:
+                                                Color.fromRGBO(0, 0, 0, 0.1),
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return _modalListaPedidosServiciosConfirmar(
+                                                  alto, ancho, context);
+                                            });
+                                      }
+                                    }).catchError((onError) {
+                                      print(onError);
                                     });
+                                  } else {
+                                    scaffoldKey.currentState
+                                        .showSnackBar(SnackBar(
+                                      content: Text(
+                                          'Necesitamos la Dirección a Pagar'),
+                                      backgroundColor: Colors.red,
+                                      duration: Duration(milliseconds: 2000),
+                                    ));
+                                  }
+                                } else {
+                                  scaffoldKey.currentState
+                                      .showSnackBar(SnackBar(
+                                    content: Text(
+                                        'Necesitamos la Dirección donde cobrarte'),
+                                    backgroundColor: Colors.red,
+                                    duration: Duration(milliseconds: 2000),
+                                  ));
+                                }
                               }
+
                               break;
                             case 2:
                               Navigator.of(context).pop();
@@ -256,7 +303,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                                               alto, ancho, context);
                                         });
                                   }
-                                }).catchError((onError){
+                                }).catchError((onError) {
                                   print(onError);
                                 });
                               } else {
@@ -457,7 +504,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                 children: <Widget>[
                   Expanded(
                     child: TextFormField(
-                      controller: _cantidadController,
+                      controller: cantidadController,
                       decoration: InputDecoration(
                           helperText: "En Pesos",
                           prefixIcon: Icon(Icons.attach_money),
@@ -488,7 +535,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                           if (_stados.isPunto("x")) {
                             var _producto = {
                               "nombre": _tituloController.text,
-                              "cantidad": int.parse(_cantidadController.text),
+                              "cantidad": int.parse(cantidadController.text),
                               "punto": _stados.getDirecciondelPunto("x"),
                               "distancia": 0.0,
                               "comprado": false,
@@ -497,7 +544,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                               _orderLines.add(_producto);
                             });
                             _tituloController.clear();
-                            _cantidadController.clear();
+                            cantidadController.clear();
                           } else {
                             _stados.salioAdvertencia();
                           }
@@ -934,11 +981,28 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                 children: <Widget>[
                   Expanded(
                     flex: 2,
-                    child: pieTablaRigth("Total Pedido:  \$"),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: RichText(
+                        textAlign: TextAlign.right,
+                        text: TextSpan(
+                          text: 'Total del Pedido:\n ',
+                          style: TextStyle(fontSize: 15, color: Colors.grey),
+                          children: <TextSpan>[
+                            TextSpan(
+                                text: '(Pagalo al repartidor)',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                )),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                   Expanded(
                     flex: 1,
-                    child: pieTablaRigth(pieSubtotal(_orderLines).toString()),
+                    child: pieTablaRigth(
+                        "\$  " + pieSubtotal(_orderLines).toString()),
                   )
                 ],
               ),
@@ -951,11 +1015,30 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                 children: <Widget>[
                   Expanded(
                     flex: 2,
-                    child: pieTablaRigth("Costo del Servicio:  \$"),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: RichText(
+                        textAlign: TextAlign.right,
+                        text: TextSpan(
+                          text: 'Costo por el Servicio\n',
+                          //style: TextStyle(fontSize: 15, color: Colors.green),
+                          //textAlign: TextAlign.right,
+                          style: TextStyle(fontSize: 15, color: Colors.grey),
+                          children: <TextSpan>[
+                            TextSpan(
+                                text: '(Pagalo aquí en la app):',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                )),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                   Expanded(
                     flex: 1,
-                    child: pieTablaRigth(redondear(costoServicio).toString()),
+                    child: pieTablaRigth(
+                        "\$  " + redondear(costoServicio).toString()),
                   )
                 ],
               ),
@@ -1008,7 +1091,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                             Navigator.of(context).pop();
                           } else {
                             Navigator.of(context).pop();
-                            _scaffoldKey.currentState.showSnackBar(SnackBar(
+                            scaffoldKey.currentState.showSnackBar(SnackBar(
                               content: Text('Algo Pasó, Intentalo de Nuevo'),
                               backgroundColor: Color(0xffee6179),
                               duration: Duration(milliseconds: 2000),
@@ -1036,7 +1119,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
 
   Future<void> _calcularCostedelServicioProductos(
       var destino, List orden, int sub) async {
-    //print(".......Calculando Coste del Servicio Compra de Productos.....");
+    print(".......Calculando Coste del Servicio Compra de Productos.....");
     double _dist = await totalDistancia(orden, destino);
     double preCostoServicio =
         porDestinos(orden, sub) + porCompra(sub) + precioDistancia(_dist);
@@ -1045,20 +1128,29 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     });
   }
 
-  //Future<void> _calcularCostedelServicioServicio() async {
-  //print(".....Calculando Coste de un Pago de Servicio .......");
-  //double _dis = await _porDistanciaUnica();
-  //double preCostoServicio = (subtotal * 0.10) + porCompra(subtotal);
-  //setState(() {
-//      costoServicio = preCostoServicio + comisionApp(preCostoServicio);
-  //  });
-  //}
+  Future<void> _calcularCostedelServicioServicio(
+      var destino, var origen, var subtotal) async {
+    print(".....Calculando Coste de un Pago de Servicio .......");
+    double _startLatitude = destino['latitud'];
+    double _startLongitude = destino['longitud'];
+    double _endLatitude = origen['latitud'];
+    double _endLongitude = origen['longitud'];
 
-  /////////////////////////////////////////////////////////
+    double _dis = await Geolocator().distanceBetween(
+        _startLatitude, _startLongitude, _endLatitude, _endLongitude);
+    print("DISTANCIA: " + _dis.toString());
+    double preCostoServicio =
+        (subtotal * 0.10) + porCompra(subtotal) + precioDistancia(_dis);
 
-///////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////FORM///////////////////////////////////////////////////////////////////////
+    setState(() {
+      costoServicio = preCostoServicio + comisionApp(preCostoServicio);
+    });
+  }
+
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+///////////////////////FORM//////////////////////////////////////
 ///////////////////////////DE///////////////////////////////////////////////////////////////////
 ////////////////////////////////PAGO DE SERVICIOS///////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -1116,7 +1208,7 @@ class _NuevoPedidoState extends State<NuevoPedido> {
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: TextFormField(
-                controller: _cantidadController,
+                controller: cantidadController,
                 keyboardType: TextInputType.number,
                 maxLength: 5,
                 validator: (value) {
@@ -1134,6 +1226,73 @@ class _NuevoPedidoState extends State<NuevoPedido> {
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(right: 10.0, left: 10.0),
+                          child: Icon(Icons.pin_drop, color: Colors.grey),
+                        ),
+                        Text('Lugar a Cobrar (Tu Domicilio):',
+                            style: TextStyle(color: Colors.grey)),
+                      ],
+                    ),
+                    _stados.isPunto("b")
+                        ? iconDeleteRedDos("b", _stados)
+                        : SizedBox(),
+                  ],
+                ),
+                !_stados.isPunto("b")
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[
+                          MaterialButton(
+                            color: Colors.grey[300],
+                            onPressed: () {
+                              showModalBottomSheet(
+                                  elevation: alto * 0.8,
+                                  backgroundColor: Color.fromRGBO(250, 0, 0, 1),
+                                  //shape:
+                                  context: context,
+                                  isScrollControlled: true,
+                                  builder: (context) {
+                                    return elegirUbicacion(
+                                        context, currentUser.uid, alto, "b");
+                                  });
+                            },
+                            child: Text('Ubicacion Guardada',
+                                style: TextStyle(color: Colors.grey[600])),
+                            disabledColor: Colors.grey[300],
+                          ),
+                          MaterialButton(
+                            color: Colors.grey[300],
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      NuevaUbicacion(data: 'b'),
+                                ),
+                              );
+                            },
+                            disabledColor: Colors.grey[300],
+                            child: Text("Ubicacion Nueva",
+                                style: TextStyle(color: Colors.grey[600])),
+                          )
+                        ],
+                      )
+                    : Center(
+                        child: Padding(
+                        padding: const EdgeInsets.only(top: 8.0, bottom: 1.0),
+                        child: Text(_stados.getDirecciondelPunto("b")['label'],
+                            style: TextStyle(color: Colors.grey)),
+                      )),
+                Divider(
+                  color: Colors.grey,
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
@@ -1289,76 +1448,155 @@ class _NuevoPedidoState extends State<NuevoPedido> {
     );
   }
 
-  Widget _modalTicketServicio(double alto, double ancho, int subtot) {
+  Widget _modalListaPedidosServiciosConfirmar(
+      double alto, double ancho, BuildContext context) {
     return Container(
+      height: alto * 0.7,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20.0),
-          topRight: Radius.circular(20.0),
+          topLeft: Radius.circular(10.0),
+          topRight: Radius.circular(10.0),
         ),
       ),
       child: SingleChildScrollView(
         child: Column(
           children: [
-            ListTile(
-              leading: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                      onTap: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Icon(Icons.arrow_back_ios, color: Colors.grey))),
-              title: Text("Mi Ticket", style: TextStyle(color: Colors.grey)),
+            Text(
+              "Punto de Pago:",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, color: Colors.grey[800]),
             ),
-            Divider(),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  flex: 2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: pieTabla("Subtotal:    \$"),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: pieTabla("Costo Servicio:    \$"),
-                      ),
-                    ],
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 2.0, bottom: 4.0, left: 10, right: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    flex: 1,
+                    child: Icon(Icons.person_pin_circle),
                   ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 60),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: pieTabla(pieSubtotal(_orderLines).toString()),
+                  Expanded(
+                    flex: 9,
+                    child: Text(
+                        "${Provider.of<LoginState>(context, listen: true).getDirecciondelPunto('b')['label']}",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            ),
+            Divider(
+              color: Colors.grey,
+            ),
+            Text(
+              "Punto de Cobro (Tu Domicilio):",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, color: Colors.grey[800]),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 2.0, bottom: 4.0, left: 10, right: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    flex: 1,
+                    child: Icon(Icons.person_pin_circle),
+                  ),
+                  Expanded(
+                    flex: 9,
+                    child: Text(
+                        "${Provider.of<LoginState>(context, listen: true).getDirecciondelPunto('b')['label']}",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            ),
+            Divider(
+              color: Colors.grey,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 4.0, bottom: 4.0, left: 20, right: 30),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Expanded(
+                    flex: 2,
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: RichText(
+                        textAlign: TextAlign.right,
+                        text: TextSpan(
+                          text: 'Cantidad del Pago:\n ',
+                          style: TextStyle(fontSize: 15, color: Colors.grey),
+                          children: <TextSpan>[
+                            TextSpan(
+                                text: '(Pagalo al repartidor)',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                )),
+                          ],
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: pieTabla(redondear(costoServicio).toString()),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                  Expanded(
+                    flex: 1,
+                    child: pieTablaRigth(
+                        int.parse(cantidadController.text).toString()),
+                  )
+                ],
+              ),
             ),
-            Divider(),
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 4.0, bottom: 4.0, left: 20, right: 30),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Expanded(
+                    flex: 2,
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: RichText(
+                        textAlign: TextAlign.right,
+                        text: TextSpan(
+                          text: 'Costo por el Servicio:\n',
+                          style: TextStyle(fontSize: 15, color: Colors.grey),
+                          children: <TextSpan>[
+                            TextSpan(
+                                text: '(Pagalo aquí en la app):',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                )),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: pieTablaRigth(redondear(costoServicio).toString()),
+                  )
+                ],
+              ),
+            ),
+            Divider(
+              color: Colors.grey,
+            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   OutlineButton(
-                    splashColor: Colors.red[300],
+                    splashColor: Colors.red[200],
                     textColor: Colors.red[300],
                     onPressed: () {
                       Navigator.of(context).pop();
@@ -1368,44 +1606,50 @@ class _NuevoPedidoState extends State<NuevoPedido> {
                       child: Text('Cancelar'),
                     ),
                   ),
-                  OutlineButton(
-                    onPressed: () async {
-                      final _stados =
-                          Provider.of<LoginState>(context, listen: false);
-                      bool _pedidoregistrado = false;
-
-                      if (_stados.isTipoPedido() == 1) {
-                        print("estas aqui");
-                        String _url = await _subirImagen(_image);
-                        _pedidoregistrado =
-                            UserServices().newPedidoPagoServicios(
-                                _tituloController.text,
-                                _datosController.text,
-                                int.parse(_cantidadController.text),
-                                300, //_totalPedido(subtot),
-                                _stados.currentUser(),
-                                _url,
-                                _stados.getDirecciondelPunto('a'));
-                      }
-
-                      if (_pedidoregistrado) {
-                        //_formPedidoKey.currentState.reset();
-                        //_formPedidoProductoKey.currentState.reset();
-                        _stados.plusStep();
-                        _stados.setStepPedido(0);
-                        Navigator.of(context).pop();
-                      } else {
-                        Navigator.of(context).pop();
-                        _scaffoldKey.currentState.showSnackBar(SnackBar(
-                          content: Text('Algo Pasó, Intentalo de Nuevo'),
-                          backgroundColor: Color(0xffee6179),
-                          duration: Duration(milliseconds: 2000),
-                        ));
-                      }
-                    },
+                  Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 30.0, right: 30.0),
-                      child: Text('Confirmar'),
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: RaisedButton(
+                        onPressed: () async {
+                          final _stados =
+                              Provider.of<LoginState>(context, listen: false);
+                          bool _pedidoregistrado = false;
+                          final _destino = _stados.getDirecciondelPunto('b');
+                          double _distancia =
+                              await totalDistancia(_orderLines, _destino);
+                          _pedidoregistrado = UserServices()
+                              .newPedidoPagoServicios(
+                                  _tituloController.text,
+                                  _datosController.text,
+                                  int.parse(cantidadController.text),
+                                  costoServicio,
+                                  _stados.currentUser(),
+                                  "null",
+                                  _stados.getDirecciondelPunto('a'),
+                                  _stados.getDirecciondelPunto('b'),
+                                  _distancia);
+
+                          if (_pedidoregistrado) {
+                            print("=== PEDIDO AGREGADO ====");
+                            //_formPedidoKey.currentState.reset();
+                            //_formPedidoProductoKey.currentState.reset();
+                            ProfileClienteState().cabio();
+                            _stados.setStepPedido(0);
+                            Navigator.of(context).pop();
+                            Navigator.of(context).pop();
+                          } else {
+                            Navigator.of(context).pop();
+                            scaffoldKey.currentState.showSnackBar(SnackBar(
+                              content: Text('Algo Pasó, Intentalo de Nuevo'),
+                              backgroundColor: Color(0xffee6179),
+                              duration: Duration(milliseconds: 2000),
+                            ));
+                          }
+                        },
+                        child: Text('Confirmar',
+                            style: TextStyle(color: Colors.white)),
+                        color: Colors.grey[900],
+                      ),
                     ),
                   ),
                 ],

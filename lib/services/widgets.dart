@@ -25,6 +25,25 @@ Future<double> totalDistancia(List list, var destino) async {
   return _disTotal;
 }
 
+Future<double> totalDistanciaUnica(List list, var destino) async {
+  double _startLatitude = destino['latitud'];
+  double _startLongitude = destino['longitud'];
+  List _listaTemporal = [...list];
+  int _posmin = 0;
+  double _disTotal = 0.0;
+  while (_listaTemporal.isNotEmpty) {
+    _listaTemporal = await 
+        llenarDistancias(_listaTemporal, _startLatitude, _startLongitude);
+    _posmin = posicionMenor(_listaTemporal);
+    _disTotal = _disTotal + _listaTemporal[_posmin]['distancia'];
+    _startLatitude = _listaTemporal[_posmin]['punto']['latitud'];
+    _startLongitude = _listaTemporal[_posmin]['punto']['longitud'];
+    //_listaTemporal.removeAt(_posmin);
+    _listaTemporal.remove(_listaTemporal[_posmin]);
+  }
+  return _disTotal;
+}
+
 //print(":::DISTANCIA TOTAL: " + _disTotal.toString());
 llenarDistancias(
     List listaTemporal, double startLatitude, double startLongitude) async {
@@ -113,6 +132,7 @@ double porDestinos(List list, int subtotal) {
   if (_destinos <= 10) return subtotal * 0.03;
   if (_destinos >= 11) return subtotal * 0.02;
 }
+
 
 int posicionMenor(List li) {
   int _pos = 0;
