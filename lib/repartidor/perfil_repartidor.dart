@@ -112,7 +112,7 @@ class _DataRepartidorState extends State<DataRepartidor> {
                           borderRadius: BorderRadius.circular(150),
                         ),
                         child: Image.asset(
-                          'lib/assets/FO.jpg',
+                          'lib/assets/FO.png',
                           fit: BoxFit.cover,
                         ),
                       ),
