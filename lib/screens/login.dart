@@ -146,59 +146,54 @@ class _LoginState extends State<Login> {
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        width: ancho * 0.7,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10.0)),
-                        child: Center(
-                            child: Text(
-                          'o entra con:',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.blueGrey,
-                              fontWeight: FontWeight.normal),
-                        )),
-                      ),
+                    SizedBox(
+                      height: alto * 0.02,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        InkWell(
-                          onTap: () {
-                            Provider.of<LoginState>(context, listen: false)
-                                .socialLogin(2);
-                          },
-                          child: Container(
-                              decoration: BoxDecoration(
-                                  color: Color(0xff3b5998),
-                                  borderRadius: BorderRadius.circular(90)),
-                              width: 40,
-                              height: 40,
-                              child: Icon(FontAwesomeIcons.facebookF,
-                                  size: 20, color: Color(0xfff6f4f3))),
-                        ),
-                        SizedBox(
-                          width: ancho * 0.01,
-                        ),
-                        InkWell(
-                          onTap: () async {
-                            Provider.of<LoginState>(context, listen: false)
-                                .socialLogin(3);
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                                color: Color(0xffee6179),
-                                borderRadius: BorderRadius.circular(90)),
-                            width: 40,
-                            height: 40,
-                            child: Icon(FontAwesomeIcons.google,
-                                size: 20, color: Color(0xfff6f4f3)),
+                    Container(
+                      width: ancho * 0.7,
+                      child: Center(
+                          child: Text(
+                        'O también puedes:',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.blueGrey,
+                            fontWeight: FontWeight.normal),
+                      )),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          top: 5.0, bottom: 4.0, left: 30.0, right: 30.0),
+                      child: InkWell(
+                        onTap: () async {
+                           Provider.of<LoginState>(context, listen: false)
+                             .socialLogin(2);
+                          
+                        },
+                        child: Container(
+                          height: 35,
+                          decoration: BoxDecoration(
+                              color: Color(0xff464d77),
+                              borderRadius: BorderRadius.circular(10.0)),
+                          child: Row(
+                            children: <Widget>[
+                              Expanded(
+                                  flex: 1,
+                                  child: Icon(FontAwesomeIcons.facebookF,
+                                      color: Colors.white, size: 16)),
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  'Entrar con Facebook',
+                                  style: TextStyle(
+                                    color: Color(0xffffffff),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
                     SizedBox(
                       height: alto * 0.02,

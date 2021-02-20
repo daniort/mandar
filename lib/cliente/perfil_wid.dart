@@ -114,7 +114,7 @@ class _DataClienteState extends State<DataCliente> {
                             borderRadius: BorderRadius.circular(150),
                           ),
                           child: Image.asset(
-                            'lib/assets/2.jpg',
+                            'lib/assets/FO.png',
                             fit: BoxFit.cover,
                             
                             
@@ -131,7 +131,7 @@ class _DataClienteState extends State<DataCliente> {
                       ),
                     ),
                     Text(
-                      "${_user.displayName}",
+                      "${_user.displayName.toUpperCase()}",
                       style: TextStyle(
                           fontSize: 25,
                           color: Color(0xff484349),

@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mandadero/screens/login.dart';
 import 'package:mandadero/state/loginstate.dart';
 
 import 'package:provider/provider.dart';
@@ -12,7 +12,7 @@ class FirtsPage extends StatefulWidget {
 
 class _FirtsPageState extends State<FirtsPage> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  
+
   @override
   Widget build(BuildContext context) {
     final alto = MediaQuery.of(context).size.height;
@@ -122,11 +122,17 @@ class _FirtsPageState extends State<FirtsPage> {
                       left: 8.0, right: 8.0, bottom: 8.0, top: 16.0),
                   child: InkWell(
                     onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Login(),
+                        ),
+                      );
                       Provider.of<LoginState>(context, listen: false)
-                            .setUser(2);
-                            //Navigator.of(context).pushNamed(loginRoute);
-                        Provider.of<LoginState>(context, listen: false)
-                            .setStepLogin(2);
+                          .setUser(2);
+                      //Navigator.of(context).pushNamed(loginRoute);
+                      //Provider.of<LoginState>(context, listen: false)
+                          //.setStepLogin(2);
                     },
                     child: Container(
                       width: ancho * 0.6,
@@ -136,7 +142,7 @@ class _FirtsPageState extends State<FirtsPage> {
                           borderRadius: BorderRadius.circular(10.0)),
                       child: Center(
                         child: Text(
-                          'Entrar como Repartidor',
+                          'Soy un Repartidor',
                           style: TextStyle(
                               fontSize: 15,
                               color: Color(0xfff6f4f3),
@@ -151,10 +157,10 @@ class _FirtsPageState extends State<FirtsPage> {
                   child: InkWell(
                     onTap: () {
                       Provider.of<LoginState>(context, listen: false)
-                            .setUser(1);
-                       //Navigator.of(context).pushNamed(loginRoute);
-                        Provider.of<LoginState>(context, listen: false)
-                            .setStepLogin(2);
+                          .setUser(1);
+                      //Navigator.of(context).pushNamed(loginRoute);
+                      Provider.of<LoginState>(context, listen: false)
+                          .setStepLogin(2);
                     },
                     child: Container(
                       width: ancho * 0.6,
@@ -164,7 +170,7 @@ class _FirtsPageState extends State<FirtsPage> {
                           borderRadius: BorderRadius.circular(10.0)),
                       child: Center(
                           child: Text(
-                        'Entrar como Cliente',
+                        'Soy un Cliente',
                         style: TextStyle(
                             fontSize: 15,
                             color: Color(0xfff6f4f3),

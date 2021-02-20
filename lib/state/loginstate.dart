@@ -109,7 +109,7 @@ class LoginState with ChangeNotifier {
     _loading = true;
     notifyListeners();
     switch (index) {
-      case 2: //facebook
+      case 2:
         await _facebookLogin.logIn(['email', 'public_profile']).then((result) {
           switch (result.status) {
             case FacebookLoginStatus.loggedIn:
@@ -119,13 +119,19 @@ class LoginState with ChangeNotifier {
                 _user = res.user;
                 print("Login Faceboon Hecho" + _user.displayName);
                 if (_user != null) {
-                  _prefs.setBool('isLoggedIn', true);
-                  _login = true;
-                  _loading = false;
-                  notifyListeners();
+
+                    print(_user.uid);
+        //verificarExistencia();
+        _loading = false;
+        _prefs.setBool('isLoggedIn', true);
+        _login = true;
+
+        notifyListeners();
+
+        
                 } else {
                   _login = false;
-                  salioError();
+                  //_salioError();
                   notifyListeners();
                 }
               }).catchError((e) {
@@ -135,19 +141,23 @@ class LoginState with ChangeNotifier {
               break;
             case FacebookLoginStatus.cancelledByUser:
               print('Login Facebook Cancelado por el Usuario.');
-              _loading = false;
-              salioError();
+             // loading = false;
+              //_salioError();
               notifyListeners();
               break;
             case FacebookLoginStatus.error:
               print('Error Login Facebook: ${result.errorMessage}');
-              _loading = false;
-              salioError();
+              //loading = false;
+            //  _salioError();
               notifyListeners();
               break;
           }
+        }).catchError((e) {
+          //_salioError();
+          print("salio error" + e);
         });
         break;
+
       case 3: //google
         try {
           final GoogleSignInAccount googleUser =
@@ -301,8 +311,9 @@ class LoginState with ChangeNotifier {
     _stepPedido = 0;
     notifyListeners();
   }
-
+//////////////////////////////////////////////////////
   ////////////////////////////UBICACIONES////////////////
+  /////////////////////////////////////////////////////////
 
   bool _puntoa = false;
   bool _puntob = false;
@@ -381,5 +392,9 @@ class LoginState with ChangeNotifier {
     _pedidoactivo = true;
     documentoActivo = document;
     notifyListeners();
+  }
+
+  void loginWithFacebook() {
+    print("login Fb");
   }
 }

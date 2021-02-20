@@ -2,8 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class UserServices {
-  bool newPedidoProductos(List orderLines, int subtotal, double servicio,
-      FirebaseUser user, puntob, double distancia) {
+  bool newPedidoProductos(List orderLines,
+   int subtotal, double servicio,
+      FirebaseUser user, puntob,
+       double distancia) {
     var hoy = DateTime.now();
     try {
       Firestore.instance.collection('pedidos').document().setData({
@@ -36,8 +38,17 @@ class UserServices {
     }
   }
 
-  bool newPedidoPagoServicios(String titulo, String datos, int subtotal,
-      int totalPedido, FirebaseUser user, String image, puntoa) {
+  bool newPedidoPagoServicios(
+      String titulo, 
+      String datos,
+      int subtotal,
+      double totalPedido, 
+      FirebaseUser user, 
+      String image,
+      puntoa,
+      puntob,
+      distancia,
+       ) {
     var hoy = DateTime.now();
     try {
       Firestore.instance.collection('pedidos').document().setData({
@@ -56,6 +67,7 @@ class UserServices {
         "horai": "${hoy.hour}:${hoy.minute}:${hoy.second}",
         "horaf": "",
         "puntoa": puntoa,
+        "puntob": puntob,
         "urlrecibocliente": image,
         "urlreciborepartidor": "null",
         "fin_repartidor": false,
@@ -148,5 +160,61 @@ class UserServices {
     } catch (e) {
       return false;
     }
+  }
+
+  void primero(
+      int type_user,
+      FirebaseUser user,
+      String nombre,
+      String correo,
+      String telefono,
+      String direccion,
+      String nota,
+      String titular,
+      String tarjeta,
+      String mes,
+      String year,
+      String cvc,
+      String url,
+      // token = '$token',String token,
+      bool aceptados,
+      bool ocupado) {
+    Firestore.instance
+        .collection(type_user == 1 ? 'users' : 'repartidores')
+        .document(user.uid)
+        .collection('datos')
+        .document(user.uid)
+        .setData({
+      'nombre': nombre,
+      'email': correo,
+      'telefono': telefono,
+      'direccion': direccion,
+      'nota': nota,
+      'titular': titular,
+      'tarjeta': tarjeta,
+      'mes': mes,
+      'año': year,
+      'cvc': cvc,
+      'ine': url,
+      // token = '$token','token': token,
+      'aceptado': false,
+      'ocupado': false,
+    });
+  }
+
+  void saveData(
+    int type_user,
+    FirebaseUser user,
+    String campo,
+    String valor,
+  ) {
+    Firestore.instance
+        .collection(type_user == 1 ? 'users' : 'repartidores')
+        .document(user.uid)
+        .collection('datos')
+        .document(user.uid)
+        .updateData({
+      '$campo': valor,
+    });
   }
 }
